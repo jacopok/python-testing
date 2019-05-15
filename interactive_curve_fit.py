@@ -6,7 +6,6 @@ import dill
 import os
 import numpy.random as rand
 
-
 def save(function, name, cwd = False):
     os.chdir(".\saved_functions") if cwd == False else os.chdir(os.getcwd())
     file = open(name + ".txt", 'wb')
