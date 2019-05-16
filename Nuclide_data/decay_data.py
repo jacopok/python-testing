@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-data = pd.read_csv('livechart.csv')
+data = pd.read_csv('livechart.csv', index_col=False)
 
 intensities = data.iloc[:,2].values
 iarray = []
