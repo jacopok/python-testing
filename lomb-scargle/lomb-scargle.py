@@ -16,26 +16,43 @@ y_test = data['y'].values
 slope, intercept, r, p, err = linregress(x, y_test)
 y = y_test - slope * x - intercept
 
-n = len(x)
-nfreq = int(n / 10000)
+def spectrogram(x, y):
+    n = len(x)
+    nfreq = int(n / 1000)
 
-dxmin = np.diff(x).min()
-duration = x.ptp()
-freqs = np.linspace(1 / duration, 100 / duration, nfreq)
-periodogram = lombscargle(x, y, freqs)
+    dxmin = np.diff(x).min()
+    duration = x.ptp()
+    omegas = np.linspace(1 / duration, 100 / duration, nfreq)
+    periodogram = lombscargle(x, y, omegas)
+    freqs = omegas /(2*np.pi)
 
-kmax = periodogram.argmax()
-print("%8.3f" % (freqs[kmax],))
+    kmax = periodogram.argmax()
+    print("%8.3f" % (freqs[kmax],))
 
-plt.figure(1)
-plt.plot(freqs, np.sqrt(4 * periodogram / nfreq))
-plt.xlabel('Frequency (rad/s)')
-plt.axvline(freqs[kmax], color='r', alpha=0.25)
-plt.show()
+    lab = 'x between ' + str(min(x)) + ' and ' + str(max(x))
+
+    plt.figure(1)
+    plt.plot(freqs, np.sqrt(4 * periodogram / nfreq), label=lab)
+    plt.xlabel('Frequency (1/V)')
+    plt.axvline(freqs[kmax], color='r', alpha=0.25)
+    plt.show()
+    return(freqs[kmax])
+
+
+length = len(x)//2
+
+fmax = []
+
+fmax.append(spectrogram(x, y))
+fmax.append(spectrogram(x[:length], y[:length]))
+fmax.append(spectrogram(x[length:], y[length:]))
+
+plt.legend()
 
 plt.figure(2)
 plt.plot(x, y, 'b')
-plt.plot(x, np.sin(x * freqs[kmax]) * np.max(y), 'r')
+for f in fmax:
+    plt.plot(x, np.sin(x * f * 2 * np.pi) * np.max(y), 'r')
 plt.xlabel('x')
 plt.ylabel('y')
 
