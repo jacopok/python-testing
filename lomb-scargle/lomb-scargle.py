@@ -47,7 +47,7 @@ fmax.append(spectrogram(x, y))
 fmax.append(spectrogram(x[:length], y[:length]))
 fmax.append(spectrogram(x[length:], y[length:]))
 
-plt.legend()
+#plt.legend()
 
 plt.figure(2)
 plt.plot(x, y, 'b')
