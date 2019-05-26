@@ -16,7 +16,7 @@ def average_damage(damage_modifier, die_damage, attack_modifier, armor_class, ba
             damage += hit_damage
     return damage / hit_die
 
-ac_array = np.arange(0, 30)
+ac_array = np.arange(30)
 
 damage_d8 = average_damage(3,  4.5, 5, ac_array)
 damage_d6 = average_damage(13, 3.5, 0, ac_array)
