@@ -3,30 +3,63 @@ from pydub import AudioSegment
 import os
 import matplotlib.pyplot as plt
 
-path = 'data'
+class data:
 
-files = []
-# r=root, d=directories, f = files
-for r, d, f in os.walk(path):
-    for file in f:
-        if '.mp3' in file:
-            files.append(os.path.join(r, file))
+    def __init__(self, path, extension):
+        self.path = path
+        self.extension = extension
 
-second_lengths = []
+    @classmethod
+    def default_init(cls):
+        return(cls(path='data', extension='mp3'))
 
-for f in files:
-    print("Analyzing " + f)
-    audio = AudioSegment.from_mp3(f)
-    second_length = len(audio) / 1000 # pydub 
-    second_lengths.append(second_length)
-    print(f"{second_length} seconds")
+    @property
+    def file_list(self):
 
-minute_lengths = np.array(second_lengths) / 60
+        files = []
+        # r=root, d=directories, f = files
+        for r, d, f in os.walk(self.path):
+            for file in f:
+                if self.extension in file:
+                    files.append(os.path.join(r, file))
+        return(files)
 
-plt.hist(minute_lengths)
-plt.xlabel("Duration (minutes)")
-plt.ylabel("Counts")
+    @property
+    def lengths_array_seconds(self):
 
-if(len(minute_lengths)>2):
-    print(f'Standard Deviation = {np.std(minute_lengths)}')
-    print(f'Mean = {np.mean(minute_lengths)}')
+        second_lengths = []
+        for f in self.file_list:
+            audio = AudioSegment.from_file(f, self.extension)
+            second_length = self.get_audio_length(audio)
+            second_lengths.append(second_length)
+        return(np.array(second_lengths))
+
+    @property
+    def lengths_array_minutes(self):
+        return self.lengths_array_seconds / 60
+
+    def plot_lengths(self):
+        plt.hist(self.lengths_array_minutes)
+        plt.xlabel("Duration (minutes)")
+        plt.ylabel("Counts")
+        plt.show()
+
+    def analyze_histogram(self):
+        if(len(self.lengths_array_seconds)<2):
+            raise ValueError('Too few files to analyze')
+            return None
+        standard_dev = np.std(self.lengths_array_minutes)
+        mean = np.mean(self.lengths_array_minutes)
+        print(f'Standard Deviation = {standard_dev}')
+        print(f'Mean = {mean}')
+
+
+    @staticmethod
+    def get_audio_length(audio):
+        # might be changed later, to remove silence
+
+        return(len(audio) / 1000) # pydub uses milliseconds
+
+if __name__=='__main__':
+    dat = data.default_init()
+    dat.plot_lengths()
