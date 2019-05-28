@@ -11,6 +11,10 @@ class child(parent):
         parent.__init__(self, **properties)
         self.name = name
 
+    @classmethod
+    def create_child(cls):
+        return cls('Bob', a=1, b=1)
+
     @staticmethod
     def multiply(f, g):
         return f*g
@@ -18,8 +22,9 @@ class child(parent):
     def multiply_properties(self):
         return self.multiply(self.a, self.b)
 
-
-y = child("Bob", a=20, b=10)
-
-print(y.multiply_properties())
-print(child.multiply(1, 2))
+if(__name__ == '__main__'):
+    y = child("Bob", a=20, b=10)
+    print(y.multiply_properties())
+    print(child.multiply(1, 2))
+    x = child.create_child()
+    print(x.multiply_properties())
