@@ -1,4 +1,4 @@
-class parent():
+class parent:
 
     def __init__(self, **properties):
 
@@ -8,13 +8,18 @@ class parent():
 class child(parent):
 
     def __init__(self, name, **properties):
-        parent.__init__(**properties)
+        parent.__init__(self, **properties)
         self.name = name
 
-x = parent(a = 10)
+    @staticmethod
+    def multiply(f, g):
+        return f*g
 
-print(x.a)
+    def multiply_properties(self):
+        return self.multiply(self.a, self.b)
 
-y = child("Bob", a=20)
 
-y.
+y = child("Bob", a=20, b=10)
+
+print(y.multiply_properties())
+print(child.multiply(1, 2))
