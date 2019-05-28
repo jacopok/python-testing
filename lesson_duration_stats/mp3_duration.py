@@ -1,5 +1,5 @@
 import numpy as np
-from mutagen.mp3 import MP3
+from pydub import AudioSegment
 import os
 import matplotlib.pyplot as plt
 
@@ -16,8 +16,8 @@ second_lengths = []
 
 for f in files:
     print("Analyzing " + f)
-    audio = MP3(f)
-    second_length = audio.info.length
+    audio = AudioSegment.from_mp3(f)
+    second_length = len(audio) / 1000 # pydub 
     second_lengths.append(second_length)
     print(f"{second_length} seconds")
 
