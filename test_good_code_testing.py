@@ -1,5 +1,5 @@
 import unittest
-from good_code_tests import child
+from good_code_tests import child, parent
 
 class TestChild(unittest.TestCase):
 
@@ -32,6 +32,12 @@ class TestChild(unittest.TestCase):
         self.assertEqual(self.x.multiply_properties(), 2, 'multiply_properties not working')
         c = child.create_child()
         self.assertEqual(c.multiply_properties(), 1, 'multiply_properties not working')
+
+class TestParent(unittest.TestCase):
+
+    def test_parent(self):
+        x = parent(a=1)
+        self.assertEqual(x.a, 1, 'message')
 
 if __name__ == '__main__':
     unittest.main()
