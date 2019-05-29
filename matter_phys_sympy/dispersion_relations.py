@@ -2,7 +2,8 @@ from sympy import *
 import numpy as np
 import matplotlib.pyplot as plt
 
-K, ka, M, m = symbols('K ka, M, m')
+K, M, m = symbols('K M m', real=True, positive=True)
+ka = symbols('ka')
 sig = symbols('sig', integer=True)
 
 mu = 1/(1/M + 1/m)
@@ -31,4 +32,4 @@ plot(omega_plus.subs(K, K_val).subs(m, m_val).subs(M, M_val),
 omega_diff = (omega_plus - omega_minus).subs(ka, pi/2).subs(m, 1).subs(K, 1)
 func = lambdify(M, omega_diff, 'numpy')
 x = np.arange(1, 10, 0.1)
-y = func(y)
+y = func(x)
