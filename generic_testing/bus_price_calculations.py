@@ -19,4 +19,3 @@ cost_per_kid_per_distance = total_cost / np.dot(kids_number_array, distance_arra
 costs_array = cost_per_kid_per_distance * kids_number_array * distance_array
 
 print(costs_array)
-
