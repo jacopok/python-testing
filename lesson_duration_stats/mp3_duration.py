@@ -11,7 +11,7 @@ class data:
 
     @classmethod
     def default_init(cls):
-        return(cls(path='data', extension='mp3'))
+        return(cls(path='data', extension='3gp'))
 
     @property
     def file_list(self):
