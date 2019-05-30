@@ -21,6 +21,9 @@ class data:
         first_parts = []
         other_parts = []
         # r=root, d=directories, f = files
+        if not os.path.isdir('data'):
+            raise FileNotFoundError ('Running from the wrong directory')
+
         for r, d, f in os.walk(self.path):
             for file in f:
                 if self.extension in file:
@@ -91,10 +94,10 @@ class data:
     def plot_separate_lengths(self):
         first_parts, second_parts = self.separate_lengths_array
         means = [np.mean(x) for x in [first_parts, second_parts]]
-        maximums = [np.max(first_parts), np.max(second_parts), 45]
-        minimums = [np.min(first_parts), np.min(second_parts), 45]
-        bins = np.linspace(min(minimums), max(maximums), num=10)
-        plt.hist([first_parts, second_parts], bins, alpha=0.5,
+        maximum  = np.amax(np.concatenate((first_parts, second_parts, [45])))
+        minimum  = np.amin(np.concatenate((first_parts, second_parts, [45])))
+        bins = np.linspace(minimum, maximum, num=10)
+        plt.hist([first_parts, second_parts], bins, stacked=True, alpha=0.5,
         label=[f"First parts, mean = {means[0]:.1f}min" , f"Second parts, mean = {means[1]:.1f}min"])
 
         plt.xlabel("Duration (minutes)")
@@ -112,7 +115,6 @@ class data:
         print(f'Standard Deviation = {standard_dev}')
         print(f'Mean = {mean}')
 
-
     @staticmethod
     def get_audio_length(name):
         # might be changed later, to remove silence
@@ -120,7 +122,6 @@ class data:
         #return(len(audio) / 1000) # pydub uses milliseconds
         audio = MP3(name)
         return(audio.info.length)
-
 
 if __name__=='__main__':
     dat = data.default_init()
