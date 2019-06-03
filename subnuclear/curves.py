@@ -12,8 +12,8 @@ delta_t = sy.lambdify(t, delta, 'numpy')
 
 times = np.linspace(0, 15, num=500)
 
-
 curve = delta_t(times)
+
 
 plt.plot(times, curve, label = 'delta')
 plt.yscale('symlog', linthreshy=1e-6)
