@@ -167,7 +167,8 @@ def gauss_x(x, a, x0, k0):
 
 def cut_gauss_x(x, a, x0, k0, cut_frac):
     """
-    a gaussian wave packet of width a, centered at x0, with momentum k0
+    a gaussian wave packet of width a, centered at x0, with momentum k0,
+    set to zero between + and - cut_frac * sigma
     """
     from scipy.stats import norm
     normalization = 1-norm.cdf(cut_frac)+norm.cdf(-cut_frac)
@@ -224,7 +225,7 @@ dx = 0.1
 x = dx * (np.arange(N) - 0.5 * N)
 
 # specify potential
-V0 = 1.5
+V0 = 0.5
 L = hbar / np.sqrt(2 * m * V0)
 a = 3 * L
 x0 = -60 * L
