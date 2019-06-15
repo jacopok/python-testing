@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+plt.style.use('seaborn')
 
 data = pd.read_csv('binding_energies.csv', index_col=False)
 
@@ -40,17 +41,24 @@ params_odd = get_params(*p_odd, A=A)
 a_A, a_C = np.average(np.stack((params_even, params_odd), axis=0), axis=0)
 a_P = get_a_P(vertex(*p_even), vertex(*p_odd), A=A)
 
-experimental_const = np.average([p_even[2], p_odd[2]], axis=0)
+experimental_vertex = np.average([vertex(*p_even), vertex(*p_odd)], axis=0)
 
 a_V, a_S = 16, 17
 
 th_constant = a_V* A - a_A*A -  a_S * A**(2/3)
 
+th_b = 4 * a_A
+
+th_a = - a_C * A**(-1/3) - 4 * a_A / A
+
+th_vertex = th_constant - th_b**2 / (4*th_a)
+
 print(f'a_A = {a_A:.2f} MeV')
 print(f'a_C = {a_C:.2f} MeV')
 print(f'a_P = {a_P:.2f} MeV')
 
-print(f'Const: theoretical {th_constant:.2f}, experimental {experimental_const:.2f}')
+print(f'Vertex energy: theoretical {th_vertex:.0f} MeV, experimental {experimental_vertex:.0f} MeV')
+print(f'Calculated with a_V = {a_V} MeV and a_S = {a_S} MeV')
 
 parabola = np.vectorize(lambda x, a, b, c: x**2 *a + x*b + c)
 
@@ -67,7 +75,7 @@ plt.xlabel('Z')
 plt.ylabel('B [MeV]')
 plt.legend()
 
-parabolas.show()
+parabolas.savefig('parabolic_fits.eps', format='eps')
 
 even_residuals = parabola(Z[::2], *p_even) - energies[::2]
 odd_residuals = parabola(Z[1::2], *p_odd) - energies[1::2]
@@ -75,9 +83,12 @@ odd_residuals = parabola(Z[1::2], *p_odd) - energies[1::2]
 residuals = plt.figure(2)
 plt.scatter(Z[::2], 1e3*even_residuals, label = 'Even residuals')
 plt.scatter(Z[1::2], 1e3*odd_residuals, label = 'Odd residuals')
+plt.plot(Z_array, np.zeros(len(Z_array)))
 
 plt.xlabel('Z')
 plt.ylabel('ΔB [keV]')
 
 plt.legend()
-residuals.show()
+residuals.savefig('residuals.eps', format='eps')
+
+plt.close('all')
