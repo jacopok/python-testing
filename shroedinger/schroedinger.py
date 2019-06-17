@@ -225,7 +225,7 @@ dx = 0.1
 x = dx * (np.arange(N) - 0.5 * N)
 
 # specify potential
-V0 = 0.5
+V0 = 1
 L = hbar / np.sqrt(2 * m * V0)
 a = 3 * L
 x0 = -60 * L
@@ -235,7 +235,8 @@ V_x[x < -98] = 1E6
 V_x[x > 98] = 1E6
 
 # specify initial momentum and quantities derived from it
-p0 = np.sqrt(2 * m * 0.2 * V0)
+#p0 = np.sqrt(2 * m * 0.2 * V0)
+p0 = np.sqrt(2 * m * 0.5 * V0)
 dp2 = p0 * p0 * 1./80
 d = hbar / np.sqrt(2 * dp2)
 
