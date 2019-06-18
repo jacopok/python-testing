@@ -5,6 +5,13 @@ plt.style.use('seaborn')
 
 data = pd.read_csv('binding_energies.csv', index_col=False)
 
+from matplotlib import rc
+rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
+rc('text.latex', preamble=r'''\usepackage{amsmath}
+          \usepackage{physics}
+          ''')
+
 # these correspond to A = 148
 
 # intensities = data.iloc[:,2].values
@@ -71,8 +78,8 @@ plt.scatter(Z[1::2], energies[1::2], label = 'Odd energies')
 plt.plot(Z_array, parabola(Z_array, *p_even), label = 'Even energies, model')
 plt.plot(Z_array, parabola(Z_array, *p_odd), label = 'Odd energies, model')
 
-plt.xlabel('Z')
-plt.ylabel('B [MeV]')
+plt.xlabel('$Z$')
+plt.ylabel('$B$ [MeV]')
 plt.legend()
 
 parabolas.savefig('parabolic_fits.eps', format='eps')
@@ -85,8 +92,8 @@ plt.scatter(Z[::2], 1e3*even_residuals, label = 'Even residuals')
 plt.scatter(Z[1::2], 1e3*odd_residuals, label = 'Odd residuals')
 plt.plot(Z_array, np.zeros(len(Z_array)))
 
-plt.xlabel('Z')
-plt.ylabel('ΔB [keV]')
+plt.xlabel('$Z$')
+plt.ylabel('$\Delta B$ [keV]')
 
 plt.legend()
 residuals.savefig('residuals.eps', format='eps')
