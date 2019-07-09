@@ -48,5 +48,3 @@ sigma = [
 Matrix([[0,1],[1,0]]),
 Matrix([[0,I],[-I,0]]),
 Matrix([[1,0],[-1,0]])]
-
-# %%markdown
