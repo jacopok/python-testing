@@ -1,17 +1,32 @@
 from sympy.physics.quantum import *
 from sympy.physics.quantum.qubit import *
+from sympy.physics.paulialgebra import Pauli
 
-psi = Qubit(0)
+import numpy as np
+import matplotlib.pyplot as plt
+plt.style.use('seaborn')
 
-pp = Ket('pp') # psi prime
+from sympy import *
 
-rho = psi * psi.dual
+dim = 2**2
+M = np.reshape(np.ones(dim**2), (dim, dim))
+id = np.identity(dim)
+D = 1/dim * (M - 2 * id)
 
-rho_prime = TensorProduct(pp, Dagger(psi)) - TensorProduct(psi, Dagger(pp))
+for x in range(dim):
+    vec = np.ones(dim)
+    vec[x] -=2
+    print(D@vec)
+H = 1/np.sqrt(2)* np.array([[1,1], [1,-1]])
+H2 = np.kron(H, H)
+sigma_x = np.array([[0,1], [1,0]])
+sigma_x2 = np.kron(sigma_x, sigma_x)
+CNOT = np.array([[1,0,0,0],[0,1,0,0],[0,0,0,1],[0,0,1,0]])
+idH = np.kron(np.identity(2), H)
+Dprime = sigma_x2 @ idH @ CNOT @ idH @ sigma_x2
+print('Dprime = ', sigma_x2 @ idH @ CNOT @ idH @ sigma_x2)
+D = H2 @ sigma_x2 @ idH @ CNOT @ idH @ sigma_x2 @ H2
 
-print(rho)
-print(rho_prime)
-
-to_trace = rho * rho_prime * rho_prime
-
-print(to_trace)
+Dprime
+D @ np.array([1,1,1,-1])
+H@H
