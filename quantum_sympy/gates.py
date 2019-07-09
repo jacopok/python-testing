@@ -35,8 +35,11 @@ sigma_x2 = np.kron(sigma_x, sigma_x)
 CNOT = np.array([[1,0,0,0],[0,1,0,0],[0,0,0,1],[0,0,1,0]])
 idH = np.kron(np.identity(2), H)
 Dprime = sigma_x2 @ idH @ CNOT @ idH @ sigma_x2
-print('Dprime = ', Dprime)
 D = H2 @ sigma_x2 @ idH @ CNOT @ idH @ sigma_x2 @ H2
+
+# %%
+
+print('Dprime = ', Dprime)
 print('D = ', D)
 
 # %%
@@ -44,8 +47,6 @@ print('D = ', D)
 sigma = [
 Matrix([[0,1],[1,0]]),
 Matrix([[0,I],[-I,0]]),
-Matrix([[1,0],[-1,0]])
-]
+Matrix([[1,0],[-1,0]])]
 
-for s in sigma:
-    print(H * s * H)
+# %%markdown
