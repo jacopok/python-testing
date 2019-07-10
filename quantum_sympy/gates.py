@@ -8,19 +8,25 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.style.use('seaborn')
 
-from sympy import *
+import sympy as sp
+sp.init_printing()
 
 # %%
 
 dim = 2**2
-M = np.reshape(np.ones(dim**2), (dim, dim))
-id = np.identity(dim)
+M = sp.Matrix(np.reshape(np.ones(dim**2), (dim, dim)))
+id = sp.eye(dim)
 D = 1/dim * (M - 2 * id)
+D
 
-# %% markdown
+# %%md
 
 We show the form of the operators used in the Grover algorithm
-in the $n=2$ case.
+in the
+
+$\dot z =2 $
+
+case.
 
 # %%
 
