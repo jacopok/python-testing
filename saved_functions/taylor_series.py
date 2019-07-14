@@ -37,3 +37,9 @@ theta_t
 #sp.series(theta_t, x=N, x0=1, n=3)
 
 sp.series(N_t, x=theta, x0=0, n=3)
+
+# %%
+
+x = sp.symbols('x')
+
+sp.series(sp.sqrt(1-x), x=x, x0=0, n=4)
