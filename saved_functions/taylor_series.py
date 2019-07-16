@@ -36,10 +36,22 @@ theta_t
 
 #sp.series(theta_t, x=N, x0=1, n=3)
 
-sp.series(N_t, x=theta, x0=0, n=3)
+print(sp.latex(sp.series(N_t, x=theta, x0=0, n=5)))
 
 # %%
 
 x = sp.symbols('x')
 
 sp.series(sp.sqrt(1-x), x=x, x0=0, n=4)
+
+# %%
+
+i = 1.336
+g = 2.689e-5
+print((i-1)/2/g/i)
+
+# %%
+
+%matplotlib qt
+sp.plot_implicit(sp.Eq((index-1)/gamma/index/2, 5000), (index, 1, 2), (gamma, 2e-5, 4e-5))
+w
