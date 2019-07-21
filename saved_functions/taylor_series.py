@@ -5,6 +5,12 @@ import matplotlib.pyplot as plt
 plt.style.use('seaborn')
 
 # %%
+
+x = sp.symbols('x')
+
+sp.series(sp.log(1-x))
+
+# %%
 %%markdown
 
 '''
