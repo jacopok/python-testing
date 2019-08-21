@@ -27,8 +27,9 @@ def cooling (T, *c):
 T = np.logspace(3, 9, num=100)
 c = [1.42e-27, 4.4e-10, 6e-22, 1e25, 1.5849e4]
 c_nofirst = [0, 4.4e-10, 6e-22, 1e25, 1.5849e4]
-%matplotlib qt
+fig = plt.figure(1)
 plt.plot(T, cooling(T, *c), label='Cooling function')
-plt.xlabel('$T$ (Kelvin, log scale)')
-plt.ylabel('$\\Lambda(T)$ (\SI{}{erg cm^{-3} s^{-1}, log scale)')
-plt.legend()
+fig.xlabel('$T$ (Kelvin, log scale)')
+fig.ylabel('$\\Lambda(T)$ (\SI{}{erg cm^{-3} s^{-1}, log scale)')
+fig.legend()
+fig.savefig('cooling_function.pdf', format = 'pdf')
