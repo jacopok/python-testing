@@ -25,3 +25,4 @@ f = lambda x : legendre(2,x)
 plot(f)
 
 nprint(polyroots(taylor(f, 0, 2)[::-1]))
+print(np.sqrt(1/3))
