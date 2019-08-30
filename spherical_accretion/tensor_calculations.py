@@ -33,6 +33,6 @@ fiducial_basis = sp.Matrix([
 [0,0,0,1/(r*sp.sin(theta))]
 ])
 
-T_rad_spherical = sp.simplify(fiducial_basis.T * T_fiducial * fiducial_basis)
+T_spherical = sp.simplify(fiducial_basis.T * T_fiducial * fiducial_basis)
 
-T_rad_spherical
+print(sp.latex(T_spherical))
