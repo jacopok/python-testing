@@ -35,4 +35,4 @@ fiducial_basis = sp.Matrix([
 
 T_spherical = sp.simplify(fiducial_basis.T * T_fiducial * fiducial_basis)
 
-print(sp.latex(T_spherical))
+print(sp.latex(T_spherical[0:2,0:2]))
