@@ -15,3 +15,9 @@ quad(lambda x : x**2 / (exp(x)-1), [0, inf])
 g = 1/(1-x**2)
 
 sp.diff(g)
+
+
+#%%
+M, r = sp.symbols('M r')
+
+sp.series(sp.sqrt(1 - 2*M/r), x=r, x0=sp.oo)
