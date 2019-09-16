@@ -77,4 +77,4 @@ def make_segments(x, y):
     segments = np.concatenate([points[:-1], points[1:]], axis=1)
     return segments
 
-multicolored_lines(lambda x:1, figname = 'first_moment')
+multicolored_lines(lambda x:(5*x**3 - 3*x)/2, figname = 'nth_moment')
