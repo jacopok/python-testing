@@ -14,7 +14,7 @@ MAP = 'seismic'
 
 import matplotlib.collections as mcoll
 
-def multicolored_lines():
+def multicolored_lines(z, figname=None):
     """
     http://nbviewer.ipython.org/github/dpsanders/matplotlib-examples/blob/master/colorline.ipynb
     http://matplotlib.org/examples/pylab_examples/multicolored_line.html
@@ -25,11 +25,15 @@ def multicolored_lines():
     x = np.cos(theta)
     y = np.sin(theta)
     fig, ax = plt.subplots()
-    lc = colorline(x, y, z=x**2-1/3, cmap=MAP)
+    lc = colorline(x, y, z=z(x), cmap=MAP)
     plt.colorbar(lc)
     plt.xlim(-1.1, 1.1)
     plt.ylim(-1.1, 1.1)
-    plt.show()
+    ax.set_aspect('equal')
+    if(figname):
+        plt.savefig(figname + '.pdf', format = 'pdf')
+    else:
+        plt.show()
 
 def colorline(
         x, y, z=None, cmap='copper', norm=plt.Normalize(-1.0, 1.0),
@@ -73,4 +77,4 @@ def make_segments(x, y):
     segments = np.concatenate([points[:-1], points[1:]], axis=1)
     return segments
 
-multicolored_lines()
+multicolored_lines(lambda x:1, figname = 'first_moment')
