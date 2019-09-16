@@ -1,13 +1,22 @@
 import numpy as np
 
-M = 1/2
 r = 4
 
 v = 0.5
 
-gamma = 1 / np.sqrt(1-v**2)
+def get_vectors(v, r, M=1/2):
+    gamma = 1 / np.sqrt(1-v**2)
+    y = gamma * np.sqrt(1 - 2 * M / r)
+    e_t = [-y*v, gamma**2 / y]
+    e_r = [y, -v*gamma**2 / y]
 
-y = gamma * np.sqrt(1 - 2 * M / r)
+    return(e_t, e_r)
+
+#%%
+%%markdown
+
+I  will return vectors as $(r, t)$ instead of $(t, r)$ since that is most intuitive
+for a spacetime diagram.
 
 #%%
 
@@ -18,55 +27,64 @@ def norm(vec, M, r):
 
 #%%
 
-e_t = [gamma**2 / y, -y*v]
-e_r = [-v*gamma**2 / y,  y]
+import matplotlib.pyplot as plt
+plt.style.use('seaborn')
+from matplotlib import rc
+rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
+rc('text.latex', preamble=r'''\usepackage{amsmath}
+          \usepackage{physics}
+          \usepackage{siunitx}
+          ''')
+
+v=0.5
+r=1.3
+
+e_t, e_r = get_vectors(v=v, r=r)
+e_t_schw, e_r_schw = [0,1], [1,0]
+
+origin = [0], [0]
+
+from itertools import cycle
+colors = cycle(('firebrick', 'navy', 'lightcoral', 'cornflowerblue'))
+x_coords =[]
+y_coords =[]
+
+def plot_vector(vec, name):
+    plt.quiver(
+        *origin,
+        *vec,
+        color=next(colors),
+        scale_units='xy',
+        angles='xy',
+        scale = 1,
+        label=name)
+    x_coords.append(vec[0])
+    y_coords.append(vec[1])
+    return(None)
+
+plt.figure()
+plot_vector(e_t, 'fiducial $e_t$')
+plot_vector(e_r, 'fiducial $e_r$')
+plot_vector(e_t_schw, 'coordinate $e_t$')
+plot_vector(e_r_schw, 'coordinate $e_r$')
+
+
+max_x = np.max(x_coords)
+max_y = np.max(y_coords)
+min_x = np.min(x_coords)
+min_y = np.min(y_coords)
+
+avg_minmax = np.average(np.abs([max_x, max_y, min_x, min_y]))*0.2
+
+plt.xlim(min_x-avg_minmax, max_x+avg_minmax)
+plt.ylim(min_y-avg_minmax, max_y+avg_minmax)
+plt.xlabel('Coordinate radius $r$')
+plt.ylabel('Coordinate time $t$')
+title = f'$v = {v}$, $r/2M = {r}$'
+figtitle = f'{v}_{r}'
+plt.title(title)
+plt.legend()
+plt.savefig(figtitle+'.pdf', format = 'pdf')
 
 #%%
-
-print(e_t)
-print(e_r)
-print(y)
-print(gamma)
-
-#%%
-
-import plotly.graph_objects as go
-
-# Create figure
-fig = go.Figure()
-
-# Add traces, one for each slider step
-for step in np.arange(0, 5, 0.1):
-    fig.add_trace(
-        go.Scatter(
-            visible=False,
-            line=dict(color="#00CED1", width=6),
-            name="𝜈 = " + str(step),
-            x=np.arange(0, 10, 0.01),
-            y=np.sin(step * np.arange(0, 10, 0.01))))
-
-# Make 10th trace visible
-fig.data[10].visible = True
-
-# Create and add slider
-steps = []
-for i in range(len(fig.data)):
-    step = dict(
-        method="restyle",
-        args=["visible", [False] * len(fig.data)],
-    )
-    step["args"][1][i] = True  # Toggle i'th trace to "visible"
-    steps.append(step)
-
-sliders = [dict(
-    active=10,
-    currentvalue={"prefix": "Frequency: "},
-    pad={"t": 50},
-    steps=steps
-)]
-
-fig.update_layout(
-    sliders=sliders
-)
-
-fig.show()
