@@ -7,44 +7,57 @@ plt.style.use('seaborn')
 
 g = 9.81 # m*s**(-2)
 
-t = float(input("t = "))
-h = float(input("h = "))
+t = float(input("Please input the time t in seconds"))
+t = float(input("Please input the height h in metres"))
 
 x = 1/2 * g * t**2
 print(f"x = {x}")
 
 t2 = np.sqrt(2*g*h)
 print(f"t_2 = {t2}")
+
 #%% Exercise 1.2
 
-import scipy.integrate as integrate
+def distance(z, type=None):
+    """
+    `distance` takes as input:
+        the redshift z,
+        the `type` parameter, a string which can currently be
+        "luminosity" or "comoving", depending on which integral
+        one wishes to compute.
 
-def distance(z, type=None): #definition of new function looktime.
-    # This function takes one argument (z)
+    It returns the desired type of distance.
+    """
+
     H0=67.2 #Hubble constant in km/s/Mpc
     convert=1e5/3.086e24*3.1536e7*1e9
     #converts from km/s/Mpc to Gyr
     OmegaM=0.2726 #omega matter, parameter from cosmology
     OmegaL= 0.7274 #omega lambda, parameter from cosmology
-    if(type=="comoving"):
-        integrand = lambda x: 1./((OmegaM*(1.+x)**3.+ \
-            OmegaL)**0.5)
-    elif(type=="luminosity"):
-        integrand = lambda x: (1.+x)/((OmegaM*(1.+x)**3.+ \
-            OmegaL)**0.5)
-    else:
+
+    try:
+        integrand = {
+            "comoving": lambda x: 1./((OmegaM*(1.+x)**3.+ \
+                OmegaL)**0.5),
+            "luminosity": lambda x: (1.+x)/((OmegaM*(1.+x)**3.+ \
+                OmegaL)**0.5),
+        }[type]
+    except KeyError:
         raise(NotImplementedError("This type of integral is not implemented."))
 
-    #integrand is the function I want to integrate
-    #between 0 and z
+    import scipy.integrate as integrate
+
     ltime=integrate.quad(integrand, 0.0, z)
-    #ltime is an array of 2 elements:
-    # ltime[0] = result of integral
-    # ltime[1] = error
     look=ltime[0]
     look/=(H0*convert)
     return look #function looktime returns look, which is
     #the lookback time at redshift z in comoving framework
+
+#%%
+
+distance(1, "not")
+
+#%%
 
 z=10. #initial redshift
 comoving_dist=[] #comoving distance list
@@ -53,8 +66,7 @@ redsh=[] #redshift list
 while(z>0.0):
     comoving_dist.append(distance(z, "comoving"))
     luminosity_dist.append(distance(z, "luminosity"))
-    redsh.append(z) #store z into list redsh
+    redsh.append(z)
     z-=0.1
-for i in range(len(look)): #loop over the elements of look
-    print(redsh[i], comoving_dist[i], luminosity_dist[i]) #prints redshift and
-    #corresponding look back time list
+for i in range(len(look)):
+    print(f"z = {redsh[i]:.1f}, D_C = {comoving_dist[i]:.2f}, D_L = {luminosity_dist[i]:.2f}")
