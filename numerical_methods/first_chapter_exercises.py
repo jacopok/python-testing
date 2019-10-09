@@ -1,14 +1,14 @@
+#%%
 import numpy as np
 
 import matplotlib.pyplot as plt
 plt.style.use('seaborn')
-
 #%% Exercise 1.1
 
 g = 9.81 # m*s**(-2)
 
 t = float(input("Please input the time t in seconds"))
-t = float(input("Please input the height h in metres"))
+h = float(input("Please input the height h in metres"))
 
 x = 1/2 * g * t**2
 print(f"x = {x}")
@@ -68,5 +68,5 @@ while(z>0.0):
     luminosity_dist.append(distance(z, "luminosity"))
     redsh.append(z)
     z-=0.1
-for i in range(len(look)):
+for i in range(len(redsh)):
     print(f"z = {redsh[i]:.1f}, D_C = {comoving_dist[i]:.2f}, D_L = {luminosity_dist[i]:.2f}")
