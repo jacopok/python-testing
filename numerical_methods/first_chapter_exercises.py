@@ -70,3 +70,6 @@ while(z>0.0):
     z-=0.1
 for i in range(len(redsh)):
     print(f"z = {redsh[i]:.1f}, D_C = {comoving_dist[i]:.2f}, D_L = {luminosity_dist[i]:.2f}")
+
+# %%
+
