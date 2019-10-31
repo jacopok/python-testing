@@ -4,6 +4,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 plt.style.use('seaborn')
 
+import os
+os.chdir('/home/jacopo/PycharmProjects/python-testing/numerical_methods/contours')
+
 tot_filename = "chirpmass_tmerg_tot.dat"
 tmerg_filename = "tmerg_bin.dat"
 chirpmass_filename = "chirpmass_bin.dat"
@@ -24,19 +27,19 @@ chirpmass_data = np.array(chirpmass_data, dtype=np.float)
 import matplotlib.cm as cm
 import matplotlib.ticker as ticker
 
-plt.ylim((0, 40))
+plt.ylim((0, 30))
 
-ctf = plt.contourf(tmerg_data, chirpmass_data, tot_data, cmap=cm.plasma, locator=ticker.LogLocator())
-ct = plt.contour(tmerg_data, chirpmass_data, tot_data, locator=ticker.LogLocator())
+ctf = plt.contourf(tmerg_data, chirpmass_data, tot_data, cmap=cm.BuPu, levels=100)
+ct = plt.contour(tmerg_data, chirpmass_data, tot_data)
 
 def fmt(x):
     return(f'{x:.0e}')
 
-# ct.levels = [fmt(i) for i in ct.levels]
+ct.levels = [fmt(i) for i in ct.levels]
 
-cb = plt.colorbar(ctf)
-cb.set_ticks([fmt(x) for x in cb.get_ticks()])
-plt.clabel(ct, ct.levels)
+cb = plt.colorbar(ctf, format=':%.1e')
+
+plt.clabel(ct, ct.levels, colors='b')
 
 
 # %%
