@@ -55,10 +55,6 @@ def distance(z, type=None):
 
 #%%
 
-distance(1, "not")
-
-#%%
-
 z=10. #initial redshift
 comoving_dist=[] #comoving distance list
 luminosity_dist=[] #luminosity distance list
@@ -71,5 +67,12 @@ while(z>0.0):
 for i in range(len(redsh)):
     print(f"z = {redsh[i]:.1f}, D_C = {comoving_dist[i]:.2f}, D_L = {luminosity_dist[i]:.2f}")
 
-# %%
+# %% 1.4
 
+plt.plot(redsh, comoving_dist, label="Comoving distance")
+plt.plot(redsh, luminosity_dist, label="Luminosity distance")
+
+plt.xlabel("redshift $z$")
+plt.legend()
+
+# %%
