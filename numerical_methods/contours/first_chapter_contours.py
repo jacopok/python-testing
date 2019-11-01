@@ -29,7 +29,7 @@ import matplotlib.ticker as ticker
 
 plt.ylim((0, 30))
 
-ctf = plt.contourf(tmerg_data, chirpmass_data, tot_data, cmap=cm.BuPu, levels=100)
+ctf = plt.contourf(tmerg_data, chirpmass_data, tot_data, cmap=cm.inferno, levels=100)
 ct = plt.contour(tmerg_data, chirpmass_data, tot_data)
 
 def fmt(x):
@@ -39,7 +39,8 @@ ct.levels = [fmt(i) for i in ct.levels]
 
 cb = plt.colorbar(ctf, format=':%.1e')
 
-plt.clabel(ct, ct.levels, colors='b')
-
+plt.clabel(ct, ct.levels)
 
 # %%
+
+# # column 1: identifier; col. 2: host total stellar mass host; col. 3: formation redshift; col. 4: metallicity star; col. 5: metallicity pop. synth.; col. 6: identifier binary; col. 7: mass black hole 1/MSun; col. 8: mass black hole 2/Msun; col. 9: delay time/Gyr; col. 10: merger time (look back)/Gyr
