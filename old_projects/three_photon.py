@@ -7,20 +7,25 @@ E, Em = sp.symbols('E Em', real=True, positive=True)
 
 # %%
 
-eq1 = sp.Eq(E + z2 + z3, 0)
-eq2 = sp.Eq(Em, E + sp.sqrt(x3 ** 2 + y3 ** 2 + z3 ** 2) + sp.sqrt(x2 ** 2 + y2 ** 2 + z2 ** 2))
+eq = sp.Eq(Em, E + sp.sqrt(x3 ** 2 + y3 ** 2 + (-E-z2) ** 2) + sp.sqrt(x2 ** 2 + y2 ** 2 + z2 ** 2))
 
 # %%
 
-sols = sp.solve([eq1, eq2], [z2, z3])
+from sympy import S
+sols = sp.solve(eq, z2, domain=S.Reals)
 
 # %%
 
 vect = sp.Matrix([E,
-    x2, y2, sp.simplify(sols[0][0].subs(x3, -x2).subs(y3, -y2)),
-    -x2, -y2, sp.simplify(sols[0][1].subs(x3, -x2).subs(y3, -y2)),
+    x2, y2, sp.simplify(sols[0].subs(x3, -x2).subs(y3, -y2)),
+    -x2, -y2, -E-sp.simplify(sols[0].subs(x3, -x2).subs(y3, -y2))
     ])
 coords = [E, x2, y2]
+
+def numerical_vect(Enum, x2num, y2num, Emaxnum=1):
+    z2num = sols[0].subs(x3, -x2).subs(y3, -y2).subs(E, Enum).subs(x2, x2num).subs(y2, y2num).subs(Em, Emaxnum)
+    z3num = - Enum - z2num 
+    return(Enum, x2num, y2num, z2num, -x2num, -y2num, z3num)
 
 # %%
 
