@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 plt.style.use('seaborn')
 
 import os
-os.chdir('/home/jacopo/PycharmProjects/python-testing/numerical_methods/contours')
+os.chdir('/home/jacopo/Documents/python-testing/numerical_methods/contours')
 
 tot_filename = "chirpmass_tmerg_tot.dat"
 tmerg_filename = "tmerg_bin.dat"
@@ -28,6 +28,8 @@ import matplotlib.cm as cm
 import matplotlib.ticker as ticker
 
 plt.ylim((0, 30))
+
+tot_data = np.log(tot_data)
 
 ctf = plt.contourf(tmerg_data, chirpmass_data, tot_data, cmap=cm.inferno, levels=100)
 ct = plt.contour(tmerg_data, chirpmass_data, tot_data)
