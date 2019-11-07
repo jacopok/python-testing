@@ -64,7 +64,7 @@ def merge_sort(array, comparison, sorted=False):
     n = len(array)
     if (n<=1):
         return (array)
-        
+
 
 def algorithm_comparison(algorithm_list, algorithm_names, num=1000, every=10):
     from time import time
@@ -88,3 +88,21 @@ def algorithm_comparison(algorithm_list, algorithm_names, num=1000, every=10):
         popt, pcov = curve_fit(model, range(len(times_dict[name])), times_dict[name])
         plt.plot(times_dict[name], label=f'Exponent: {popt[1]:.1e} for {name}')
     plt.legend()
+
+def merge(arr1, arr2): 
+    n1 = len(arr1) 
+    n2 = len(arr2) 
+    i = j = 0
+    comparison = lambda x, y:x<y 
+    merged = [] 
+    while (i + j < n1 + n2): 
+        if (comparison(arr1[i], arr2[j])):
+            merged.append(arr1[i]) 
+            i += 1 
+        else: 
+            merged.append(arr2[j]) 
+            j += 1
+        if (i == n1): 
+            return(merged + arr2[j:])
+        if (j == n2): 
+            return( merged + arr1[i:]) 
