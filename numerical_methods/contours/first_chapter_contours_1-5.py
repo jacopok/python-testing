@@ -43,6 +43,3 @@ cb = plt.colorbar(ctf, format=':%.1e')
 
 plt.clabel(ct, ct.levels)
 
-# %%
-
-# # column 1: identifier; col. 2: host total stellar mass host; col. 3: formation redshift; col. 4: metallicity star; col. 5: metallicity pop. synth.; col. 6: identifier binary; col. 7: mass black hole 1/MSun; col. 8: mass black hole 2/Msun; col. 9: delay time/Gyr; col. 10: merger time (look back)/Gyr
