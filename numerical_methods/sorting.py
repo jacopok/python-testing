@@ -2,7 +2,6 @@ def bubble_sort(array, comparison):
     """
     Comparison should be true for the sorted array
     """
-
     n = len(array)
     while True:
         changes = False
@@ -56,44 +55,14 @@ def quick_sort(array, comparison):
     sorted_more_than = quick_sort(more_than, comparison)
     return (sorted_less_than + [pivot] + sorted_more_than)
 
-def merge_sort(array, comparison, sorted=False):
+def merge(arr1, arr2, comparison):
     """
-    Comparison should be true for the sorted array
+    Merges two sorted arrays in O(n1+n2)
     """
     
-    n = len(array)
-    if (n<=1):
-        return (array)
-
-
-def algorithm_comparison(algorithm_list, algorithm_names, num=1000, every=10):
-    from time import time
-    def n_test(algorithm, n):
-        n_list = list(range(n)[::-1])
-        t1 = time()
-        algorithm(n_list, lambda x, y: x < y)
-        t2 = time()
-        return(t2-t1)
-    
-    times_dict = {name:[] for name in algorithm_names}
-    for (alg, name) in zip(algorithm_list, algorithm_names):
-        for n in range(num)[::every]:
-            times_dict[name].append((n_test(alg, n)))
-    
-    import matplotlib.pyplot as plt
-    from scipy.optimize import curve_fit
-    model = lambda x, exponent, constant: constant * x**exponent
-    plt.style.use('seaborn')
-    for name in times_dict:
-        popt, pcov = curve_fit(model, range(len(times_dict[name])), times_dict[name])
-        plt.plot(times_dict[name], label=f'Exponent: {popt[1]:.1e} for {name}')
-    plt.legend()
-
-def merge(arr1, arr2): 
     n1 = len(arr1) 
     n2 = len(arr2) 
     i = j = 0
-    comparison = lambda x, y:x<y 
     merged = [] 
     while (i + j < n1 + n2): 
         if (comparison(arr1[i], arr2[j])):
@@ -105,4 +74,55 @@ def merge(arr1, arr2):
         if (i == n1): 
             return(merged + arr2[j:])
         if (j == n2): 
-            return( merged + arr1[i:]) 
+            return( merged + arr1[i:])
+
+def merge_sort(array, comparison):
+    """
+    Comparison should be true for the sorted array
+    """
+    n = len(array)
+    if (n<=1):
+        return (array)
+    first_half = merge_sort(array[:int(n / 2)], comparison)
+    second_half = merge_sort(array[int(n / 2):], comparison)
+    return(merge(first_half, second_half, comparison))
+
+def algorithm_comparison(algorithm_list, algorithm_names, num=1000, every=10, test_type="random"):
+    from time import time
+    from random import sample, randrange
+
+    def random_swap(array, n):
+        n1 = randrange(n)
+        n2 = randrange(n)
+        array[n1], array[n2] = array[n2], array[n1]
+        return(array)
+
+    test_types = {
+        "inverse_sorted": lambda n: list(range(n))[::1],
+        "random": lambda n: sample(list(range(n)), k=n),
+        "almost_sorted": lambda n: random_swap(list(range(n)), n)
+    } 
+
+    def n_test(algorithm, n):
+        n_list = test_types[test_type](n)
+        t1 = time()
+        algorithm(n_list, lambda x, y: x < y)
+        t2 = time()
+        return(t2-t1)
+    
+    times_dict = {name:[] for name in algorithm_names}
+    for (alg, name) in zip(algorithm_list, algorithm_names):
+        print("Testing " + name)
+        for n in range(1, num)[::every]:
+            times_dict[name].append((n_test(alg, n)))
+    
+    import matplotlib.pyplot as plt
+    from scipy.optimize import curve_fit
+    model = lambda x, exponent, constant: constant * x**exponent
+    plt.style.use('seaborn')
+    for name in times_dict:
+        popt, pcov = curve_fit(model, range(len(times_dict[name])), times_dict[name])
+        plt.plot(times_dict[name], label=f'Exponent: {popt[0]:.3f} for {name}')
+        plt.plot(range(len(times_dict[name])), model(range(len(times_dict[name])), *popt))
+    plt.legend()
+    plt.title(test_type)
