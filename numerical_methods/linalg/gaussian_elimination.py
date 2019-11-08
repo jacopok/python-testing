@@ -1,4 +1,6 @@
 import numpy as np
+from numpy.linalg import det, solve
+from time import sleep
 
 def test_data(n, pathological=False):
     from numpy.random import rand
@@ -22,19 +24,40 @@ def gaussian_elimination(A, b):
     n_rows, n_cols = A_shape
     A = np.array(A)
     b = np.array(b)
-    for i in range(n_rows):
-        # print(A)
-        for j in range(i):
-            b[i] -= A[i, j] * b[j]
-            A[i,:] -= A[i, j] * A[j,:]
-        if (A[i, i] == 0):
-            # print("Swapping")
-            # print(A)
-            A[i,:], A[-1,:] = A[-1,:], A[i,:]
-            b[i], b[-1] = b[-1], b[i]
-            # print(A)
-            pass 
-        b[i] = b[i] / A[i, i]
-        A[i,:] = A[i,:] / A[i, i]
+    # print(solve(A, b))
+
+    scale = np.average([np.average(np.abs(A.flatten())), np.average(np.abs(b))])
+
+    def is_zero(x, scale=scale, threshold=1e-10):
+        return(np.abs(x)<threshold*scale)
+
+    if (is_zero(det(A))):
+        raise TypeError("Zero determinant")
     
+    def roll(A, start=0):
+        for j in range(start, len(A) - 1):
+            A[j], A[j + 1] = A[j + 1], A[j]
+        return (A)
+    
+    print("Solutions", solve(A, b))
+    
+    i=0
+    while (i<n_cols):
+        pivot = A[i, i]
+        # print("Det:", det(A))
+        # print(A)
+        if (pivot == 0):
+            A[i:,:] = np.roll(A[i:,:], 1, axis=0)
+            b[i:] = np.roll(b[i:], 1, axis=0)
+            # A = roll(A)
+            sleep(1)
+            continue
+        A[i,:] /= pivot
+        for j in range(i+1, n_rows):
+            A[j,:] -= A[i,:] * A[j, i]
+            b[j] -= b[i] * A[j, i]
+        i += 1
+    
+    print("My solutions", solve(A, b))
+
     return(A, b)
