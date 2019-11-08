@@ -1,12 +1,13 @@
 import numpy as np
 
-def test_data(n):
-    nums = range(n ** 2)
-    from random import sample
-    nums = sample(nums, k=n ** 2)
-    nums_vec = range(n)
-    nums_vec = sample(nums_vec, k = n)
-    return(np.reshape(nums, (n,n)), nums_vec)
+def test_data(n, pathological=False):
+    from numpy.random import rand
+    A = rand(n, n)
+    b = rand(n)
+    if(pathological):
+        for i in range(n):
+            A[i,i] = 0
+    return(A, b)
 
 def gaussian_elimination(A, b):
     A_shape = np.shape(A)
@@ -21,16 +22,19 @@ def gaussian_elimination(A, b):
     n_rows, n_cols = A_shape
     A = np.array(A)
     b = np.array(b)
-    print("Starting b")
-    print(b)
     for i in range(n_rows):
-        if(A[i, i] != 0):
-            A[i,:] = A[i,:] / A[i, i]
-            b[i] = b[i] / A[i, i]
+        # print(A)
         for j in range(i):
-            A[i,:] -= A[i, j] * A[j,:]
             b[i] -= A[i, j] * b[j]
+            A[i,:] -= A[i, j] * A[j,:]
+        if (A[i, i] == 0):
+            # print("Swapping")
+            # print(A)
+            A[i,:], A[-1,:] = A[-1,:], A[i,:]
+            b[i], b[-1] = b[-1], b[i]
+            # print(A)
+            pass 
+        b[i] = b[i] / A[i, i]
+        A[i,:] = A[i,:] / A[i, i]
     
-    print("Ending b")
-    print(b)
     return(A, b)
