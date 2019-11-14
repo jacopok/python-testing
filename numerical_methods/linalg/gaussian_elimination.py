@@ -71,6 +71,7 @@ def LU_decomposition(A):
 
     if (matrix_rank(A) < min(n_rows, n_cols)):
         raise TypeError("Rank too low")
+        return(None)
         
     i=0
     while (i<n_rows):
@@ -89,18 +90,18 @@ def LU_decomposition(A):
     
     return(A, Linv)
 
-def complexity(nmax, every=1, *options):
+def complexity(nmax, every=1, **options):
     from time import time
     from random import sample, randrange
 
     def n_test(n):
         t1 = time()
-        gaussian_elimination(*test_data(n, *options))
+        gaussian_elimination(*test_data(n, **options))
         t2 = time()
         return (t2 - t1)
         
     times= []
-    for n in range(1, nmax, every):
+    for n in range(2, nmax, every):
         times.append(n_test(n))
     
     import matplotlib.pyplot as plt
