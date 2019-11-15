@@ -84,7 +84,7 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True, verbose=True):
         print(f"Did {n} iterations")
     
     if (divergence_count > 5):
-        if(verbose):
+        if(verbose): 
             print("Algorithm is diverging")
         return None
 
@@ -93,19 +93,28 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True, verbose=True):
         print(f"Oopt = {Oopt}")
     else:
         Oopt = 1
-
+    
+    diverged=False
     while dist(xold, xnew) > eps * problem_scale:
         xold = xnew
         xnew = iteration_step(A, b, xold, Oopt)
+        if (dist(xold, xnew) > Dxk):
+            divergence_count += 1
+        if (divergence_count > 100):
+            diverged=True
+            break
         n += 1
 
-    if(verbose):
-        print(f"Algoritm converged after {n} iterations")
+    if (verbose):
+        if(diverged):
+            print(f"Algorithm diverged after {n} iterations")
+        else:
+            print(f"Algoritm converged after {n} iterations")
         print(f"Error is {norm(A@xnew - b)}")
 
     return (xnew)
 
-def test(**kwargs):
+def test(dim=3, **kwargs):
     from math import isnan
     from gaussian_elimination import gaussian_elimination
     from time import sleep
@@ -116,7 +125,7 @@ def test(**kwargs):
             n=0 
             while(True): 
                 n+=1 
-                A, b = test_data(3, **kwargs)
+                A, b = test_data(dim, **kwargs)
                 x = gauss_seidel(A, b, relaxation=False, verbose=False)
                 if(x is not None): 
                     if(not isnan(x[0])): 
@@ -128,4 +137,11 @@ def test(**kwargs):
             print(f"Found convergence for the {n}th system")
         except KeyboardInterrupt:
             trigger = False
-    return(conv)
+    return (conv)
+
+Amap = np.array([
+    [4, -1, 1],
+    [-1, 4, -2],
+    [1, -2, 4]
+])
+bmap = np.array([12, -1, 5])
