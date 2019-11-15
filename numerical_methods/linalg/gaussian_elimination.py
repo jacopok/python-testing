@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.linalg import matrix_rank, solve
 
-def test_data(nrows, ncols=None, pathological=False, whole=True):
+def test_data(nrows, ncols=None, pathological=False, whole=True, diagonal_multiplier=1, positive_definite=False):
     from numpy.random import rand
     if (not ncols):
         ncols = nrows
@@ -17,7 +17,11 @@ def test_data(nrows, ncols=None, pathological=False, whole=True):
     else:
         for i in range(min(nrows,ncols)):
             if (A[i, i] == 0):
-                A[i,i] += 1
+                A[i, i] += 1
+    for i in range(min(nrows, ncols)):
+        A[i, i] *= diagonal_multiplier
+    if (positive_definite):
+        A = A @ A.T
     return(A, b)
 
 def gaussian_elimination(A, b):
@@ -75,7 +79,6 @@ def LU_decomposition(A):
 
     if (matrix_rank(A) < min(n_rows, n_cols)):
         raise TypeError("Rank too low")
-        return(None)
         
     i=0
     while (i<n_rows):

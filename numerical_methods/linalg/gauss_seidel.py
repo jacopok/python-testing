@@ -100,7 +100,7 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True, verbose=True):
         n += 1
 
     if(verbose):
-        print(f"Did {n} iterations")
+        print(f"Algoritm converged after {n} iterations")
         print(f"Error is {norm(A@xnew - b)}")
 
     return (xnew)
@@ -117,13 +117,13 @@ def test(**kwargs):
             while(True): 
                 n+=1 
                 A, b = test_data(3, **kwargs)
-                x = gauss_seidel(A, b, relaxation=False, verbose=False) 
+                x = gauss_seidel(A, b, relaxation=False, verbose=False)
                 if(x is not None): 
                     if(not isnan(x[0])): 
                         print(x) 
                         print(gaussian_elimination(A, b)) 
                         conv.append(n) 
-                        sleep(.2)
+                        sleep(.1)
                         break
             print(f"Found convergence for the {n}th system")
         except KeyboardInterrupt:
