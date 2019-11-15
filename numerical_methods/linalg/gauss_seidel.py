@@ -22,7 +22,7 @@ def iteration_step(A, b, x, relaxation=1):
         xnew[i] = y / A[i,i]
     return (relaxation*xnew + (1-relaxation) * x)
 
-def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True):
+def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True, verbose=True):
     A_shape = np.shape(A)
     b_shape = np.shape(b)
     if (len(A_shape) != 2):
@@ -37,7 +37,8 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True):
     b = np.array(b, dtype=np.float64)
 
     if (matrix_rank(A) < min(n_rows, n_cols)):
-        raise TypeError("Rank too low")
+        return(None)
+        # raise TypeError("Rank too low")
     
     
     norm = lambda y : np.linalg.norm(y, ord=1)
@@ -48,18 +49,23 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True):
     else:
         xnew = b
 
+    problem_scale = np.linalg.norm(A, ord='fro')
+
     # iteration number
     n = 0
     for _ in range(10):
         xold = xnew
         xnew = iteration_step(A, b, xold)
-        print(xnew)
+        if(verbose):
+            print(xnew)
         n+=1
 
-    print(f"Did {n} iterations")
+    if(verbose):
+        print(f"Did {n} iterations")
 
     Dxk = dist(xold,xnew)
-    print(f"Dx = {Dxk}")
+    if(verbose):
+        print(f"Dx = {Dxk}")
 
     Oopt = []
     divergence_count=0
@@ -71,12 +77,15 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True):
             divergence_count += 1
         else:
             Oopt.append(2/(1+np.sqrt(1-(Dx/Dxk)**(1/p))))
-        print(f"Dx = {Dx}")
+        if(verbose):
+            print(f"Dx = {Dx}")
         n += 1
-    print(f"Did {n} iterations")
+    if(verbose):
+        print(f"Did {n} iterations")
     
     if (divergence_count > 5):
-        print("Algorithm is diverging")
+        if(verbose):
+            print("Algorithm is diverging")
         return None
 
     if(relaxation):
@@ -85,12 +94,38 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True):
     else:
         Oopt = 1
 
-    while dist(xold, xnew) > eps * norm(xnew):
+    while dist(xold, xnew) > eps * problem_scale:
         xold = xnew
         xnew = iteration_step(A, b, xold, Oopt)
         n += 1
 
-    print(f"Did {n} iterations")
-    print(f"Error is {norm(A@xnew - b)}")
+    if(verbose):
+        print(f"Did {n} iterations")
+        print(f"Error is {norm(A@xnew - b)}")
 
     return (xnew)
+
+def test(**kwargs):
+    from math import isnan
+    from gaussian_elimination import gaussian_elimination
+    from time import sleep
+    conv = []
+    trigger = True
+    while (trigger == True):
+        try: 
+            n=0 
+            while(True): 
+                n+=1 
+                A, b = test_data(3, **kwargs)
+                x = gauss_seidel(A, b, relaxation=False, verbose=False) 
+                if(x is not None): 
+                    if(not isnan(x[0])): 
+                        print(x) 
+                        print(gaussian_elimination(A, b)) 
+                        conv.append(n) 
+                        sleep(.2)
+                        break
+            print(f"Found convergence for the {n}th system")
+        except KeyboardInterrupt:
+            trigger = False
+    return(conv)
