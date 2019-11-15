@@ -20,7 +20,7 @@ def iteration_step(A, b, x, relaxation=1):
             if (j != i):
                 y -= val * x[j]
         xnew[i] = y / A[i,i]
-    return (relaxation*xnew - (1-relaxation) * x)
+    return (relaxation*xnew + (1-relaxation) * x)
 
 def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True):
     A_shape = np.shape(A)
