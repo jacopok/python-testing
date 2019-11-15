@@ -13,7 +13,11 @@ def test_data(nrows, ncols=None, pathological=False, whole=True):
         b = rand(nrows)
     if(pathological):
         for i in range(min(nrows,ncols)):
-            A[i,i] = 0
+            A[i, i] = 0
+    else:
+        for i in range(min(nrows,ncols)):
+            if (A[i, i] == 0):
+                A[i,i] += 1
     return(A, b)
 
 def gaussian_elimination(A, b):

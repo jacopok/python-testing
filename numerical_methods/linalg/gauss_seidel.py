@@ -1,7 +1,28 @@
 import numpy as np
 from numpy.linalg import matrix_rank
+from gaussian_elimination import test_data
 
-def gauss_seidel(A, b, ansatz=None, eps = 1e-5):
+def dirty_matrix(A, eps = 1e-5):
+    Aflat = A.flatten()
+    scale = np.average(np.abs(Aflat))
+    nr, nc = np.shape(A)
+
+    for i in range(min(nr, nc)):
+        A[i, i] += np.random.normal(scale=scale * eps)
+        
+    return (A)
+    
+def iteration_step(A, b, x, relaxation=1):
+    xnew = np.zeros_like(x)
+    for i in range(len(x)):
+        y = b[i]
+        for j, val in enumerate(A[i,:]):
+            if (j != i):
+                y -= val * x[j]
+        xnew[i] = y / A[i,i]
+    return (relaxation*xnew - (1-relaxation) * x)
+
+def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True):
     A_shape = np.shape(A)
     b_shape = np.shape(b)
     if (len(A_shape) != 2):
@@ -18,19 +39,11 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-5):
     if (matrix_rank(A) < min(n_rows, n_cols)):
         raise TypeError("Rank too low")
     
-    def iteration_step(A, b, x, relaxation):
-        xnew = np.zeros(np.shape(x))
-        for i in range(len(x)):
-            xnew[i] = 1 / A[i, i] * (b[i] - A[i,:] * x + A[i, i] * x[i])
-        return (relaxation*xnew - (1-relaxation) * x)
     
-    def dist(x1, x2):
-        return (np.sum(np.abs(x1 - x2)))
+    norm = lambda y : np.linalg.norm(y, ord=1)
+    dist = lambda y,z : norm(y-z)
     
-    def norm(x):
-        return (np.sum(np.abs(x)))
-    
-    if (ansatz):
+    if (ansatz is not None):
         xnew = ansatz
     else:
         xnew = b
@@ -38,22 +51,46 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-5):
     # iteration number
     n = 0
     for _ in range(10):
-        xold, xnew = xnew, iteration_step(A, b, xnew, 1)
+        xold = xnew
+        xnew = iteration_step(A, b, xold)
+        print(xnew)
         n+=1
-    
+
+    print(f"Did {n} iterations")
+
     Dxk = dist(xold,xnew)
+    print(f"Dx = {Dxk}")
 
-    Oopt=[]
-    for p in range(1,10):
-        xold, xnew = xnew, iteration_step(A, b, xnew, 1)
-        Dx= dist(xnew, xold)
-        Oopt.append(2/(1+np.sqrt(1-(Dx/Dxk)**(1/p))))
+    Oopt = []
+    divergence_count=0
+    for p in range(1,11):
+        xold = xnew
+        xnew = iteration_step(A, b, xold)
+        Dx = dist(xnew, xold)
+        if(Dx>Dxk):
+            divergence_count += 1
+        else:
+            Oopt.append(2/(1+np.sqrt(1-(Dx/Dxk)**(1/p))))
+        print(f"Dx = {Dx}")
         n += 1
+    print(f"Did {n} iterations")
     
-    Oopt = np.average(Oopt)
+    if (divergence_count > 5):
+        print("Algorithm is diverging")
+        return None
 
-    while dist(xold, xnew) < eps * norm(xnew):
-        xold, xnew = xnew, iteration_step(A, b, xnew, Oopt)
+    if(relaxation):
+        Oopt = np.average(Oopt)
+        print(f"Oopt = {Oopt}")
+    else:
+        Oopt = 1
+
+    while dist(xold, xnew) > eps * norm(xnew):
+        xold = xnew
+        xnew = iteration_step(A, b, xold, Oopt)
         n += 1
 
-    return(xnew)
+    print(f"Did {n} iterations")
+    print(f"Error is {norm(A@xnew - b)}")
+
+    return (xnew)
