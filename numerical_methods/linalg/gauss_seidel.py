@@ -5,11 +5,8 @@ from gaussian_elimination import test_data
 class dirty_matrix():
     def __init__(self, A, eps=1e-5):
         self.A = A
-        self.scale = np.linalg.norm(A, ord='fro')
         self.n = min(np.shape(A))
-
         self.sumrows=np.sum(np.abs(A), axis=1)
-        self.distributions = np.random.normal(scale=2*self.sumrows)
 
     def __iter__(self):
         return self
@@ -18,15 +15,14 @@ class dirty_matrix():
         dirtyA = np.copy(self.A)
         for i in range(self.n):
             noise = 0
-            print(noise)
-            print(self.sumrows[i])
-            while (np.abs(noise) > self.sumrows[i]):
-                print(noise)
-                print(self.sumrows[i])
-                noise = self.distributions[i]
+            while (np.abs(noise) < self.sumrows[i]):
+                noise = np.random.normal(self.sumrows[i])
             dirtyA[i, i] += noise
     
-        return(dirtyA)
+        return (dirtyA)
+
+def not_diagonally_dominant(A):
+    return((np.sum(np.abs(A), axis=1) > 2*np.diagonal(np.abs(A))).any())
     
 def iteration_step(A, b, x, relaxation=1):
     xnew = np.copy(x)
@@ -38,7 +34,7 @@ def iteration_step(A, b, x, relaxation=1):
         xnew[i] = y / A[i,i]
     return (relaxation*xnew + (1-relaxation) * x)
 
-def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True, verbose=True):
+def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True, verbose=True, diagonally_dominant=False):
     A_shape = np.shape(A)
     b_shape = np.shape(b)
     if (len(A_shape) != 2):
@@ -55,7 +51,19 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True, verbose=True):
     if (matrix_rank(A) < min(n_rows, n_cols)):
         return(None, 0)
         # raise TypeError("Rank too low")
-    
+
+    if(not diagonally_dominant):
+        if (not_diagonally_dominant(A)):
+            print("Doing stochastic calculation")
+            iterator = dirty_matrix(A)
+            xarray = []
+            narray= []
+            for _ in range(1000):
+                x, n = gauss_seidel(next(iterator), b, ansatz=ansatz, relaxation=relaxation, verbose=False, diagonally_dominant=True)
+                xarray.append(x)
+                narray.append(n)
+            return(np.average(xarray), np.sum(n))
+
     
     norm = lambda y : np.linalg.norm(y, ord=1)
     dist = lambda y,z : norm(y-z)
