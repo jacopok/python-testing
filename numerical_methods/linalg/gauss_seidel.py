@@ -2,23 +2,39 @@ import numpy as np
 from numpy.linalg import matrix_rank
 from gaussian_elimination import test_data
 
-def dirty_matrix(A, eps = 1e-5):
-    Aflat = A.flatten()
-    scale = np.average(np.abs(Aflat))
-    nr, nc = np.shape(A)
+class dirty_matrix():
+    def __init__(self, A, eps=1e-5):
+        self.A = A
+        self.scale = np.linalg.norm(A, ord='fro')
+        self.n = min(np.shape(A))
 
-    for i in range(min(nr, nc)):
-        A[i, i] += np.random.normal(scale=scale * eps)
-        
-    return (A)
+        self.sumrows=np.sum(np.abs(A), axis=1)
+        self.distributions = np.random.normal(scale=2*self.sumrows)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        dirtyA = np.copy(self.A)
+        for i in range(self.n):
+            noise = 0
+            print(noise)
+            print(self.sumrows[i])
+            while (np.abs(noise) > self.sumrows[i]):
+                print(noise)
+                print(self.sumrows[i])
+                noise = self.distributions[i]
+            dirtyA[i, i] += noise
+    
+        return(dirtyA)
     
 def iteration_step(A, b, x, relaxation=1):
-    xnew = np.zeros_like(x)
+    xnew = np.copy(x)
     for i in range(len(x)):
         y = b[i]
         for j, val in enumerate(A[i,:]):
             if (j != i):
-                y -= val * x[j]
+                y -= val * xnew[j]
         xnew[i] = y / A[i,i]
     return (relaxation*xnew + (1-relaxation) * x)
 
@@ -37,7 +53,7 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True, verbose=True):
     b = np.array(b, dtype=np.float64)
 
     if (matrix_rank(A) < min(n_rows, n_cols)):
-        return(None)
+        return(None, 0)
         # raise TypeError("Rank too low")
     
     
@@ -86,7 +102,7 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True, verbose=True):
     if (divergence_count > 5):
         if(verbose): 
             print("Algorithm is diverging")
-        return None
+        return (None, n)
 
     if(relaxation):
         Oopt = np.average(Oopt)
@@ -112,13 +128,14 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True, verbose=True):
             print(f"Algoritm converged after {n} iterations")
         print(f"Error is {norm(A@xnew - b)}")
 
-    return (xnew)
+    return (xnew, n)
 
-def test(dim=3, **kwargs):
+def test(dim=3, relaxation=False, **kwargs):
     from math import isnan
     from gaussian_elimination import gaussian_elimination
     from time import sleep
     conv = []
+    nits = []
     trigger = True
     while (trigger == True):
         try: 
@@ -126,22 +143,23 @@ def test(dim=3, **kwargs):
             while(True): 
                 n+=1 
                 A, b = test_data(dim, **kwargs)
-                x = gauss_seidel(A, b, relaxation=False, verbose=False)
+                x, nit = gauss_seidel(A, b, relaxation=relaxation, verbose=False)
                 if(x is not None): 
                     if(not isnan(x[0])): 
                         print(x) 
                         print(gaussian_elimination(A, b)) 
-                        conv.append(n) 
+                        conv.append(n)
+                        nits.append(nit)
                         sleep(.1)
                         break
             print(f"Found convergence for the {n}th system")
         except KeyboardInterrupt:
             trigger = False
-    return (conv)
+    return (conv, nits)
 
-Amap = np.array([
+Atest = np.array([
     [4, -1, 1],
     [-1, 4, -2],
     [1, -2, 4]
 ])
-bmap = np.array([12, -1, 5])
+btest = np.array([12, -1, 5])
