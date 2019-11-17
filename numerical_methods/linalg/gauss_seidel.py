@@ -5,7 +5,8 @@ from gaussian_elimination import test_data
 class dirty_matrix():
     def __init__(self, A, eps=1e-5):
         self.A = A
-        self.n = min(np.shape(A))
+        self.n=min(np.shape(A))
+        print(f"Initialized an {self.n}-dimensional matrix")
         self.sumrows=np.sum(np.abs(A), axis=1)
 
     def __iter__(self):
@@ -16,9 +17,9 @@ class dirty_matrix():
         for i in range(self.n):
             noise = 0
             while (np.abs(noise) < self.sumrows[i]):
-                noise = np.random.normal(self.sumrows[i])
+                noise = np.random.normal(scale=self.sumrows[i])
+
             dirtyA[i, i] += noise
-    
         return (dirtyA)
 
 def not_diagonally_dominant(A):
@@ -57,12 +58,14 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True, verbose=True, 
             print("Doing stochastic calculation")
             iterator = dirty_matrix(A)
             xarray = []
-            narray= []
-            for _ in range(1000):
+            narray = []
+            from tqdm import tqdm
+            for _ in tqdm(range(10000)):
                 x, n = gauss_seidel(next(iterator), b, ansatz=ansatz, relaxation=relaxation, verbose=False, diagonally_dominant=True)
                 xarray.append(x)
                 narray.append(n)
-            return(np.average(xarray), np.sum(n))
+            xav = np.average(np.array(xarray),axis=0)
+            return(xav, np.sum(n))
 
     
     norm = lambda y : np.linalg.norm(y, ord=1)
@@ -114,7 +117,8 @@ def gauss_seidel(A, b, ansatz=None, eps = 1e-10, relaxation=True, verbose=True, 
 
     if(relaxation):
         Oopt = np.average(Oopt)
-        print(f"Oopt = {Oopt}")
+        if (verbose):
+            print(f"Oopt = {Oopt}")
     else:
         Oopt = 1
     
