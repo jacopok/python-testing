@@ -1,4 +1,4 @@
-def bubble_sort(array, comparison):
+def bubble_sort(array, comparison = lambda x,y: x<y):
     """
     Comparison should be true for the sorted array
     """
@@ -12,7 +12,7 @@ def bubble_sort(array, comparison):
         if (changes == False):
             return (array)
 
-def selection_sort(array, comparison):
+def selection_sort(array, comparison = lambda x,y: x<y):
     """
     Comparison should be true for the sorted array
     """
@@ -34,7 +34,7 @@ def selection_sort(array, comparison):
         if (sorted_index == n - 1):
             return(array)
 
-def quick_sort(array, comparison):
+def quick_sort(array, comparison = lambda x,y: x<y):
     """
     Comparison should be true for the sorted array
     """
@@ -76,7 +76,7 @@ def merge(arr1, arr2, comparison):
         if (j == n2): 
             return( merged + arr1[i:])
 
-def merge_sort(array, comparison):
+def merge_sort(array, comparison = lambda x,y: x<y):
     """
     Comparison should be true for the sorted array
     """
@@ -106,7 +106,7 @@ def algorithm_comparison(algorithm_list, algorithm_names, num=1000, every=10, te
     def n_test(algorithm, n):
         n_list = test_types[test_type](n)
         t1 = time()
-        algorithm(n_list, lambda x, y: x < y)
+        algorithm(n_list)
         t2 = time()
         return(t2-t1)
     

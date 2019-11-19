@@ -22,3 +22,5 @@ for i in range(n):
 plt.hist2d(BH1, BH2, bins=100, norm=LogNorm())
 plt.colorbar()
 plt.show()
+
+# %%

@@ -27,9 +27,9 @@ chirpmass_data = np.array(chirpmass_data, dtype=np.float)
 import matplotlib.cm as cm
 import matplotlib.ticker as ticker
 
-plt.ylim((0, 30))
+plt.ylim((0, 35))
 
-tot_data = np.log(tot_data)
+# tot_data = np.log(tot_data)
 
 ctf = plt.contourf(tmerg_data, chirpmass_data, tot_data, cmap=cm.inferno, levels=100)
 ct = plt.contour(tmerg_data, chirpmass_data, tot_data)
@@ -43,3 +43,6 @@ cb = plt.colorbar(ctf, format=':%.1e')
 
 plt.clabel(ct, ct.levels)
 
+
+
+# %%
