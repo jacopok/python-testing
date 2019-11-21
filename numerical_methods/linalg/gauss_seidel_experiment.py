@@ -160,8 +160,8 @@ def test(dim=3, relaxation=False, **kwargs):
                 x, nit = gauss_seidel(A, b, relaxation=relaxation, verbose=False)
                 if(x is not None): 
                     if(not isnan(x[0])): 
-                        print(x) 
-                        print(gaussian_elimination(A, b)) 
+                        print(x)
+                        print(gaussian_elimination(A, b))
                         conv.append(n)
                         nits.append(nit)
                         sleep(.1)
