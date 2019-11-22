@@ -17,7 +17,6 @@ def relaxation(f, x0, eps=1e-6):
     while True:
         xold = x
         x = f(x)
-        print(x)
         if (np.abs(x - xold) < eps):
             return (x)
 
@@ -49,7 +48,7 @@ def bisection(f, interval, eps=1e-10, verbose=False):
         if (number_iterations % 100 == 0 and verbose):
             print(f"{number_iterations} iterations")
 
-def newton_rhapson(f, x0, f_prime=None, eps=1e-10, cdeps=1e-11):
+def newton_rhapson(f, x0, f_prime=None, eps=1e-10, cdeps=1e-11, verbose=False):
     if (not f_prime):
         f_prime = lambda x : (f(x+cdeps/2) - f(x-cdeps/2))/cdeps
 
@@ -59,10 +58,11 @@ def newton_rhapson(f, x0, f_prime=None, eps=1e-10, cdeps=1e-11):
         xold = x
         x -= delta_x
         if (np.abs(xold - x) < eps):
-            print(f"Error is {f(x)}")
+            if (verbose):
+                print(f"Error is {f(x)}")
             return (x)
 
-def symbolic_newton_rhapson(f, x0, eps=1e-10):
+def symbolic_newton_rhapson(f, x0, eps=1e-10, verbose=False):
     x=x0
     x_symb = sp.symbols('x')
 
@@ -76,5 +76,22 @@ def symbolic_newton_rhapson(f, x0, eps=1e-10):
         xold = x
         x -= delta_x
         if (np.abs(xold - x) < eps):
-            print(f"Error is {n_f(x)}")
+            if(verbose):
+                print(f"Error is {n_f(x)}")
             return(x)
+
+if __name__ == "__main__":
+    #equals zero
+    func_0 = lambda ecc, F: (lambda E: E - ecc * np.sin(E) - F)
+    #equals E
+    func_E = lambda ecc, F: (lambda E: ecc * np.sin(E) + F)
+    
+    ecc_list = [.1, .7, .9, .3]
+    F_list = [np.pi / 3, np.pi / 3, np.pi / 3, np.pi]
+    
+    starting_point = 1
+    other_extreme = 2
+    for ecc, F in zip(ecc_list, F_list):
+        print(relaxation(func_E(ecc, F), starting_point))
+        print(newton_rhapson(func_0(ecc, F), starting_point))
+        print(bisection(func_0(ecc, F), (starting_point, other_extreme)))
