@@ -30,5 +30,5 @@ so we can solve the system with the Gauss-Seidel method:
 the kind of circuit guarantees that the matrix is (not strictly) diagonally dominant, since the diagonal entries must equal the number of ones on the row (counting a one also if there is a V+ on the rame row of b)
 """
 
-
-x, n =gauss_seidel(A, b)
+x, n = gauss_seidel(A, b)
+print(x)    
