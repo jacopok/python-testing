@@ -36,27 +36,3 @@ plt.plot(bins, f(bins, *p_N))
 plt.plot(bins, f(bins, *p_grad))
 plt.show()
 
-# from scipy import stats
-
-# def pdf(alpha=2.3):
-#     return(lambda x : x**(-alpha))
-# class distribution(stats.rv_continuous):
-#     def __init__(self, alpha=2.3, m_min=.1, m_max=150, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-
-#         # integrate area of the PDF in range a..b
-#         from scipy.integrate import quad
-#         self.a = m_min
-#         self.b = m_max
-#         self.alpha = alpha
-
-#         self.scale, _ = quad(pdf(alpha=alpha), self.a, self.b)
-
-#     def _pdf(self, x):
-#         return (pdf(alpha=self.alpha)(x) / self.scale)
-
-# d = distribution()
-# masses = np.linspace(.1, 150, num=2000)
-# plt.plot(masses, d.cdf(masses))
-# x = np.linspace(0., 1., num=200)
-# plt.plot(m_from_x(x), x)
