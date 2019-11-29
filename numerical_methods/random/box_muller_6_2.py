@@ -1,6 +1,6 @@
 import numpy as np
 
-def box_muller(loc=0., scale=1., N=int(1e6)):
+def box_muller(loc=0., scale=2., N=int(1e6)):
 
     Ntrue = int(N/2)
     z1 = np.random.uniform(size=Ntrue)
