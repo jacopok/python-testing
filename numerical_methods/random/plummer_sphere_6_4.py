@@ -7,8 +7,7 @@ plt.style.use(astropy_mpl_style)
 M = 1e4  # solar masses
 a_scale = 5. # parsec
 sigma_speed = 5. # km/s
-N = int(1e4)  #simulated stars
-
+N = int(1e4)  # number of simulated stars
 
 class plummer_radius(stats.rv_continuous):
     def __init__(self, a_scale=a_scale, *args, **kwargs):
