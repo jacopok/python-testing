@@ -24,18 +24,18 @@ if __name__ == "__main__":
     pc = 3.0857e16
     solar_mass = 2e30
     sigma_1 = 10e3  # km/s
-    rmax_1 = 10 * pc  # pc
+    rmax_1 = 10  # pc
     
-    rho0_2 = 1e8 * solar_mass / pc**3   # solar_mass / kpc**3
-    r_s_2 = 10 * pc # m
-    rmax_2 = 100 * r_s_2
+    rho0_2 = 1e8  # solar_mass / kpc**3
+    r_s_2 = 10  # pc
+    rmax_2 = 100 # times r_s_2
     from scipy.constants import G
 
-    singular_consts = 4 * sigma_1**2 / (2 * G) / solar_mass
+    singular_consts = 2 * sigma_1**2 / G / solar_mass * pc
         
     singular = np.vectorize(lambda x:1, otypes=[np.float64])
     
-    NFW_consts = rho0_2 * r_s_2**3 * 4 * np.pi / solar_mass
+    NFW_consts = rho0_2 * (r_s_2*pc)**3 * 4 * np.pi / solar_mass
 
     def NFW(R):
         return(R /(1+R))
