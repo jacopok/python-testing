@@ -40,19 +40,17 @@ if __name__ == "__main__":
     def NFW(R):
         return(R /(1+R))
     
-    sing_int_constin = []
-    sing_int_constout = []
-    NFW_int_constout = []
-    NFW_int_constin = []
+    sing_int = []
+    NFW_int = []
     hrange = np.logspace(0, -4)
     for h in hrange:
-        sing_int_constout.append(singular_consts * trapezoid_integrate(singular, 0, rmax_1, h))
-        sing_int_constin.append(trapezoid_integrate(lambda x : singular(x) * singular_consts, 0, rmax_1, h))
-        NFW_int_constout.append(NFW_consts * trapezoid_integrate(NFW, 0, rmax_2, h))
-        NFW_int_constin.append(trapezoid_integrate(lambda x: NFW(x) * NFW_consts, 0, rmax_2, h))
+        sing_int.append(singular_consts * trapezoid_integrate(singular, 0, rmax_1, h))
+        NFW_int.append(NFW_consts * trapezoid_integrate(NFW, 0, rmax_2, h))
     
-    # plt.loglog(hrange, sing_int_constin)
-    plt.loglog(hrange, sing_int_constout, label="sing")
-    # plt.loglog(hrange, NFW_int_constin)
-    plt.loglog(hrange, NFW_int_constout, label="NFW")
+    plt.loglog(hrange, sing_int, label="sing")
+    plt.loglog(hrange, NFW_int, label="NFW")
     plt.legend()
+
+    x1, x2 = plt.xlim()
+    plt.xlim(x2, x1)
+
