@@ -22,12 +22,12 @@ def trapezoid_integrate(f, a, b, h_frac):
     
 if __name__ == "__main__":
     pc = 3.0857e16
-    solar_mass = 2e30
-    sigma_1 = 10e3  # km/s
+    solar_mass = 1.989e30
+    sigma_1 = 1e4  # m/s
     rmax_1 = 10  # pc
     
     rho0_2 = 1e8  # solar_mass / kpc**3
-    r_s_2 = 10  # pc
+    r_s_2 = 10  # kpc
     rmax_2 = 100 # times r_s_2
     from scipy.constants import G
 
@@ -35,20 +35,25 @@ if __name__ == "__main__":
         
     singular = np.vectorize(lambda x:1, otypes=[np.float64])
     
-    NFW_consts = rho0_2 * (r_s_2*pc)**3 * 4 * np.pi / solar_mass
+    NFW_consts = rho0_2 * r_s_2**3 * 4 * np.pi # solar_mass 
 
     def NFW(R):
-        return(R /(1+R))
+        return(R /(1+R)**2)
     
     sing_int = []
+    sing_analytic = 4.65437e5 # solar mass
     NFW_int = []
+    NFW_analytic = 4.56e12 # solar mass
+
     hrange = np.logspace(0, -4)
     for h in hrange:
         sing_int.append(singular_consts * trapezoid_integrate(singular, 0, rmax_1, h))
         NFW_int.append(NFW_consts * trapezoid_integrate(NFW, 0, rmax_2, h))
     
-    plt.loglog(hrange, sing_int, label="sing")
-    plt.loglog(hrange, NFW_int, label="NFW")
+    plt.loglog(hrange, np.abs(np.array(sing_int) - sing_analytic), label="sing")
+    plt.loglog(hrange, np.abs(np.array(NFW_int) - NFW_analytic), label="NFW")
+    plt.xlabel('subdivisions divided by integration region: $h$')
+    plt.ylabel('absolute value of difference between numerical result and given value')
     plt.legend()
 
     x1, x2 = plt.xlim()
