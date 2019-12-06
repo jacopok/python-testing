@@ -24,7 +24,7 @@ def IS_integrate(f, a, b, weight_pdf, weight_ppf, N=int(1e6)):
             return (weight_pdf(x) / self.integral)
             
         def _ppf(self, x):
-            return (weight_ppf(x) * self.integral)
+            return (weight_ppf(x*self.integral))
     
     w = weight()
     xs = w.rvs(size=N)
@@ -35,7 +35,7 @@ def IS_integrate(f, a, b, weight_pdf, weight_ppf, N=int(1e6)):
 f = lambda x: x ** (-1 / 2.) / (1 + np.exp(x))
 edges = (0, 1)
 weight_pdf = lambda x: x ** (-1 / 2.)
-weight_ppf = lambda x: x ** 2 / 2. 
+weight_ppf = lambda x: x ** 2 / 4. 
 
 ns = np.logspace(4, 7, num=20)
 ints = []
