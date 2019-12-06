@@ -12,7 +12,6 @@ N = int(1e4)  # number of simulated stars
 class plummer_radius(stats.rv_continuous):
     def __init__(self, a_scale=a_scale, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.M = M
         self.scale = a_scale
         self.a = 0.
 

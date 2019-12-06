@@ -50,11 +50,13 @@ if __name__ == "__main__":
         sing_int.append(singular_consts * trapezoid_integrate(singular, 0, rmax_1, h))
         NFW_int.append(NFW_consts * trapezoid_integrate(NFW, 0, rmax_2, h))
     
-    plt.loglog(hrange, np.abs(np.array(sing_int) - sing_analytic), label="sing")
-    plt.loglog(hrange, np.abs(np.array(NFW_int) - NFW_analytic), label="NFW")
+    plt.loglog(hrange, np.abs(np.array(sing_int) - sing_analytic)/sing_analytic, label="sing")
+    plt.loglog(hrange, np.abs(np.array(NFW_int) - NFW_analytic)/NFW_analytic, label="NFW")
     plt.xlabel('subdivisions divided by integration region: $h$')
-    plt.ylabel('absolute value of difference between numerical result and given value')
+    plt.ylabel('Relative difference between numerical result and given value')
     plt.legend()
+    print(f'Singular: numeric {sing_int[-1]:.3e}, analytic {sing_analytic:.3e}')
+    print(f'NFW: numeric {NFW_int[-1]:.3e}, analytic {NFW_analytic:.3e}')
 
     x1, x2 = plt.xlim()
     plt.xlim(x2, x1)
