@@ -2,7 +2,12 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-plt.style.use('seaborn')
+from astropy.visualization import astropy_mpl_style
+plt.style.use(astropy_mpl_style)
+from matplotlib import ticker, cm
+from matplotlib.colors import LogNorm
+plt.close()
+
 
 import os
 os.chdir('/home/jacopo/Documents/python-testing/numerical_methods/contours')
@@ -22,26 +27,24 @@ tot_data = np.array(tot_data, dtype=np.float)
 tmerg_data = np.array(tmerg_data, dtype=np.float)
 chirpmass_data = np.array(chirpmass_data, dtype=np.float)
 
-# %%
 
-import matplotlib.cm as cm
-import matplotlib.ticker as ticker
+plt.ylim((0, 40))
 
-plt.ylim((0, 30))
+tot_data = np.maximum(tot_data, np.ones_like(tot_data) * 1e-4)
+norm = LogNorm(vmin=1, vmax=1e8, clip=True)
 
-tot_data = np.log(tot_data)
-
-ctf = plt.contourf(tmerg_data, chirpmass_data, tot_data, cmap=cm.inferno, levels=100)
-ct = plt.contour(tmerg_data, chirpmass_data, tot_data)
+ctf = plt.contourf(tmerg_data, chirpmass_data, tot_data, levels=10, norm=norm)
+ct = plt.contour(tmerg_data, chirpmass_data, tot_data, norm=norm, levels=10)
 
 def fmt(x):
     return(f'{x:.0e}')
 
-ct.levels = [fmt(i) for i in ct.levels]
+# ct.levels = [fmt(i) for i in ct.levels]
 
-cb = plt.colorbar(ctf, format=':%.1e')
+# cb = plt.colorbar(ctf, format=':%.1e')
+cb = plt.colorbar(ctf, norm=norm)
 
-plt.clabel(ct, ct.levels)
+# plt.clabel(ct, ct.levels)
 
 # %%
 
