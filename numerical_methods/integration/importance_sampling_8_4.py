@@ -11,6 +11,8 @@ rc('text.latex', preamble=r'''\usepackage{amsmath}
 \usepackage{siunitx}
 ''')
 
+from mean_value_8_3 import mean_value_integrate
+
 def IS_integrate(f, a, b, weight_pdf, weight_ppf, N=int(1e6)):
     
     class weight(stats.rv_continuous):
@@ -35,13 +37,22 @@ def IS_integrate(f, a, b, weight_pdf, weight_ppf, N=int(1e6)):
 f = lambda x: x ** (-1 / 2.) / (1 + np.exp(x))
 edges = (0, 1)
 weight_pdf = lambda x: x ** (-1 / 2.)
-weight_ppf = lambda x: x ** 2 / 4. 
+weight_ppf = lambda x: x ** 2 / 4.
+# weight_pdf = lambda x: x
+# weight_ppf = lambda x: (2*x)**(1/2.)
 
 ns = np.logspace(4, 7, num=20)
-ints = []
+ints_imp = []
+ints_mvm = []
 
 for n in ns:
-    i = IS_integrate(f, *edges, weight_pdf, weight_ppf, int(n))
-    ints.append(i)
+    i1 = IS_integrate(f, *edges, weight_pdf, weight_ppf, int(n))
+    ints_imp.append(i1)
+    i2 = mean_value_integrate(f, *edges, int(n))
+    ints_mvm.append(i2)
 
-plt.plot(ns, ints)
+plt.semilogx(ns, ints_imp, label="Importance sampling")
+plt.semilogx(ns, ints_mvm, label="Mean value sampling")
+plt.xlabel("$N$")
+plt.ylabel("Integral")
+plt.legend()

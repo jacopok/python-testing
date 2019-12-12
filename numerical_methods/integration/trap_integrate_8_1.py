@@ -21,8 +21,7 @@ def trapezoid_integrate(f, a, b, h_frac):
     return (h * (np.sum(f(x)) + edges_sum))
     
 if __name__ == "__main__":
-    pc = 3.0857e16
-    solar_mass = 1.989e30
+    solar_mass = 1.9885e30
     sigma_1 = 1e4  # m/s
     rmax_1 = 10  # pc
     
@@ -30,6 +29,7 @@ if __name__ == "__main__":
     r_s_2 = 10  # kpc
     rmax_2 = 100 # times r_s_2
     from scipy.constants import G
+    from scipy.constants import parsec as pc
 
     singular_consts = 2 * sigma_1**2 / G / solar_mass * pc
         
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     NFW_int = []
     NFW_analytic = 4.56e12 # solar mass
 
-    hrange = np.logspace(0, -4)
+    hrange = np.logspace(0, -5)
     for h in hrange:
         sing_int.append(singular_consts * trapezoid_integrate(singular, 0, rmax_1, h))
         NFW_int.append(NFW_consts * trapezoid_integrate(NFW, 0, rmax_2, h))
@@ -59,5 +59,6 @@ if __name__ == "__main__":
     print(f'NFW: numeric {NFW_int[-1]:.3e}, analytic {NFW_analytic:.3e}')
 
     x1, x2 = plt.xlim()
-    plt.xlim(x2, x1)
+    if(x1<x2):
+        plt.xlim(x2, x1)
 
