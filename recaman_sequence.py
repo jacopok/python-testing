@@ -24,11 +24,11 @@ def recaman(n, k=0):
             # print(f"Got stuck starting at {k} after {i} elements.")
     return (x, stuck)
     
-# from time import time
+from time import time
 
-# times=[]
-# for j in range(0, 10000, 100):
-#     t1 = time()
-#     recaman(j)
-#     t2 = time()
-#     times.append(t2-t1)
+times=[]
+for j in range(0, 10000, 100):
+    t1 = time()
+    recaman(j)
+    t2 = time()
+    times.append(t2-t1)
