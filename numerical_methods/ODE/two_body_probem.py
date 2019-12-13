@@ -39,15 +39,16 @@ def E(xs):
 
 if __name__ == "__main__":
     params = (0, 300, np.array([1, 1, -1, -1, -.5, 0, .5, 0]))
-    ts, xs = euler(f, *params, h=.01)
+    h0 = .01
+    ts, xs = euler(f, *params, h=h0)
     # plt.plot(xs[:,0], xs[:,1])
     # plt.plot(xs[:, 2], xs[:, 3])
     plt.plot(ts, E(xs))
-    ts, xs = midpoint(f, *params, h=.01)
+    ts, xs = midpoint(f, *params, h=2*h0)
     # plt.plot(xs[:,0], xs[:,1])
     # plt.plot(xs[:, 2], xs[:, 3])
     plt.plot(ts, E(xs))
-    ts, xs = fourth_order(f, *params, h=.01)
+    ts, xs = fourth_order(f, *params, h=4*h0)
     # plt.plot(xs[:,0], xs[:,1])
     # plt.plot(xs[:, 2], xs[:, 3])
     plt.plot(ts, E(xs))
