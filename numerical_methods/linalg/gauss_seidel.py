@@ -88,7 +88,7 @@ def gauss_seidel(A, b, ansatz=None, eps=1e-10, relaxation=True, verbose=True):
         return(None, 0)
     
     # utility functions
-    norm = lambda y : np.linalg.norm(y, ord=1)
+    norm = lambda y : np.linalg.norm(y, ord=2)
     dist = lambda y,z : norm(y-z)
     
     # define ansatz
