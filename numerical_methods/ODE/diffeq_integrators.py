@@ -54,7 +54,17 @@ if __name__ == "__main__":
     ftest = lambda x, t: - x ** 3 + np.sin(t)
     params = (0, 100, [0])
 
-    plt.plot(*euler(ftest, *params), label="Euler")
-    plt.plot(*midpoint(ftest, *params), label="Midpoint")
-    plt.plot(*fourth_order(ftest, *params), label="Fourth order")
+    t, x_euler = euler(ftest, *params)
+    t, x_midpoint = midpoint(ftest, *params)
+    t, x_fourth_order = fourth_order(ftest, *params)
+    tc, x_correct = fourth_order(ftest, *params, h=hdefault / 100)
+    x_c = x_correct[99::100]
+    # Need to start from there because all integrators with large timesteps diverge from the correct path initially and pick up a phase of the order h
+    x_e = x_euler - x_c
+    x_m = x_midpoint - x_c
+    x_f = x_fourth_order - x_c
+    plt.plot(t, x_e, label="Euler")
+    plt.plot(t, x_m, label="Midpoint")
+    plt.plot(t, x_f, label="Fourth order")
     plt.legend()
+    plt.yscale('symlog', linthreshy=1e-3)
