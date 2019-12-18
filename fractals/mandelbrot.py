@@ -54,12 +54,12 @@ def generate_set(*args,
     
     return(xs, ys, cs)
 
-def plot(xs, ys, cs, color='plasma'):
+def plot(xs, ys, cs, color='gnuplot2'):
     X, Y = np.meshgrid(xs, ys)
     plt.close()
-    colors = plt.contourf(X, Y, cs, cmap = plt.get_cmap('plasma'))
+    colors = plt.contourf(X, Y, cs, cmap = plt.get_cmap(color))
     plt.colorbar(colors)
 
 def rc(c):
     rmax = 1/2. + np.sqrt(1/4. + np.abs(c))
-    return({'c':c, 'rmax':rmax}) 
+    return({'c':c, 'rmax':rmax})
