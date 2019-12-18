@@ -12,25 +12,11 @@ rc('text.latex', preamble=r'''\usepackage{amsmath}
 
 hdefault = .4
 
-# def initialize(t0, tmax, x0, h):
-#     ts = np.arange(t0, tmax, h)
-#     xs = np.zeros((len(ts), len(x0)))
-#     xs[0] = x0
-#     return(ts, xs)
-
-def initialize(t0, tmax, x0, h):
+def initialize(t0, tmax, start, h):
     ts = np.arange(t0, tmax, h)
-    xs = np.zeros(((len(ts),) + np.shape(x0)))
-    xs[0] = x0
+    xs = np.zeros(((len(ts),) + np.shape(start)))
+    xs[0] = start
     return(ts, xs)
-
-# def euler(f, t0, tmax, x0, h=hdefault):
-#     ts, xs = initialize(t0, tmax, x0, h)
-
-#     for i, t in enumerate(ts[:-1]):
-#         x = xs[i]
-#         xs[i+1] = x + h * f(*x, t)
-#     return (ts, xs)
 
 def euler(f, t0, tmax, x0, h=hdefault):
     ts, xs = initialize(t0, tmax, x0, h)
@@ -74,7 +60,7 @@ def leapfrog_KDK(G, t0, tmax, x0, v0, h=hdefault):
 
     ts, xs = initialize(t0, tmax, x0, h)
     _, vs = initialize(t0, tmax, v0, h)
-    a_s = vs
+    a_s = np.copy(vs)
     a_s[0] = G(xs[0])
 
     for i, t in enumerate(ts[:-1]):
@@ -82,9 +68,9 @@ def leapfrog_KDK(G, t0, tmax, x0, v0, h=hdefault):
         v = vs[i]
         a = a_s[i]
         xs[i + 1] = x + h * v + h * h * a / 2.
-        a_s[i + 1] = G(x, t)
+        a_s[i + 1] = G(x)
         vs[i + 1] = v + h / 2. * (a + a_s[i + 1])
-    return(ts, np.array([xs, vs]))
+    return(ts, np.stack((xs, vs), axis=1))
 
 if __name__ == "__main__":
     ftest = lambda x, t: - x ** 3 + np.sin(t)
