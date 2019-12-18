@@ -6,3 +6,4 @@ lesson_duration_stats/data/*
 *dat
 fractals/py-mandelbrot/**
 fractals/*.npy
+fractals/*.pdf
