@@ -12,22 +12,24 @@ rc('text.latex', preamble=r'''\usepackage{amsmath}
 
 hdefault = .4
 
-def euler(f, t0, tmax, x0, h=hdefault):
+def initialize(t0, tmax, x0, h):
     ts = np.arange(t0, tmax, h)
     xs = np.zeros((len(ts), len(x0)))
     xs[0] = x0
+    return(ts, xs)
 
-    for i, t in enumerate(ts[1:]):
+def euler(f, t0, tmax, x0, h=hdefault):
+    ts, xs = initialize(t0, tmax, x0, h)
+
+    for i, t in enumerate(ts[:-1]):
         x = xs[i]
         xs[i+1] = x + h * f(*x, t)
     return (ts, xs)
 
 def midpoint(f, t0, tmax, x0, h=hdefault):
-    ts = np.arange(t0, tmax, h)
-    xs = np.zeros((len(ts), len(x0)))
-    xs[0] = x0
+    ts, xs = initialize(t0, tmax, x0, h)
 
-    for i, t in enumerate(ts[1:]):
+    for i, t in enumerate(ts[:-1]):
         x = xs[i]
         xhalf = x + h / 2. * f(*x, t)
         thalf = t + h / 2.
@@ -35,11 +37,9 @@ def midpoint(f, t0, tmax, x0, h=hdefault):
     return (ts, xs)
 
 def fourth_order(f, t0, tmax, x0, h=hdefault):
-    ts = np.arange(t0, tmax, h)
-    xs = np.zeros((len(ts), len(x0)))
-    xs[0] = x0
+    ts, xs = initialize(t0, tmax, x0, h)
 
-    for i, t in enumerate(ts[1:]):
+    for i, t in enumerate(ts[:-1]):
         x = xs[i]
         thalf = t + h / 2.
         tnew = t + h
@@ -50,6 +50,12 @@ def fourth_order(f, t0, tmax, x0, h=hdefault):
         xs[i+1] = x + (2.*k1 + 4.*k2 + 2.*k3 + k4)/6.
     return (ts, xs)
 
+# def leapfrog_KDK(f, t0, tmax, x0, h=hdefault):
+#     ts, xs = initialize(t0, tmax, x0, h)
+
+#     for i, t in enumerate(ts[:-1]):
+
+
 if __name__ == "__main__":
     ftest = lambda x, t: - x ** 3 + np.sin(t)
     params = (0, 100, [0])
@@ -58,7 +64,7 @@ if __name__ == "__main__":
     t, x_midpoint = midpoint(ftest, *params)
     t, x_fourth_order = fourth_order(ftest, *params)
     tc, x_correct = fourth_order(ftest, *params, h=hdefault / 100)
-    x_c = x_correct[99::100]
+    x_c = x_correct[::100]
     # Need to start from there because all integrators with large timesteps diverge from the correct path initially and pick up a phase of the order h
     x_e = x_euler - x_c
     x_m = x_midpoint - x_c
