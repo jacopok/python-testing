@@ -12,6 +12,23 @@ rc('text.latex', preamble=r'''\usepackage{amsmath}
 
 from diffeq_integrators import euler, midpoint, fourth_order
 
+def remove_index(list, i):
+    return (np.append(list[:i], list[:i + 1]))
+    
+def norm_cubed(x, y):
+    return(np.linalg.norm(x-y, ord=2)** 3)
+
+def G(positions):
+    """ 
+    positions should be an array of points, each of which is an array of coordinates
+    """
+    a = np.zeros_like(positions)
+
+    for i, x in enumerate(positions):
+        for y in remove_index(positions, i):
+            a[i] += (y - x) / norm_cubed(x, y)
+    return(a)
+
 def f(x1, y1, x2, y2, v1x, v1y, v2x, v2y, t):
     distance_vector = [x2 - x1, y2 - y1]
     norm_cubed = np.linalg.norm(distance_vector, ord=2)** 3
