@@ -27,7 +27,8 @@ def E(xs):
             E0 = single_E(x)
             Es.append(0)
         else: 
-            Es.append(np.abs(single_E(x)- E0))
+            Es.append(np.abs((single_E(x) - E0) / E0))
+    print(f"Starting energy: {E0}")
     return (Es)
 
 def L(xs):
@@ -37,27 +38,31 @@ def L(xs):
             L0 = single_L(x)
             Ls.append(0)
         else: 
-            Ls.append(np.abs(single_L(x)- L0))
+            Ls.append(np.abs((single_L(x)- L0)/L0))
+    print(f"Starting angular momentum: {L0}")
     return (Ls)
     
 if __name__ == "__main__":
-    tmax = 100
+    tmax = 10000
     params = (0, tmax, np.array([[[1, 1], [-1, -1]], [[-.5, 0], [0.5, 0]]]))
     params_leapfrog = (0, tmax, np.array([[1, 1], [-1, -1]]), np.array([[-.5, 0], [0.5, 0]]))
 
     h0 = .01
-    ts, xs = euler(second_order, *params, h=h0)
-    plt.plot(ts, E(xs), label="Euler E")
-    plt.plot(ts, L(xs), label="Euler L")
-    ts, xs = midpoint(second_order, *params, h=2*h0)
-    plt.plot(ts, E(xs), label="Midpoint E")
-    plt.plot(ts, L(xs), label="Midpoint L")
-    ts, xs = fourth_order(second_order, *params, h=4*h0)
-    plt.plot(ts, E(xs), label="Runge-Kutta 4 E")
-    plt.plot(ts, L(xs), label="Runge-Kutta 4 L")
+    # ts, xs = euler(second_order, *params, h=h0)
+    # plt.plot(ts, E(xs), label="Euler E")
+    # plt.plot(ts, L(xs), label="Euler L")
+    # ts, xs = midpoint(second_order, *params, h=2*h0)
+    # plt.plot(ts, E(xs), label="Midpoint E")
+    # plt.plot(ts, L(xs), label="Midpoint L")
+    # ts, xs = fourth_order(second_order, *params, h=4*h0)
+    # plt.plot(ts, E(xs), label="Runge-Kutta 4 E")
+    # plt.plot(ts, L(xs), label="Runge-Kutta 4 L")
     ts, xs = leapfrog_KDK(G, *params_leapfrog, h=2*h0)
-    plt.plot(ts, E(xs), label="Leapfrog KDK E")
+    # plt.plot(ts, E(xs), label="Leapfrog KDK E")
     plt.plot(ts, L(xs), label="Leapfrog KDK L")
+    # ts, xs = leapfrog_DKD(G, *params_leapfrog, h=2*h0)
+    # plt.plot(ts, E(xs), label="Leapfrog DKD E")
+    # plt.plot(ts, L(xs), label="Leapfrog DKD L")
     plt.xlabel("Time (arbitrary units)")
-    plt.ylabel("$\\abs{E - E_0}/E$ and $\\abs{L - L_0}/L$")
+    plt.ylabel("$\\abs{(E - E_0)/E}$ and $\\abs{(L - L_0)/L}$")
     plt.legend()
