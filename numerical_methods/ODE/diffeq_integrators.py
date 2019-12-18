@@ -9,6 +9,7 @@ rc('text.latex', preamble=r'''\usepackage{amsmath}
           \usepackage{physics}
           \usepackage{siunitx}
           ''')
+from tqdm import tqdm
 
 hdefault = .4
 
@@ -21,7 +22,7 @@ def initialize(t0, tmax, start, h):
 def euler(f, t0, tmax, x0, h=hdefault):
     ts, xs = initialize(t0, tmax, x0, h)
 
-    for i, t in enumerate(ts[:-1]):
+    for i, t in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc = "Euler"):
         x = xs[i]
         xs[i+1] = x + h * f(x, t)
     return (ts, xs)
@@ -29,7 +30,7 @@ def euler(f, t0, tmax, x0, h=hdefault):
 def midpoint(f, t0, tmax, x0, h=hdefault):
     ts, xs = initialize(t0, tmax, x0, h)
 
-    for i, t in enumerate(ts[:-1]):
+    for i, t in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc = "Midpoint"):
         x = xs[i]
         xhalf = x + h / 2. * f(x, t)
         thalf = t + h / 2.
@@ -39,7 +40,7 @@ def midpoint(f, t0, tmax, x0, h=hdefault):
 def fourth_order(f, t0, tmax, x0, h=hdefault):
     ts, xs = initialize(t0, tmax, x0, h)
 
-    for i, t in enumerate(ts[:-1]):
+    for i, t in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc = "Fourth order RK"):
         x = xs[i]
         thalf = t + h / 2.
         tnew = t + h
@@ -60,16 +61,35 @@ def leapfrog_KDK(G, t0, tmax, x0, v0, h=hdefault):
 
     ts, xs = initialize(t0, tmax, x0, h)
     _, vs = initialize(t0, tmax, v0, h)
-    a_s = np.copy(vs)
-    a_s[0] = G(xs[0])
+    _, a_s = initialize(t0, tmax, G(xs[0]), h)
 
-    for i, t in enumerate(ts[:-1]):
+    for i, t in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc="Leapfrog KDK"):
         x = xs[i]
         v = vs[i]
         a = a_s[i]
         xs[i + 1] = x + h * v + h * h * a / 2.
-        a_s[i + 1] = G(x)
+        a_s[i + 1] = G(xs[i+1])
         vs[i + 1] = v + h / 2. * (a + a_s[i + 1])
+    return (ts, np.stack((xs, vs), axis=1))
+
+def leapfrog_DKD(G, t0, tmax, x0, v0, h=hdefault):
+    """
+    To be used only with second order problems, 
+    instead of a first order equation it takes
+    as input the second order one, G, which should be 
+    x'' = G(x, t)
+    """
+
+    ts, xs = initialize(t0, tmax, x0, h)
+    _, vs = initialize(t0, tmax, v0, h)
+
+    for i, t in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc = "Leapfrog DKD"):
+        x = xs[i]
+        v = vs[i]
+        xhalf = x + h * v /2.
+        ahalf = G(xhalf)
+        vs[i + 1] = v + h * ahalf
+        xs[i + 1] = x + h * v + h * h / 2. * ahalf
     return(ts, np.stack((xs, vs), axis=1))
 
 if __name__ == "__main__":
