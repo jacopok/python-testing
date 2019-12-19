@@ -63,7 +63,7 @@ def leapfrog_KDK(G, t0, tmax, x0, v0, h=hdefault):
     _, vs = initialize(t0, tmax, v0, h)
     _, a_s = initialize(t0, tmax, G(xs[0]), h)
 
-    for i, t in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc="Leapfrog KDK"):
+    for i, _ in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc="Leapfrog KDK"):
         x = xs[i]
         v = vs[i]
         a = a_s[i]
@@ -83,7 +83,7 @@ def leapfrog_DKD(G, t0, tmax, x0, v0, h=hdefault):
     ts, xs = initialize(t0, tmax, x0, h)
     _, vs = initialize(t0, tmax, v0, h)
 
-    for i, t in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc = "Leapfrog DKD"):
+    for i, _ in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc = "Leapfrog DKD"):
         x = xs[i]
         v = vs[i]
         xhalf = x + h * v /2.
