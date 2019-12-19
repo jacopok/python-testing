@@ -68,8 +68,8 @@ if __name__ == "__main__":
     # plt.legend()
     # plt.show()
 
-    tmax = 10000
-    ratio = 1e-3
+    tmax = 100
+    ratio = 1e-2
     params = (0, tmax, np.array([[0, 0], [1, 0]]), np.array([[0, -ratio], [0, 1]]))
     masses = [1, ratio]
     h0 = .01
