@@ -6,4 +6,5 @@ lesson_duration_stats/data/*
 *dat
 fractals/py-mandelbrot/**
 fractals/*.npy
-fractals/*.pdf
+fractals/pictures/*.pdf
+!fractals/pictures/high_res_plasma.pdf
