@@ -1,3 +1,5 @@
+# shamelessly stolen from wikipedia
+
 import turtle
 import random
 
