@@ -10,7 +10,7 @@ ITMAX = int(1e3)
 def iterate(z, c):
     return(z**2 + c)
 
-def convergence_mandelbrot(c, eps=1e-6):
+def convergence_mandelbrot(c, eps=1e-6, itmax=ITMAX):
 
     iterations = 0
     z = 0
@@ -18,11 +18,11 @@ def convergence_mandelbrot(c, eps=1e-6):
         z = iterate(z, c)
         if (np.abs(z) > 2):
             return(iterations)
-        if (iterations>ITMAX):
+        if (iterations>itmax):
             return(-1)
         iterations += 1
 
-def convergence_julia(z0, c, rmax, eps=1e-5):
+def convergence_julia(z0, c, rmax, eps=1e-5, itmax=ITMAX):
 
     iterations = 0
     z=z0
@@ -31,7 +31,7 @@ def convergence_julia(z0, c, rmax, eps=1e-5):
         z = iterate(z, c)
         if (np.abs(z) > rmax):
             return(iterations)
-        if (iterations>ITMAX):
+        if (iterations>itmax):
             return (-1)
         if (np.abs(z - oldz) < eps):
             return (-1)
