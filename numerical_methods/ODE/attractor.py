@@ -42,5 +42,5 @@ def plot(xs):
     ax.plot(xs[:, 0], xs[:, 1], xs[:, 2], linewidth=.5)
     plt.show()
 
-# ts, xs = fourth_order(lorenz, 0, 40, [1., 1., 1.], h=1e-4)
-ts, xs = fourth_order(rossler, 0, 400, [1, 1, 1], h=1e-3)
+ts, xs = fourth_order(lorenz, 0, 40, [1., 1., 1.], h=1e-4)
+# ts, xs = fourth_order(rossler, 0, 400, [1, 1, 1], h=1e-3)

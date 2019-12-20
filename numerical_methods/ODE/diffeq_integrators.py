@@ -92,6 +92,49 @@ def leapfrog_DKD(G, t0, tmax, x0, v0, h=hdefault):
         xs[i + 1] = x + h * v + h * h / 2. * ahalf
     return(ts, np.stack((xs, vs), axis=1))
 
+def hermite(G, Gprime, t0, tmax, x0, v0, h=hdefault):
+    """
+    To be used only with second order problems, 
+    instead of a first order equation it takes
+    as input the second order one, G, which should be 
+    x'' = G(x, t)
+    This algorithm also requires as input the derivative 
+    of the second-order function G: 
+    Gprime = dG/dt (x, v, t)
+    """
+    ts, xs = initialize(t0, tmax, x0, h)
+    _, vs = initialize(t0, tmax, v0, h)
+    _, a_s = initialize(t0, tmax, G(x0), h)
+    _, js = initialize(t0, tmax, Gprime(x0, v0), h)
+
+    for i, _ in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc = "Hermite"):
+        x = xs[i]
+        v = vs[i]
+        a = a_s[i]
+        j = js[i]
+        
+        xp = x \
+            + h * v \
+            + h**2 * a / 2. \
+            + h**3 * j / 6.
+        vp = v \
+            + h * a \
+            + h**2 * j / 2.
+        ap = G(xp)
+        jp = Gprime(xp, vp)
+
+        vs[i + 1] = v \
+            + h * (a + ap) / 2. \
+            + h * h * (j - jp) / 12.
+        xs[i + 1] = x \
+            + h * (v + vs[i + 1]) / 2. \
+            + h * h * (a - ap) / 12.
+        a_s[i + 1] = G(xs[i + 1])
+        js[i + 1] = Gprime(xs[i + 1], vs[i + 1])
+        
+    return(ts, np.stack((xs, vs), axis=1))
+
+
 if __name__ == "__main__":
     ftest = lambda x, t: - x ** 3 + np.sin(t)
     params = (0, 100, 0)
