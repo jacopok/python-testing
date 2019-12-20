@@ -1,5 +1,8 @@
 import numpy as np
 from diffeq_integrators import euler
+import matplotlib.pyplot as plt
+from astropy.visualization import astropy_mpl_style
+plt.style.use(astropy_mpl_style)
 
 def grav(y, t):
     return (np.array([y[1], -9.81]))
@@ -18,10 +21,9 @@ def cost_function(x_vec, final_pos=0):
 
 iterations=0
 while (cost_function(xs) > 1e-3):
-
     ts, xs = euler(grav, *params, x0, h=h0)
     ts_eps, xs_eps = euler(grav, *params, x0 + eps, h=h0)
-
+    plt.plot(ts, xs)
     grad_cost = cost_function(xs_eps) - cost_function(xs)
 
     x0 += np.array([0., - rate * grad_cost])
