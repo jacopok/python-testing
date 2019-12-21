@@ -14,7 +14,7 @@ from tqdm import tqdm
 hdefault = .4
 
 def initialize(t0, tmax, start, h):
-    ts = np.arange(t0, tmax, h)
+    ts = np.arange(t0, tmax+h, h)
     xs = np.zeros(((len(ts),) + np.shape(start)))
     xs[0] = start
     return(ts, xs)
@@ -22,7 +22,7 @@ def initialize(t0, tmax, start, h):
 def euler(f, t0, tmax, x0, h=hdefault):
     ts, xs = initialize(t0, tmax, x0, h)
 
-    for i, t in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc = "Euler"):
+    for i, t in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h), desc = "Euler"):
         x = xs[i]
         xs[i+1] = x + h * f(x, t)
     return (ts, xs)
@@ -30,7 +30,7 @@ def euler(f, t0, tmax, x0, h=hdefault):
 def midpoint(f, t0, tmax, x0, h=hdefault):
     ts, xs = initialize(t0, tmax, x0, h)
 
-    for i, t in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc = "Midpoint"):
+    for i, t in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h), desc = "Midpoint"):
         x = xs[i]
         xhalf = x + h / 2. * f(x, t)
         thalf = t + h / 2.
@@ -40,7 +40,7 @@ def midpoint(f, t0, tmax, x0, h=hdefault):
 def fourth_order(f, t0, tmax, x0, h=hdefault):
     ts, xs = initialize(t0, tmax, x0, h)
 
-    for i, t in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc = "Fourth order RK"):
+    for i, t in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h), desc = "Fourth order RK"):
         x = xs[i]
         thalf = t + h / 2.
         tnew = t + h
@@ -63,7 +63,7 @@ def leapfrog_KDK(G, t0, tmax, x0, v0, h=hdefault):
     _, vs = initialize(t0, tmax, v0, h)
     _, a_s = initialize(t0, tmax, G(xs[0]), h)
 
-    for i, _ in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc="Leapfrog KDK"):
+    for i, _ in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h), desc="Leapfrog KDK"):
         x = xs[i]
         v = vs[i]
         a = a_s[i]
@@ -83,7 +83,7 @@ def leapfrog_DKD(G, t0, tmax, x0, v0, h=hdefault):
     ts, xs = initialize(t0, tmax, x0, h)
     _, vs = initialize(t0, tmax, v0, h)
 
-    for i, _ in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc = "Leapfrog DKD"):
+    for i, _ in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h), desc = "Leapfrog DKD"):
         x = xs[i]
         v = vs[i]
         xhalf = x + h * v /2.
@@ -107,7 +107,7 @@ def hermite(G, Gprime, t0, tmax, x0, v0, h=hdefault):
     _, a_s = initialize(t0, tmax, G(x0), h)
     _, js = initialize(t0, tmax, Gprime(x0, v0), h)
 
-    for i, _ in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h - 1), desc = "Hermite"):
+    for i, _ in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h), desc = "Hermite"):
         x = xs[i]
         v = vs[i]
         a = a_s[i]
