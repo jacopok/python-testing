@@ -38,4 +38,3 @@ if __name__ == "__main__":
     h0=.1
 
     x0, ts, xs=shooting_gd(grav, params, h0, x0, cost_function)
-    
