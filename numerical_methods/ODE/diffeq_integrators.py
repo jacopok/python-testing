@@ -134,21 +134,20 @@ def hermite(G, Gprime, t0, tmax, x0, v0, h=hdefault):
         
     return(ts, np.stack((xs, vs), axis=1))
 
+# if __name__ == "__main__":
+#     ftest = lambda x, t: - x ** 3 + np.sin(t)
+#     params = (0, 100, 0)
 
-if __name__ == "__main__":
-    ftest = lambda x, t: - x ** 3 + np.sin(t)
-    params = (0, 100, 0)
-
-    t, x_euler = euler(ftest, *params)
-    t, x_midpoint = midpoint(ftest, *params)
-    t, x_fourth_order = fourth_order(ftest, *params)
-    tc, x_correct = fourth_order(ftest, *params, h=hdefault / 100)
-    x_c = x_correct[::100]
-    x_e = x_euler - x_c
-    x_m = x_midpoint - x_c
-    x_f = x_fourth_order - x_c
-    plt.plot(t, x_e, label="Euler")
-    plt.plot(t, x_m, label="Midpoint")
-    plt.plot(t, x_f, label="Fourth order")
-    plt.legend()
-    plt.yscale('symlog', linthreshy=1e-3)
+#     t, x_euler = euler(ftest, *params)
+#     t, x_midpoint = midpoint(ftest, *params)
+#     t, x_fourth_order = fourth_order(ftest, *params)
+#     tc, x_correct = fourth_order(ftest, *params, h=hdefault / 100)
+#     x_c = x_correct[::100]
+#     x_e = x_euler - x_c
+#     x_m = x_midpoint - x_c
+#     x_f = x_fourth_order - x_c
+#     plt.plot(t, x_e, label="Euler")
+#     plt.plot(t, x_m, label="Midpoint")
+#     plt.plot(t, x_f, label="Fourth order")
+#     plt.legend()
+#     plt.yscale('symlog', linthreshy=1e-3)
