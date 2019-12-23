@@ -106,7 +106,7 @@ def gauss_seidel(A, b, ansatz=None, eps=1e-10, relaxation=True, verbose=True):
 
     # first 10 iterations: they are always done
     # without relaxation 
-    for _ in range(10):
+    for _ in range(9):
         # store old value in the variable xold
         # in order to compute the distance 
         # between the kth and (k+1)th iteration
