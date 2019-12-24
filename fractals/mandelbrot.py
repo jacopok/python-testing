@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
 plt.style.use(astropy_mpl_style)
 from matplotlib import cm
+from multiprocessing import Pool
 
-ITMAX = int(1e3)
+ITMAX = int(2e2)
 
 def iterate(z, c):
     return(z**2 + c)
@@ -46,19 +47,28 @@ def generate_set(*args,
     ys = np.linspace(y1, y2, num=N)
 
     cs = np.zeros((N, N))
+    p = Pool(4)
 
-    for i, x in tqdm(enumerate(xs)):
+    def process_row(args):
+        i, x = args
         for j, y in enumerate(ys):
             c = complex(x, y)
             cs[j, i] = ccheck(c, **ccheck_args)
     
+    for i, x in tqdm(enumerate(xs)):
+        process_row((i, x))
+    
+    # p.map(process_row, list(enumerate(xs)))
+    
     return(xs, ys, cs)
 
-def plot(xs, ys, cs, color='gnuplot2'):
+def plot(xs, ys, cs, color='CMRmap'):
     X, Y = np.meshgrid(xs, ys)
     plt.close()
-    colors = plt.contourf(X, Y, cs, cmap = plt.get_cmap(color))
-    plt.colorbar(colors)
+    colors = plt.contourf(X, Y, cs, cmap = plt.get_cmap(color), levels=40)
+    # plt.colorbar(colors)
+    plt.axis('off')
+    plt.tight_layout()
 
 def rc(c):
     rmax = 1/2. + np.sqrt(1/4. + np.abs(c))
