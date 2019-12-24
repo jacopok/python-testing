@@ -47,7 +47,7 @@ def generate_set(*args,
     ys = np.linspace(y1, y2, num=N)
 
     cs = np.zeros((N, N))
-    p = Pool(4)
+    # p = Pool(4)
 
     def process_row(args):
         i, x = args
@@ -65,7 +65,7 @@ def generate_set(*args,
 def plot(xs, ys, cs, color='CMRmap'):
     X, Y = np.meshgrid(xs, ys)
     plt.close()
-    colors = plt.contourf(X, Y, cs, cmap = plt.get_cmap(color), levels=40)
+    plt.contourf(X, Y, cs, cmap = plt.get_cmap(color), levels=40)
     # plt.colorbar(colors)
     plt.axis('off')
     plt.tight_layout()
