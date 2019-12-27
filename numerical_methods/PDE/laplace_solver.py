@@ -12,8 +12,8 @@ rc('text.latex', preamble=r'''\usepackage{amsmath}
 from math import e as neper
 from time import time
 
-N = 101 # x number of points
-M = 101 # y number of points
+N = 100+1 # x number of points
+M = 100+1 # y number of points
 dimensions = (N, M)
 
 test_field = np.zeros(dimensions)
@@ -29,21 +29,23 @@ def sum_neighbours(i, j, matrix):
 def iteration_step(field,
         relax=1,
         charge_density=None,
-        a=None):
+        a=1.):
     inner_field = field[1:-1,1:-1]
-    if not charge_density:
+    if charge_density is None:
         # Rescaled Charge Density: 
         # should be rho / a^2
         rcd = np.zeros_like(inner_field)
+    else:
+        rcd = charge_density / a**2
     error = 0.
     for i, row in enumerate(inner_field):
         for j, phi in enumerate(row):
             new_field = sum_neighbours(i+1, j+1, field) / 4. \
             + rcd[i, j]
-            if(new_field > 0.):
+            if(new_field != 0.):
                 error += np.abs((new_field - phi) / new_field)
             inner_field[i, j] = relax * new_field \
-                + (1 - relax) * phi
+                - (1 - relax) * phi
     n, m = np.shape(field)
     relative_error = error / (n*m)
 
