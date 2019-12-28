@@ -17,4 +17,11 @@ data = sunspots['Sunspot number']
 
 def DFT(data):
   N = len(data)
+  kmax = N // 2 + 1
   
+  cs = []
+  for k in range(kmax):
+    spinner = np.exp(-1j / N * 2 * np.pi * k * np.arange(N))
+    
+    cs.append(np.sum(spinner * data))
+  return (np.array(cs))
