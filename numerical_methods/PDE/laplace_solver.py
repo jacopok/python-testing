@@ -38,8 +38,7 @@ def iteration_step(field,
     error = 0.
     for i, row in enumerate(inner_field):
         for j, phi in enumerate(row):
-            new_field = sum_neighbours(i+1, j+1, field) / 4. \
-            + rcd[i, j]
+            new_field = sum_neighbours(i+1, j+1, field) /4. + rcd[i, j]
             if(new_field != 0.):
                 error += np.abs((new_field - phi) / new_field)
             inner_field[i, j] = relax * new_field \
