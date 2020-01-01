@@ -55,7 +55,9 @@ def G_prime_mass(positions, velocities, Gmasses):
                 vij / norm_power(xij, 0, 3) -    
                 3. * (np.dot(xij, vij) * xij)
                 / norm_power(xij, 0, 5))
-    return(j)
+    return (j)
+    
+Gprime = partial(G_prime_mass, Gmasses=[1.,1.])
 
 def second_order(x, t, G=G):
     pos = x[0]

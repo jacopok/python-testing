@@ -24,6 +24,9 @@ def general_lorenz(x, t, sigma, rho, beta):
     y[1] = x[0] * (rho - x[2]) - x[1]
     y[2] = x[0] * x[1] - beta * x[2]
     return (y)
+    
+params_lorenz = {'sigma': 10., 'beta': 8. / 3., 'rho': 29.}
+lorenz = partial(general_lorenz, **params_lorenz)
 
 def general_coupled_lorenz(x, t, beta, o, r1, r2, epsilon):
   x1 = x[0]
@@ -36,9 +39,6 @@ def general_coupled_lorenz(x, t, beta, o, r1, r2, epsilon):
   y[1][1] = r2*x2[0] - x2[1] - x2[0] *x2[2]
   y[1][2] =  - beta * x2[2] + x2[0] * x2[1]
   return(y)
-    
-params_lorenz = {'sigma': 10., 'beta': 8. / 3., 'rho': 29.}
-lorenz = partial(general_lorenz, **params_lorenz)
 
 params_coupled_lorenz = {'beta': 8./3., 'o': 10., 'r1': 35., 'r2': 1.15, 'epsilon': 2.85}
 coupled_lorenz = partial(general_coupled_lorenz, **params_coupled_lorenz)
@@ -54,6 +54,26 @@ def general_rossler(x, t, A, B, C):
 params_rossler={'A': .2, 'B': .2, 'C': 5.7}
 rossler = partial(general_rossler, **params_rossler)
 
+def general_lorenz_mod2(x, t, alpha, beta, gamma, delta):
+  y = np.zeros(3)
+  y[0] = -alpha * x[0] + x[1]** 2 - x[2]** 2 + alpha * gamma
+  y[1] = x[0] * (x[1] - beta * x[2]) + delta
+  y[2] = -x[2] + x[0] * (beta * x[1] + x[2])
+  return(y)
+
+params_lorenz_mod2 = {'alpha': 0.9, 'beta': 5., 'gamma': 9.9, 'delta': 1}
+lorenz_mod2 = partial(general_lorenz_mod2, **params_lorenz_mod2)
+
+def general_halvorsen(x, t, alpha):
+  y = np.zeros(3)
+  y[0] = -alpha * x[0] - 4 * (x[1] + x[2]) - x[1]** 2
+  y[1] = -alpha * x[1] - 4 * (x[2] + x[0]) - x[2]** 2
+  y[2] = -alpha * x[2] - 4 * (x[0] + x[1]) - x[0]** 2
+  return(y)
+
+params_halvorsen = {'alpha': 1.4}
+halvorsen = partial(general_halvorsen, **params_halvorsen)
+
 def plot(xs):
     fig = plt.figure()
     ax = fig.gca(projection='3d')
@@ -66,4 +86,6 @@ def plot(xs):
 
 # ts, xs = fourth_order(lorenz, 0, 40, [1., 1., 1.], h=1e-4)
 # ts, xs = fourth_order(rossler, 0, 400, [1, 1, 1], h=1e-3)
-ts, xs = fourth_order(coupled_lorenz, 0, 200, np.random.rand(6).reshape((2, 3)), h=1e-3)
+# ts, xs = fourth_order(coupled_lorenz, 0, 200, np.random.rand(6).reshape((2, 3)), h=1e-3)
+# ts, xs = fourth_order(lorenz_mod2, 0, 100, np.random.rand(3), h=1e-3)
+ts, xs = fourth_order(halvorsen, 0, 200, np.random.rand(3), h=2e-3)
