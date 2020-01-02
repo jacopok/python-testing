@@ -9,7 +9,7 @@ rc('text.latex', preamble=r'''\usepackage{amsmath}
           \usepackage{physics}
           \usepackage{siunitx}
           ''')
-from scipy.optimize import curve_fit
+from scipy.stats import linregress
 
 from diffeq_integrators import euler, midpoint, fourth_order, leapfrog_KDK, leapfrog_DKD, hermite
 
@@ -34,7 +34,7 @@ functions = {
   'Hermite': (G, Gprime)
 }
 
-hs = np.logspace(-3, -1, num=20)
+hs = np.logspace(-3, -1, num=4)
 tmax = 30
 params_fo = (0, tmax, np.array([[[1., 1.], [-1., - 1.]], [[-.5, 0.], [0.5, 0.]]]))
 params_so = (0, tmax, np.array([[1., 1.], [-1., -1.]]), np.array([[-.5, 0], [0.5, 0]]))
@@ -79,22 +79,21 @@ def make_plot(Es_dict, Ls_dict, fit = True):
 
   fig, axs = plt.subplots(1, 2)
 
-  powerlaw = lambda x, a, b: a * x**b
-
   for method_name in methods:
     Earr = Es_dict[method_name]
     Larr = Ls_dict[method_name]
     Elab = method_name
     Llab = method_name
     if (fit):
-      Ep0 = [Earr[-1], th_order[method_name]]
-      Lp0 = [Larr[-1], th_order[method_name]]
-      Epar, _ = curve_fit(powerlaw, hs, Earr, p0 = Ep0, sigma=np.array(Earr))
-      Lpar, _ = curve_fit(powerlaw, hs, Larr, p0=Lp0, sigma=np.array(Larr))
-      Elab += f' slope {Epar[1]:.2f}'
-      Llab += f' slope {Lpar[1]:.2f}'
-      # axs[0].plot(hs, powerlaw(hs, *Ep0))
-      # axs[1].plot(hs, powerlaw(hs, *Lp0))
+      log_hs = np.log(hs)
+      log_E = np.log(Earr)
+      log_L = np.log(Larr)
+      Eslope, __, __, __, __ = linregress(log_hs, log_E) 
+      Lslope, __, __, __, __ = linregress(log_hs, log_L) 
+      Elab += f' slope {Eslope:.2f}'
+      Llab += f' slope {Lslope:.2f}'
+      # axs[0].loglog(hs, powerlaw(hs, *Ep0))
+      # axs[1].loglog(hs, powerlaw(hs, *Lp0))
 
     axs[0].loglog(hs, Earr, label=Elab)
     axs[1].loglog(hs, Larr, label=Llab)
