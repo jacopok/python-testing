@@ -20,7 +20,7 @@ def single_L(x):
         L+= np.cross(r, v)
     return(L)
 
-def E(xs):
+def E(xs, calculate_average=True):
     Es = []
     for i,x in enumerate(xs):
         if (i == 0):
@@ -29,10 +29,11 @@ def E(xs):
         else: 
             Es.append(np.abs((single_E(x) - E0) / E0))
     # print(f"Starting energy: {E0}")
-    print(f"Average energy deviation: {np.average(Es)}")
+    if(calculate_average):
+        print(f"Average energy deviation: {np.average(Es)}")
     return (Es)
 
-def L(xs):
+def L(xs, calculate_average=True):
     Ls = []
     for i,x in enumerate(xs):
         if (i == 0):
@@ -41,7 +42,8 @@ def L(xs):
         else: 
             Ls.append(np.abs((single_L(x)- L0)/L0))
     # print(f"Starting angular momentum: {L0}")
-    print(f"Average momentum deviation: {np.average(Ls)}")
+    if(calculate_average):
+        print(f"Average momentum deviation: {np.average(Ls)}")
     return (Ls)
     
 if __name__ == "__main__":

@@ -21,7 +21,7 @@ methods = {
   'Midpoint': midpoint,
   'Fourth-order': fourth_order, 
   'Leapfrog KDK': leapfrog_KDK, 
-  # 'Leapfrog DKD': leapfrog_DKD,
+  'Leapfrog DKD': leapfrog_DKD,
   'Hermite': hermite
 }
 
@@ -34,7 +34,7 @@ functions = {
   'Hermite': (G, Gprime)
 }
 
-hs = np.logspace(-3, -1, num=4)
+hs = np.logspace(-3.5, -0.5, num=50)
 tmax = 30
 params_fo = (0, tmax, np.array([[[1., 1.], [-1., - 1.]], [[-.5, 0.], [0.5, 0.]]]))
 params_so = (0, tmax, np.array([[1., 1.], [-1., -1.]]), np.array([[-.5, 0], [0.5, 0]]))
@@ -65,13 +65,13 @@ def calculate_errors():
     for h in hs:
       _, xs = methods[method_name](*functions[method_name], *params[method_name], h)
       if method_name not in Es_dict:
-        Es_dict[method_name] = [np.average(E(xs))]
+        Es_dict[method_name] = [np.average(E(xs, calculate_average=False))]
       else:
-        Es_dict[method_name].append(np.average(E(xs)))
+        Es_dict[method_name].append(np.average(E(xs, calculate_average=False)))
       if method_name not in Ls_dict:
-        Ls_dict[method_name] = [np.average(L(xs))]
+        Ls_dict[method_name] = [np.average(L(xs, calculate_average=False))]
       else:
-        Ls_dict[method_name].append(np.average(L(xs)))
+        Ls_dict[method_name].append(np.average(L(xs, calculate_average=False)))
   
   return(Es_dict, Ls_dict)
 
@@ -98,8 +98,11 @@ def make_plot(Es_dict, Ls_dict, fit = True):
     axs[0].loglog(hs, Earr, label=Elab)
     axs[1].loglog(hs, Larr, label=Llab)
   axs[0].set_title('Energy conservation')
+  axs[0].set_ylabel('$\\Delta E / E$')
   axs[1].set_title('Angular momentum conservation')
+  axs[1].set_ylabel('$\\Delta L / L$')
+  
   for ax in axs:
-    ax.legend()
+    ax.legend(loc='lower right')
     ax.set_xlabel('$h$')
   plt.show()
