@@ -5,16 +5,7 @@ import matplotlib.pyplot as plt
 plt.style.use('seaborn')
 #%% Exercise 1.1
 
-g = 9.81 # m*s**(-2)
 
-t = float(input("Please input the time t in seconds"))
-h = float(input("Please input the height h in metres"))
-
-x = 1/2 * g * t**2
-print(f"x = {x}")
-
-t2 = np.sqrt(2*g/h)
-print(f"t_2 = {t2}")
 
 #%% Exercise 1.2
 
