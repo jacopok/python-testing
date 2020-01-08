@@ -27,11 +27,13 @@ def simulate_dice(x:int, y:int, z: int, N):
 def plot_dice(x: int, y: int, z: int = 0, N=int(1e5)):
   r=simulate_dice(x, y, z, N)
   m=x * y + z
-  
+  print(f"Average: {np.average(r):.1f}")
+  print(f"Standard deviation: {np.std(r):.1f}")
+
   plt.hist(r / m,
     bins=np.linspace(0, 1, num=m + 2),
     density=True,
-    alpha=.5,
+    alpha=.4,
     label=f"{x}d{y}+{z}")
   plt.xlabel("Fraction of total result")
   plt.ylabel("Probability density")
