@@ -39,3 +39,16 @@ def plot_dice(x: int, y: int, z: int = 0, N=int(1e5)):
   plt.ylabel("Probability density")
   plt.legend()
   plt.show()
+
+def advantage(die: int = 20, N=int(1e5), mode: str = 'adv'):
+  
+  results = []
+
+  for _ in range(N):
+    res = np.random.randint(1, 21, size=2)
+    if (mode == 'adv'):
+      results.append(np.max(res))
+    elif (mode == 'dis'):
+      results.append(np.min(res))
+  
+  return(np.array(results))
