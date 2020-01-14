@@ -1,5 +1,5 @@
 import pandas as pd
-from sorting import merge_sort, quick_sort, bubble_sort
+from sorting_2_1 import merge_sort, quick_sort, bubble_sort
 from time import time
 
 filename = "../../../numerical-methods/exercises/sorting/illustris3_135.dat"
