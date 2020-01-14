@@ -8,6 +8,7 @@ plt.style.use(astropy_mpl_style)
 import matplotlib.cm as cm
 import matplotlib
 import numpy as np
+from tqdm import tqdm
 from matplotlib import rc
 rc('font',**{'family':'serif','serif':['Palatino']})
 rc('text', usetex=True)
@@ -108,7 +109,7 @@ def merge_sort(array, comparison = lambda x,y: x<y):
     second_half = merge_sort(array[int(n / 2):], comparison)
     return(merge(first_half, second_half, comparison))
 
-def algorithm_comparison(algorithm_list, algorithm_names, num=1000, every=10, test_type="random"):
+def algorithm_comparison(algorithm_list, algorithm_names, n_array, test_type="random"):
 
     def random_swap(array, n):
         n1 = randrange(n)
@@ -127,12 +128,12 @@ def algorithm_comparison(algorithm_list, algorithm_names, num=1000, every=10, te
         t1 = time()
         algorithm(n_list)
         t2 = time()
-        return(t2-t1)
+        return (t2 - t1)
     
     times_dict = {name:[] for name in algorithm_names}
     for (alg, name) in zip(algorithm_list, algorithm_names):
         print("Testing " + name)
-        for n in range(10, num)[::every]:
+        for n in tqdm(n_array):
             times_dict[name].append((n_test(alg, n)))
 
     color = iter(cm.rainbow(np.linspace(0,1,len(times_dict))))
@@ -146,16 +147,11 @@ def algorithm_comparison(algorithm_list, algorithm_names, num=1000, every=10, te
     ax.set_xscale('log')
     locmaj = matplotlib.ticker.LogLocator(base=10, subs=(1., np.sqrt(10.)),numticks=12) 
     ax.xaxis.set_major_locator(locmaj)
-    locmin = matplotlib.ticker.LogLocator(base=10.0,subs=(.2,.4,.6,.8),numticks=12)
-    ax.xaxis.set_minor_locator(locmin)
-    ax.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
 
-    for name in times_dict:
-        n_array = np.arange(10, every*len(times_dict[name]), every)
-        
+    for name in times_dict:        
         popt, pcov = curve_fit(model, np.log(n_array), np.log(times_dict[name]), p0=[1.,1e-5])
         c = next(color)
-        ax.plot(n_array, times_dict[name], label=f'{name}: exponent {popt[0]:.3f}', c=c)
+        ax.plot(n_array, times_dict[name], label=f'{name}: exponent {popt[0]:.3f}, const {np.exp(popt[1]):.1e}', c=c)
         ax.plot(n_array, np.exp(popt[1])*n_array**popt[0], c=c, linestyle=':')
 
     ax.set_xlabel('Length of the array')
@@ -171,3 +167,5 @@ if __name__ == "__main__":
     alg_names = ['Bubble', 'Selection', 'Quick', 'Merge', 'Tim']
     for alg, name in zip(alg_list, alg_names):
         print(f'{name} sort: {alg(test_list)}')
+    
+    # algorithm_comparison(alg_list, alg_names, np.logspace(1, 3, dtype=int, num=20))
