@@ -1,13 +1,16 @@
 import numpy as np
 from astropy import constants
+from astropy import units as u
 
-g = constants.g0.value # m*s**(-2)
+g = constants.g0  # reference value for the gravitational acceleration 
+# on the surface of the Earth
 
-t = float(input("Please input the time t in seconds "))
-h = float(input("Please input the height h in metres "))
+t = float(input("Please input the time t in seconds: ")) * u.s
 
-x = 1/2 * g * t**2
-print(f"x = {x}")
+x = (1./2. * g * t**2).to('m')
+print(f"The distance fallen in {t} is {x}")
 
-t2 = np.sqrt(2*g/h)
-print(f"t_2 = {t2}")
+h = float(input("Please input the height h in metres: ")) * u.m
+
+t2 = np.sqrt(2*h/g)
+print(f"The time taken to fall a distance {h} is {t2}")
