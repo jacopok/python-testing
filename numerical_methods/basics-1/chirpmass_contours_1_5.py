@@ -15,9 +15,10 @@ import matplotlib.cm as cm
 from matplotlib.ticker import LogLocator, MultipleLocator
 from scipy.ndimage.filters import gaussian_filter
 
-tot_filename = "chirpmass_tmerg_tot.dat"
-tmerg_filename = "tmerg_bin.dat"
-chirpmass_filename = "chirpmass_bin.dat"
+fn = 'contours_data/'
+tot_filename = fn + "chirpmass_tmerg_tot.dat"
+tmerg_filename = fn + "tmerg_bin.dat"
+chirpmass_filename = fn + "chirpmass_bin.dat"
 
 with open(tot_filename) as tot_file:
     tot_data = [np.array(i.strip().split(), dtype=np.float) for i in tot_file.readlines()]
