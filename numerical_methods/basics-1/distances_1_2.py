@@ -49,6 +49,7 @@ def distance(z, integration_type, units = 'Gpc'):
     return distance.value
 
 zs = np.logspace(-4,4., num=100)
+# zs = np.linspace(0, 30)
 comoving_dist = distance(zs, "comoving")
 luminosity_dist = distance(zs, "luminosity")
 
