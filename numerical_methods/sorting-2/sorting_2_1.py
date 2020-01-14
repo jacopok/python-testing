@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
 plt.style.use(astropy_mpl_style)
 import matplotlib.cm as cm
+import matplotlib
 import numpy as np
 from matplotlib import rc
 rc('font',**{'family':'serif','serif':['Palatino']})
@@ -131,25 +132,42 @@ def algorithm_comparison(algorithm_list, algorithm_names, num=1000, every=10, te
     times_dict = {name:[] for name in algorithm_names}
     for (alg, name) in zip(algorithm_list, algorithm_names):
         print("Testing " + name)
-        for n in range(1, num)[::every]:
+        for n in range(10, num)[::every]:
             times_dict[name].append((n_test(alg, n)))
 
     color = iter(cm.rainbow(np.linspace(0,1,len(times_dict))))
 
-    model = lambda x, exponent: x * exponent
+    model = lambda x, exponent, constant: x * exponent + constant
+
+    fig = plt.figure()
+    ax = plt.gca()
+
+    ax.set_yscale('log')
+    ax.set_xscale('log')
+    locmaj = matplotlib.ticker.LogLocator(base=10, subs=(1., np.sqrt(10.)),numticks=12) 
+    ax.xaxis.set_major_locator(locmaj)
+    locmin = matplotlib.ticker.LogLocator(base=10.0,subs=(.2,.4,.6,.8),numticks=12)
+    ax.xaxis.set_minor_locator(locmin)
+    ax.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
 
     for name in times_dict:
-        n_array = np.arange(1, every*len(times_dict[name]), every)
+        n_array = np.arange(10, every*len(times_dict[name]), every)
         
-        popt, pcov = curve_fit(model, np.log(n_array), np.log(times_dict[name]))
+        popt, pcov = curve_fit(model, np.log(n_array), np.log(times_dict[name]), p0=[1.,1e-5])
         c = next(color)
-        plt.loglog(n_array, times_dict[name], label=f'{name}: exponent {popt[0]:.3f}', c=c)
-        plt.loglog(n_array, n_array**popt, c=c)
+        ax.plot(n_array, times_dict[name], label=f'{name}: exponent {popt[0]:.3f}', c=c)
+        ax.plot(n_array, np.exp(popt[1])*n_array**popt[0], c=c, linestyle=':')
 
-    plt.xlabel('Length of the array')
-    plt.ylabel('Time [\\SI{}{s}]')
-    plt.grid(True)
-    plt.legend()
-    plt.title('Sorting algorithm execution types on ' + test_type + ' arrays')
+    ax.set_xlabel('Length of the array')
+    ax.set_ylabel('Time [\\SI{}{s}]')
+    ax.grid(b=True, which='major', color='black', linestyle=':')
+    ax.legend()
+    ax.set_title('Sorting algorithm execution types on ' + test_type + ' arrays')
+    fig.show()
 
-test_list = [9, -3, 5, 2, 6, 8, -6, 1, 3]
+if __name__ == "__main__":
+    test_list = [9, -3, 5, 2, 6, 8, -6, 1, 3]
+    alg_list = [bubble_sort, selection_sort, quick_sort, merge_sort, sorted]
+    alg_names = ['Bubble', 'Selection', 'Quick', 'Merge', 'Tim']
+    for alg, name in zip(alg_list, alg_names):
+        print(f'{name} sort: {alg(test_list)}')
