@@ -126,3 +126,5 @@ def algorithm_comparison(algorithm_list, algorithm_names, num=1000, every=10, te
         plt.plot(range(len(times_dict[name])), model(range(len(times_dict[name])), *popt))
     plt.legend()
     plt.title(test_type)
+
+test_list = [9, -3, 5, 2, 6, 8, -6, 1, 3]
