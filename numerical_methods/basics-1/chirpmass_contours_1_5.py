@@ -12,7 +12,7 @@ rc('text.latex', preamble=r'''\usepackage{amsmath}
           ''')
 
 import matplotlib.cm as cm
-from matplotlib.ticker import LogLocator, MultipleLocator
+from matplotlib.ticker import LogLocator
 from scipy.ndimage.filters import gaussian_filter
 
 fn = 'contours_data/'
