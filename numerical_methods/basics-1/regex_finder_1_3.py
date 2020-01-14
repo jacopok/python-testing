@@ -21,17 +21,12 @@ def get_data(filename):
     with open(filename) as file:
         t = None
         rhalf = None
-        for line in tqdm(file):
+        for line in tqdm(file, total=45503380):
+                #hardcoded for prettiness in the exam
             if re.search(time_expr, line):
-                try:
-                    t = float(line.split(" ")[-1])
-                except (ValueError):
-                    raise (TypeError)
+                t = float(line.split(" ")[-1])
             if re.search(rhalf_expr, line):
-                try:
-                    rhalf = float(line.split(" ")[-1])
-                except (ValueError):
-                    raise (TypeError)
+                rhalf = float(line.split(" ")[-1])
             if (rhalf and t):
                 results.append([t, rhalf])
                 t = None
@@ -44,8 +39,8 @@ def plot_data(results, name):
     rhalf = results[:, 1]
 
     plt.plot(times, rhalf)
-    plt.xlabel("Times")
-    plt.ylabel("rhalf")
+    plt.xlabel("times (internal code units)")
+    plt.ylabel("rhalf: half-mass radius (\\SI{}{pc})")
     plt.savefig(name, format = 'pdf')
 
 if __name__ == "__main__":
