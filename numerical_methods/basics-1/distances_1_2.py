@@ -18,20 +18,18 @@ import astropy.constants as ac
 from astropy.cosmology import WMAP9 as cosmo
 
 @np.vectorize
-def distance(z, integration_type=None):
+def distance(z, integration_type, units = 'Gpc'):
     """
     `distance` takes as input:
         the redshift z,
-        the `integration_type` parameter, a string which can currently be
+        the `integration_type` parameter, a string which can be
         "luminosity" or "comoving", depending on which integral
         one wishes to compute.
 
-    It returns the desired type of distance.
+    It returns the desired type of distance in 'units', 
+    the default is 'Gpc'.
     """
 
-    H0 = cosmo.H0.value #Hubble constant in km/s/Mpc
-    convert = 1e6 * sc.year / ac.pc.value
-    #converts from km/s/Mpc to Gyr
     OmegaM = 0.2726 #omega matter, parameter from cosmology
     OmegaL = 0.7274 #omega lambda, parameter from cosmology
 
@@ -39,31 +37,31 @@ def distance(z, integration_type=None):
                 OmegaL) ** .5)
     
     looktime = integrate.quad(integrand, 0.0, z)[0]
-    distance = looktime / H0 / convert
-    
+    distance = looktime * (ac.c / cosmo.H0).to(units)
+        
     if (integration_type == "comoving"):
         pass
     elif (integration_type == "luminosity"):
         distance *= 1+z
     else:
-        raise (NotImplementedError)
+        raise (NotImplementedError('This integration type does not exist'))
 
-    return distance
+    return distance.value
 
-zs = np.linspace(0,10., num=100)
+zs = np.logspace(-4,4., num=100)
 comoving_dist = distance(zs, "comoving")
 luminosity_dist = distance(zs, "luminosity")
 
-for i, (z, cd, ld) in enumerate(zip(zs, comoving_dist, luminosity_dist)):
-    print(f"z = {z:.1f}, D_C = {cd:.2f}, D_L = {ld:.2f}")
+# for i, (z, cd, ld) in enumerate(zip(zs, comoving_dist, luminosity_dist)):
+#     print(f"z = {z:.1f}, D_C = {cd:.2f} Gpc, D_L = {ld:.2f} Gpc")
 
-plt.plot(zs, comoving_dist, label="Comoving distance")
-plt.plot(zs, luminosity_dist, label="Luminosity distance")
+plt.loglog(zs, comoving_dist, label="Comoving distance")
+plt.loglog(zs, luminosity_dist, label="Luminosity distance")
 
-plt.ylabel("Distance (light-\SI{}{Gyr})")
+plt.loglog(zs, (cosmo.comoving_distance(zs)).to('Gpc'), label='Astropy CD')
+plt.loglog(zs, (cosmo.luminosity_distance(zs)).to('Gpc'), label='Astropy LD')
+
+plt.ylabel("Distance (\SI{}{Gpc})")
 plt.xlabel("redshift $z$")
 plt.legend()
 plt.show()
-
-plt.plot(zs, (cosmo.comoving_distance(zs) / ac.c).to('Gyr'))
-plt.plot(zs, (cosmo.luminosity_distance(zs) / ac.c).to('Gyr'))
