@@ -170,10 +170,3 @@ def test(dim=3, relaxation=False, **kwargs):
         except KeyboardInterrupt:
             trigger = False
     return (conv, nits)
-
-Atest = np.array([
-    [4, -1, 1],
-    [-1, 4, -2],
-    [1, -2, 4]
-])
-btest = np.array([12, -1, 5])
