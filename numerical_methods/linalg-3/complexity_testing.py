@@ -16,14 +16,18 @@ def complexity(nmax, every=1, **options):
         gaussian_elimination(*test_data(n, **options))
         t2 = time()
         return (t2 - t1)
-        
+    
+    sizes = range(2, nmax, every)
+
     times= []
-    for n in range(2, nmax, every):
+    for n in sizes:
         times.append(n_test(n))
     
     model = lambda x, exponent, constant: constant * x**exponent
     popt, pcov = curve_fit(model, range(len(times)), times)
-    plt.plot(times, label=f'Exponent: {popt[0]:.3f} +- {pcov[0,0]:.3f}')
-    plt.plot(range(len(times)), model(range(len(times)), *popt))
+    plt.plot(sizes, times, label=f'Exponent: {popt[0]:.3f} +- {pcov[0,0]:.3f}')
+    plt.plot(sizes, model(sizes, *popt))
     plt.legend()
-    return(popt[0], pcov[0,0])
+    plt.xlabel('')
+    return (popt[0], pcov[0, 0])
+    
