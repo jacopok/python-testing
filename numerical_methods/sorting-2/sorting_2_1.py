@@ -118,9 +118,9 @@ def algorithm_comparison(algorithm_list, algorithm_names, n_array, test_type="ra
         return(array)
 
     test_types = {
-        "inverse_sorted": lambda n: list(range(n))[::1],
+        "inverse sorted": lambda n: list(range(n))[::1],
         "random": lambda n: sample(list(range(n)), k=n),
-        "almost_sorted": lambda n: random_swap(list(range(n)), n)
+        "almost sorted": lambda n: random_swap(list(range(n)), n)
     } 
 
     def n_test(algorithm, n):
@@ -149,7 +149,7 @@ def algorithm_comparison(algorithm_list, algorithm_names, n_array, test_type="ra
     ax.xaxis.set_major_locator(locmaj)
 
     for name in times_dict:        
-        popt, pcov = curve_fit(model, np.log(n_array), np.log(times_dict[name]), p0=[1.,1e-5])
+        popt, pcov = curve_fit(model, np.log(n_array), np.log(times_dict[name]), p0=[1.,-5])
         c = next(color)
         ax.plot(n_array, times_dict[name], label=f'{name}: exponent {popt[0]:.3f}, const {np.exp(popt[1]):.1e}', c=c)
         ax.plot(n_array, np.exp(popt[1])*n_array**popt[0], c=c, linestyle=':')
