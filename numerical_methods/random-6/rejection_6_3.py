@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
 plt.style.use(astropy_mpl_style)
 
+np.random.seed(3141592)
+
 def gauss(x, sigma=2., loc = 0.):
     return(1/np.sqrt(2*np.pi)/sigma*np.exp(-(x-loc)**2/2/sigma**2))
 

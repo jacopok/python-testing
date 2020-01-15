@@ -4,6 +4,8 @@ from astropy.visualization import astropy_mpl_style
 plt.style.use(astropy_mpl_style)
 from tqdm import tqdm
 
+np.random.seed(3141592)
+
 def box_muller(loc=0., scale=2., N=int(1e6)):
 
     Ntrue = int(N/2)
