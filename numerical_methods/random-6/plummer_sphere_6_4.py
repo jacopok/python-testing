@@ -3,11 +3,14 @@ from scipy import stats
 import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
 plt.style.use(astropy_mpl_style)
+from scipy.integrate import quad
 
 M = 1e4  # solar masses
 a_scale = 5. # parsec
 sigma_speed = 5. # km/s
-N = int(1e4)  # number of simulated stars
+N = int(2e3)  # number of simulated stars
+
+np.random.seed(3141592)
 
 class plummer_radius(stats.rv_continuous):
     def __init__(self, a_scale=a_scale, *args, **kwargs):
@@ -17,7 +20,7 @@ class plummer_radius(stats.rv_continuous):
 
     def _pdf(self, r):
         R = r / self.scale
-        norm = 3 / (4 * np.pi * self.scale ** 3) 
+        norm = 3 / (4 * np.pi * self.scale ** 3)
         power = (1 + R**2 )**(-5/2) * R**2
         return (norm * power)
 
@@ -84,22 +87,20 @@ def spherical_to_cartesian(theta, phi):
 
     return (np.array([x, y, z]))
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
     r_p = plummer_radius()
     m_v = maxwell_rv_3d()
 
-    _radii = r_p.rvs(size=N)
-    _coords = []
-    for r in _radii:
+    radii = r_p.rvs(size=N)
+    coords = []
+    for r in radii:
         coord = r * spherical_to_cartesian(*angular_sample()[0])
-        _coords.append(coord)
-    coordinates = np.array(_coords)
+        coords.append(coord)
+    coordinates = np.array(coords)
     velocities = m_v.rvs(size=N)
 
-    v0 = np.zeros(N)
-    for i in range(3):
-        v0 += velocities[:, i]** 2
-    v_moduli = np.sqrt(v0)
+    v_moduli = np.linalg.norm(velocities, axis=-1)
+    x_moduli = np.linalg.norm(coordinates, axis=-1)
 
     """
     The coordinates of the new objects
@@ -109,7 +110,25 @@ if __name__ == "__main__":
     In order to check that the velocities 
     are correctly distributed do:
 
-    plt.plot(b, m_v.pdf(b))
-    plt.hist(v_moduli, bins=100, density=True)
     """
+    fig, axs = plt.subplots(2, 2)
 
+
+    v, b, _ = axs[0,1].hist(v_moduli, bins=100, density=True)
+    axs[0, 1].plot(b, m_v.pdf(b))
+    axs[0,1].set_xlabel('Velocity modulus [$\\SI{}{km/s}$]')
+
+    r, br, _ = axs[0, 0].hist(x_moduli, bins = 1000, density = True)
+    axs[0, 0].set_xlim((0, 30))
+    axs[0, 0].set_xlabel('Coordinate modulus [$\\SI{}{pc}$]')
+    
+    axs[1, 1].scatter(*(coordinates[:, i] for i in [0,1]), s=1)
+    axs[1, 1].set_xlabel('$x$ position [\\SI{}{pc}]')
+    axs[1, 1].set_ylabel('$y$ position [\\SI{}{pc}]')
+    axs[1, 1].set_xlim((-20, 20))
+    axs[1, 1].set_ylim((-20, 20))
+
+    axs[1, 0].plot((br[1:]+br[:-1])/2, np.cumsum(r))
+    axs[0, 0].set_xlim((0, 30))
+    
+    plt.show()
