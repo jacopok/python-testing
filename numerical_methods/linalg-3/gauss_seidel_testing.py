@@ -1,8 +1,8 @@
-from gauss_seidel_3_2 import gaussian_elimination
+from gauss_seidel_3_2 import gauss_seidel
 from math import isnan
 from test_data_generation import test_data
 from tqdm import tqdm
-
+import numpy as np
 
 def test_algorithm(iterations=100, dim=3, relaxation=False, **kwargs):
     conv = []
@@ -14,7 +14,7 @@ def test_algorithm(iterations=100, dim=3, relaxation=False, **kwargs):
             A, b = test_data(dim, **kwargs)
             x, nit = gauss_seidel(A, b, relaxation=relaxation, verbose=False)
             if(x is not None): 
-                if(not isnan(x[0])): 
+                if(not isnan(x[0])):
                     conv.append(n)
                     nits.append(nit)
                     break
@@ -27,8 +27,6 @@ if __name__ == '__main__':
     convergence, iterations = test_algorithm()
 
     print(f"Convergence was reached for one matrix in {np.average(convergence)}, and the median of the number of iterations was {np.median(iterations)}.")
-
-    sleep(2)
 
     print("Now let us compare relaxation with no relaxation: first, with relaxation, for 5-dimensional matrices to make the problem harder")
 
