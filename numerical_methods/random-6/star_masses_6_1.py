@@ -1,8 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
-plt.style.use(astropy_mpl_style)
+plt.style.use('default')
 from scipy.stats import linregress
+from matplotlib.ticker import LogLocator, NullFormatter
+from matplotlib import rc
+rc('text', usetex=True)
+rc('text.latex', preamble=r'''\usepackage{amsmath}
+          \usepackage{physics}
+          \usepackage{siunitx}
+          ''')
 
 np.random.seed(3141592)
 
@@ -14,7 +21,7 @@ def m_from_x(x, alpha, m_min, m_max):
     m_oneminusalpha = (m_min ** (1 - alpha) + (1 - alpha) * N * x)
     return (m_oneminusalpha ** (1 / (1 - alpha)))
     
-def log_histogram(cdf, N=int(1e8), bin_num=101, m_min=m_min, m_max=m_max, alpha=2.3):
+def log_histogram(cdf, N=int(1e7), bin_num=101, m_min=m_min, m_max=m_max, alpha=2.3):
   uniform_deviates = np.random.uniform(size=N)
 
   ms = cdf(uniform_deviates, alpha, m_min, m_max)
@@ -36,6 +43,7 @@ plt.yscale('log')
 plt.ylabel('Probability density function $\\dv*{p}{M}$ [$1/M_\\odot$, logscale]')
 plt.xscale('log')
 plt.xlabel('Mass [$M_\\odot$, log scale]')
+plt.grid('on')
 plt.show()
 
 print(f"""The sum of the probability density samples
