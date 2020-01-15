@@ -97,35 +97,6 @@ def newton_rhapson(f, x0, f_prime=None, eps=1e-10, cdeps=1e-11, verbose=False):
                 print(f"Error is {f(x)}")
             return (x)
 
-def symbolic_newton_rhapson(f, x0, eps=1e-10, verbose=False):
-    """
-    Inputs:
-    f: sympy function
-    x0: initial ansatz
-
-    eps: tolerace, defaults to 1e-10
-
-    Finds a zero of the function using the Newton-Rhapson method, 
-        with a derivative which is calculated symbolically by sympy. 
-    """
-
-    x=x0
-    x_symb = sp.symbols('x')
-
-    fprime = sp.diff(f)
-    
-    n_f = sp.lambdify(x_symb, f, 'numpy')
-    n_fprime = sp.lambdify(x_symb, fprime, 'numpy')
-
-    while True:
-        delta_x = n_f(x) / n_fprime(x)
-        xold = x
-        x -= delta_x
-        if (np.abs(xold - x) < eps):
-            if(verbose):
-                print(f"Error is {n_f(x)}")
-            return(x)
-
 if __name__ == "__main__":
     #equals zero
     func_0 = lambda ecc, F: (lambda E: E - ecc * np.sin(E) - F)
@@ -151,8 +122,16 @@ if __name__ == "__main__":
         color = next(colors)
         plt.plot(Es, func_0(ecc, F)(Es), label=f'ecc={ecc:.2f}, F={F:.2f}', c=color)
         ax = plt.gca()
-        ax.axvline(r_res, c=color, linestyle='dotted', label=f'E = {r_res:.2f}')
+        ax.axvline(r_res, c=color, linestyle='dotted', label=f'E = {r_res:.2f}', alpha=.33)
+        ax.axvline(nr_res, c=color, linestyle='dotted', alpha=.33)
+        ax.axvline(b_res, c=color, linestyle='dotted', alpha=.33)
     plt.legend()
     plt.xlabel('$E$')
     plt.ylabel('$E - \\text{ecc} \\times \\sin(E) - F$')
     plt.show()
+
+    # relaxation w/ relaxation can be useful! try:
+
+    # relaxation(func_E(.7, np.pi/3.), 1, rel=.9, verbose=True)
+    # vs
+    # relaxation(func_E(.7, np.pi/3.), 1, rel=1., verbose=True)
