@@ -1,4 +1,5 @@
-from gauss_seidel import gauss_seidel
+from gauss_seidel_3_2 import gauss_seidel
+from gaussian_elimination_3_1 import gaussian_elimination
 import numpy as np
 
 """
@@ -30,5 +31,7 @@ so we can solve the system with the Gauss-Seidel method:
 the kind of circuit guarantees that the matrix is (not strictly) diagonally dominant, since the diagonal entries must equal the number of ones on the row (counting a one also if there is a V+ on the rame row of b)
 """
 
-x, n = gauss_seidel(A, b)
-print(x)    
+xgs, n = gauss_seidel(A, b)
+print(f'Gauss Seidel gives {xgs}')
+xge = gaussian_elimination(A, b)
+print(f'Gaussian elimination gives {xge}')
