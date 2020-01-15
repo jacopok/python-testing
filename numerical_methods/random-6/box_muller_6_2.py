@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
 plt.style.use(astropy_mpl_style)
+from tqdm import tqdm
 
 def box_muller(loc=0., scale=2., N=int(1e6)):
 
@@ -11,7 +12,7 @@ def box_muller(loc=0., scale=2., N=int(1e6)):
     
     gaussian_deviates = []
 
-    for (zr, ztheta) in zip(z1, z2):
+    for (zr, ztheta) in tqdm(zip(z1, z2), total=Ntrue):
         r = np.sqrt(-2 * scale ** 2 * np.log(1 - zr))
         theta = 2 * np.pi * ztheta
         
@@ -26,3 +27,4 @@ if __name__ == '__main__':
     plt.hist(deviates, density=True, bins=100)
     plt.ylabel('Probability density function')
     plt.show()
+    
