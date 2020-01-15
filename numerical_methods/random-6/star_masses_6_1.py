@@ -2,38 +2,43 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
 plt.style.use(astropy_mpl_style)
-from scipy.optimize import curve_fit
+from scipy.stats import linregress
 
 np.random.seed(3141592)
 
-N=int(1e7)
+m_min = 0.1
+m_max = 150.
 
-def m_from_x(x, alpha=2.3, m_min=0.1, m_max=150):
+def m_from_x(x, alpha, m_min, m_max):
     N = 1 / (1 - alpha) * (m_max ** (1 - alpha) - m_min ** (1 - alpha))
     m_oneminusalpha = (m_min ** (1 - alpha) + (1 - alpha) * N * x)
     return (m_oneminusalpha ** (1 / (1 - alpha)))
     
-uniform_deviates = np.random.uniform(size=N)
+def log_histogram(cdf, N=int(1e8), bin_num=101, m_min=m_min, m_max=m_max, alpha=2.3):
+  uniform_deviates = np.random.uniform(size=N)
 
-ms = m_from_x(uniform_deviates)
-log_ms = np.log(ms)
+  ms = cdf(uniform_deviates, alpha, m_min, m_max)
+  bins = np.logspace(np.log10(m_min), np.log10(m_max), num=101)
 
-vals, bins, _ = plt.hist(log_ms, bins=100)
-# nonzero_indices = np.nonzero(grad_vals)
-# grad_vals = grad_vals[nonzero_indices]
-# bins = bins[nonzero_indices]
-# binsizes = bins[1:] - bins[:-1]
-bins = (bins[:-1]+bins[1:])/2
-grad_vals = -np.gradient(vals, bins) / np.exp(bins)
+  pdf, _ = np.histogram(ms, bins=bins)
 
-f = lambda x, alpha, C : C * np.exp(-alpha*x)
-p_grad, _ = curve_fit(f, bins, grad_vals, p0=[2, N / 10])
-p_N, _ = curve_fit(f, bins, vals, p0=[2, N / 10])
+  bin_centers = (bins[:-1]+bins[1:])/2.
+  bin_sizes = (bins[1:]-bins[:-1])/2.
+  pdf = pdf / bin_sizes / N
+  return(pdf, bin_centers, bin_sizes)
 
-#  sigma=np.sqrt(grad_vals)/np.sqrt(max(grad_vals))
+pdf, bin_centers, bin_sizes = log_histogram(m_from_x)
 
-plt.plot(bins, grad_vals)
-plt.plot(bins, f(bins, *p_N))
-plt.plot(bins, f(bins, *p_grad))
+exponent, log_const, r, p, s = linregress(np.log(bin_centers), np.log(pdf))
+
+plt.bar(bin_centers, pdf, width=0.8 * np.gradient(bin_centers))
+plt.yscale('log')
+plt.ylabel('Probability density function $\\dv*{p}{M}$ [$1/M_\\odot$, logscale]')
+plt.xscale('log')
+plt.xlabel('Mass [$M_\\odot$, log scale]')
 plt.show()
 
+print(f"""The sum of the probability density samples
+times the bin sizes is {np.sum(pdf * bin_sizes)}.
+""")
+print(f'The exponent of the powerlaw is {exponent:.2f}.')
