@@ -1,4 +1,7 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from astropy.visualization import astropy_mpl_style
+plt.style.use(astropy_mpl_style)
 
 def box_muller(loc=0., scale=2., N=int(1e6)):
 
@@ -18,3 +21,8 @@ def box_muller(loc=0., scale=2., N=int(1e6)):
         gaussian_deviates.append(y)
     return (gaussian_deviates)
 
+if __name__ == '__main__':
+    deviates = box_muller()
+    plt.hist(deviates, density=True, bins=100)
+    plt.ylabel('Probability density function')
+    plt.show()
