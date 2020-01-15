@@ -1,14 +1,25 @@
 import numpy as np
 import sympy as sp
+import matplotlib.pyplot as plt
+from astropy.visualization import astropy_mpl_style
+plt.style.use(astropy_mpl_style)
+from matplotlib import rc
+rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
+rc('text.latex', preamble=r'''\usepackage{amsmath}
+          \usepackage{physics}
+          \usepackage{siunitx}
+          ''')
 
-def relaxation(f, x0, eps=1e-6):
+def relaxation(f, x0, eps=1e-6, rel=1.):
     """
     Inputs: 
     f: 1-variable function.
         The system should look like x = f(x)
     x0: starting value
     eps: optional, threshold for convergence
-    
+    rel: relaxation parameter (set >1 for extrapolation)
+
     Finds a zero of f in the interval by iterating the 
     function.
     """    
@@ -16,7 +27,7 @@ def relaxation(f, x0, eps=1e-6):
     x = x0
     while True:
         xold = x
-        x = f(x)
+        x = f(x)*rel + xold*(1-rel)
         if (np.abs(x - xold) < eps):
             return (x)
 
@@ -90,8 +101,23 @@ if __name__ == "__main__":
     F_list = [np.pi / 3, np.pi / 3, np.pi / 3, np.pi]
     
     starting_point = 1
-    other_extreme = 2
+    other_extreme = 6
+
+    Es = np.linspace(0, 3*np.pi)
+    colors = iter(plt.get_cmap('Set1').colors)
     for ecc, F in zip(ecc_list, F_list):
-        print(relaxation(func_E(ecc, F), starting_point))
-        print(newton_rhapson(func_0(ecc, F), starting_point))
-        print(bisection(func_0(ecc, F), (starting_point, other_extreme)))
+        print(f'Eccentricity is ecc={ecc:.2f}, mean anomaly is F={F:.2f}')
+        r_res = relaxation(func_E(ecc, F), starting_point)
+        print(f'Relaxation gives {r_res:.2f}')
+        nr_res = newton_rhapson(func_0(ecc, F), starting_point)
+        print(f'Newton-Rhapson gives {nr_res:.2f}')
+        b_res = bisection(func_0(ecc, F), (starting_point, other_extreme))
+        print(f'Bisection gives {b_res:.2f}')
+        color = next(colors)
+        plt.plot(Es, func_0(ecc, F)(Es), label=f'ecc={ecc:.2f}, F={F:.2f}', c=color)
+        ax = plt.gca()
+        ax.axvline(r_res, c=color, linestyle='dotted', label=f'E = {r_res:.2f}')
+    plt.legend()
+    plt.xlabel('$E$')
+    plt.ylabel('$E - \\text{ecc} \\times \\sin(E) - F$')
+    plt.show()
