@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.linalg import matrix_rank
-from gaussian_elimination import test_data
-    
+from gaussian_elimination_3_1 import gaussian_elimination
+
 def iteration_step(A, b, x, relaxation=1):
     """
     Inputs:
@@ -18,15 +18,15 @@ def iteration_step(A, b, x, relaxation=1):
     """
 
     xnew = np.copy(x)
-    for i in range(len(x)):
-        y = b[i]
+    bnew = np.copy(b)
+    for i, y in enumerate(bnew):
         for j, val in enumerate(A[i,:]):
             if (j != i):
                 y -= val * xnew[j]
         xnew[i] = y / A[i,i]
     return (relaxation*xnew + (1-relaxation) * x)
 
-def gauss_seidel(A, b, ansatz=None, eps=1e-10, relaxation=True, verbose=True):
+def gauss_seidel(A, b, ansatz=None, eps=1e-12, relaxation=True, verbose=False):
     """
     Inputs:
     A: a matrix, shape = (n,n)
@@ -104,7 +104,7 @@ def gauss_seidel(A, b, ansatz=None, eps=1e-10, relaxation=True, verbose=True):
     # iteration number
     n = 0
 
-    # first 10 iterations: they are always done
+    # first 9 iterations: they are always done
     # without relaxation 
     for _ in range(9):
         # store old value in the variable xold
@@ -133,7 +133,9 @@ def gauss_seidel(A, b, ansatz=None, eps=1e-10, relaxation=True, verbose=True):
             if(Dx>Dxk):
                 divergence_count += 1
             else:
-                Oopt_vec.append(2/(1+np.sqrt(1-(Dx/Dxk)**(1/p))))
+                Oopt_vec.append(2 / (1 + np.sqrt(1 - (Dx / Dxk)**(1 / p))))
+                if (verbose):
+                    print(f'p={p}: omega = {Oopt_vec[-1]}')
             n += 1
 
         if (divergence_count > 5):
@@ -164,32 +166,11 @@ def gauss_seidel(A, b, ansatz=None, eps=1e-10, relaxation=True, verbose=True):
         n += 1
 
     if (verbose):
-        if(diverged):
-            print(f"Algorithm diverged after {n} iterations")
-        else:
-            print(f"Algoritm converged after {n} iterations")
+        div_dict={True:'diverged', False:'converged'}
+        print(f"Algorithm {div_dict[diverged]} after {n} iterations")
         print(f"Error is {norm(A@xnew - b)}")
 
     return (xnew, n)
-
-def test_algorithm(iterations=100, dim=3, relaxation=False, **kwargs):
-    from math import isnan
-    from gaussian_elimination import gaussian_elimination
-    from tqdm import tqdm
-    conv = []
-    nits = []
-    for _ in tqdm(range(iterations)):
-        n=0 
-        while(True): 
-            n+=1 
-            A, b = test_data(dim, **kwargs)
-            x, nit = gauss_seidel(A, b, relaxation=relaxation, verbose=False)
-            if(x is not None): 
-                if(not isnan(x[0])): 
-                    conv.append(n)
-                    nits.append(nit)
-                    break
-    return (conv, nits)
 
 Atest = np.array([
     [4, -1, 1],
@@ -199,43 +180,16 @@ Atest = np.array([
 btest = np.array([12, -1, 5])
 
 if __name__ == "__main__":
-    from time import sleep
-    sleep(.5)
-    print("Let us tes the algorithm for the system with:")
+    print("Let us test the algorithm for the system with:")
 
     print("A = \n", Atest)
     print("b = ", btest)
 
-    sleep(2)
-
-    print("First with relaxation: ")
-    x, n = gauss_seidel(Atest, btest)
-    print("The solution given is ", x)
-
-    sleep(2)
-
     print("First without relaxation: ")
-    x, n = gauss_seidel(Atest, btest, relaxation=False)
+    x, n = gauss_seidel(Atest, btest, relaxation=False, verbose=True)
     print("The solution given is ", x)
 
-    sleep(2)
+    print("Now with relaxation: ")
+    x, n = gauss_seidel(Atest, btest, verbose=True)
+    print("The solution given is ", x)
 
-    print("Let us test convergence for generic matrices")
-
-    convergence, iterations = test_algorithm()
-
-    print(f"Convergence was reached for one matrix in {np.average(convergence)}, and the median of the number of iterations was {np.median(iterations)}.")
-
-    sleep(2)
-
-    print("Now let us compare relaxation with no relaxation: first, with relaxation, for 5-dimensional matrices to make the problem harder")
-
-    convergence, iterations = test_algorithm(dim=5, relaxation=True)
-
-    print(f"Convergence was reached for one matrix in {np.average(convergence)}, and the median of the number of iterations was {np.median(iterations)}.")
-
-    print("Now without relaxation: ")
-
-    convergence, iterations = test_algorithm(dim=5, relaxation=False)
-
-    print(f"Convergence was reached for one matrix in {np.average(convergence)}, and the median of the number of iterations was {np.median(iterations)}.")
