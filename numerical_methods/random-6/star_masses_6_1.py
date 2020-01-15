@@ -4,6 +4,8 @@ from astropy.visualization import astropy_mpl_style
 plt.style.use(astropy_mpl_style)
 from scipy.optimize import curve_fit
 
+np.random.seed(3141592)
+
 N=int(1e7)
 
 def m_from_x(x, alpha=2.3, m_min=0.1, m_max=150):
@@ -16,7 +18,6 @@ uniform_deviates = np.random.uniform(size=N)
 ms = m_from_x(uniform_deviates)
 log_ms = np.log(ms)
 
-plt.close()
 vals, bins, _ = plt.hist(log_ms, bins=100)
 # nonzero_indices = np.nonzero(grad_vals)
 # grad_vals = grad_vals[nonzero_indices]
