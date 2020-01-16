@@ -17,17 +17,26 @@ p0 = np.load('Nbody/coordinates.npy')
 N = 10
 p0 *= (u.pc).to('m')
 v0 *= (u.km / u.s).to('m/s')
+
 v0 = fix_com(v0)
 
 G = partial(G_mass, Gmasses=np.ones(N)*ac.GM_sun.value*1e4)
 
-dt = 1e10
-steps= int(1e2)
+dt = 1e9
+steps= int(1e5)
 
-ts, xs = leapfrog_DKD(G, 0., steps*dt, p0[:N], v0[:N], dt)
+def calculate(Nbodies=N, dt=dt, steps=steps):
+  ts, xs = leapfrog_DKD(G, 0., steps * dt, p0[:N], v0[:N], dt)
+  return(ts, xs)
 
 def plot(xs):
-  for i, pos in enumerate(np.rollaxis(xs[:,0,:,0:2], 1)): 
+  max_plot = 1e3
+  times = np.shape(xs)[0]
+  if (times > max_plot):
+    divisions = int(times / max_plot)
+  else:
+    divisions = None
+  for i, pos in enumerate(np.rollaxis(xs[::divisions,0,:,0:2], 1)): 
 
     lab = None
     if (i % 10 == 0):
