@@ -11,7 +11,9 @@ rc('text.latex', preamble=r'''\usepackage{amsmath}
 \usepackage{siunitx}
 ''')
 
-from mean_value_8_3 import mean_value_integrate
+np.random.seed(3141592)
+
+from mean_value_7_3 import mean_value_integrate
 
 def IS_integrate(f, a, b, weight_pdf, weight_ppf, N=int(1e6)):
     
@@ -20,7 +22,7 @@ def IS_integrate(f, a, b, weight_pdf, weight_ppf, N=int(1e6)):
             super().__init__(*args, **kwargs)
             self.a = a
             self.b = b
-            self.integral = integrate.quad(weight_pdf, a, b)[0]
+            self.integral, _ = integrate.quad(weight_pdf, a, b)
 
         def _pdf(self, x):
             return (weight_pdf(x) / self.integral)
@@ -56,3 +58,4 @@ plt.semilogx(ns, ints_mvm, label="Mean value sampling")
 plt.xlabel("$N$")
 plt.ylabel("Integral")
 plt.legend()
+plt.show()

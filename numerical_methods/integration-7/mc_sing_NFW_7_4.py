@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
 plt.style.use(astropy_mpl_style)
 
+np.random.seed(3141592)
+
 solar_mass = 1.9885e30
 sigma_1 = 1e4  # m/s
 rmax_1 = 10  # pc
