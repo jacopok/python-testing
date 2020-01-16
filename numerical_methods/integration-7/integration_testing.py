@@ -28,7 +28,7 @@ a = 0
 b = 10
 
 
-h_array = np.logspace(0, -4)
+h_array = np.logspace(0, -4, num=1000)
 
 rect_arr = []
 trap_arr = []
