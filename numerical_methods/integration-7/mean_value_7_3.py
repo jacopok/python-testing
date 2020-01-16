@@ -14,6 +14,7 @@ from scipy.integrate import quad
 np.random.seed(3141592)
 
 def mean_value_integrate(f, a, b, N=int(1e6)):
+    # Easy implementation, not memory-efficient at all
     xs=uniform(a, b, size=N)
     return (np.sum(f(xs)) * (b - a) / N)
 
@@ -28,11 +29,12 @@ edges = (0,2)
 ints = []
 
 for n in ns:
-    i = mean_value_integrate(topologists_sine, *edges)
+    i = mean_value_integrate(topologists_sine, *edges, int(n))
     ints.append(i)
   
-small = 1e-2
-correct_value, err = quad(topologists_sine, small, 2 - small)
+# approximation, but a rather good one 
+small = 1e-5
+correct_value, err = quad(topologists_sine, small, 2 - small, limit=int(1e5))
 correct_value += small
 
 fig, axs = plt.subplots(1, 2)
