@@ -44,14 +44,20 @@ if __name__ == "__main__":
     sing_analytic = 4.65e5 # solar mass
     NFW_int = []
     NFW_analytic = 4.56e12 # solar mass
+    # NFW_rect = []
+    # sing_rect = []
 
     hrange = np.logspace(0, -5, num=100)
     for h in hrange:
         sing_int.append(singular_consts * trapezoid_integrate(singular, 0, rmax_1, h))
         NFW_int.append(NFW_consts * trapezoid_integrate(NFW, 0, rmax_2, h))
+        # NFW_rect.append(NFW_consts * rectangle_integrate(NFW, 0, rmax_2, h))
+        # sing_rect.append(singular_consts * rectangle_integrate(singular, 0, rmax_1, h))
     
     plt.loglog(hrange, np.abs(np.array(sing_int) - sing_analytic)/sing_analytic, label="sing")
     plt.loglog(hrange, np.abs(np.array(NFW_int) - NFW_analytic)/NFW_analytic, label="NFW")
+    # plt.loglog(hrange, np.abs(np.array(NFW_rect) - NFW_analytic)/NFW_analytic, label="NFW rectangle")
+    # plt.loglog(hrange, np.abs(np.array(sing_int) - sing_analytic)/sing_analytic, label="sing rectangle")
     plt.xlabel('subdivisions divided by integration region: $h$')
     plt.ylabel('Relative difference between numerical result and given value')
     plt.legend()
