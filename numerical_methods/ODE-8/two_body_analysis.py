@@ -1,4 +1,12 @@
-from two_body_problem import *
+import numpy as np
+import matplotlib.pyplot as plt
+from astropy.visualization import astropy_mpl_style
+plt.style.use(astropy_mpl_style)
+from functools import partial
+
+from two_body_problem import G_prime_mass, second_order, G
+from diffeq_integrators import euler, midpoint, fourth_order, leapfrog_KDK, leapfrog_DKD, hermite
+
 
 def single_E(x, masses=None):
     pos = x[0]
@@ -57,34 +65,35 @@ def L(xs, masses=None, calculate_average=True):
     return (Ls)
     
 if __name__ == "__main__":
-    # tmax = 100
-    # params = (0, tmax, np.array([[[1., 1.], [-1., -1.]], [[-.5, 0.], [0.5, 0.]]]))
-    # params_so = (0, tmax, np.array([[1., 1.], [-1., - 1.]]), np.array([[-.5, 0.], [0.5, 0.]]))
-    # Gp = partial(G_prime_mass, Gmasses=[1.,1.])
+    tmax = 100
+    params = (0, tmax, np.array([[[1., 1.], [-1., -1.]], [[-.5, 0.], [0.5, 0.]]]))
+    params_so = (0, tmax, np.array([[1., 1.], [-1., - 1.]]), np.array([[-.5, 0.], [0.5, 0.]]))
+    Gp = partial(G_prime_mass, Gmasses=[1.,1.])
 
-    # h0=.01
-    # fig, axs = plt.subplots(1, 2)
-    # ts, xs = euler(second_order, *params, h=h0)
-    # axs[0].plot(ts, E(xs), label="Euler E")
-    # axs[1].plot(ts, L(xs), label="Euler L")
-    # ts, xs = midpoint(second_order, *params, h=h0)
-    # axs[0].plot(ts, E(xs), label="Midpoint E")
-    # axs[1].plot(ts, L(xs), label="Midpoint L")
-    # ts, xs = fourth_order(second_order, *params, h=h0)
-    # axs[0].plot(ts, E(xs), label="Runge-Kutta 4 E")
-    # axs[1].plot(ts, L(xs), label="Runge-Kutta 4 L")
-    # ts, xs = leapfrog_KDK(G, *params_so, h=h0)
-    # axs[0].plot(ts, E(xs), label="Leapfrog KDK E")
-    # axs[1].plot(ts, L(xs), label="Leapfrog KDK L")
-    # ts, xs = leapfrog_DKD(G, *params_so, h=h0)
-    # axs[0].plot(ts, E(xs), label="Leapfrog DKD E")
-    # axs[1].plot(ts, L(xs), label="Leapfrog DKD L")
-    # ts, xs = hermite(G, Gp, *params_so, h=h0)
-    # axs[0].plot(ts, E(xs), label="Hermite E")
-    # axs[1].plot(ts, L(xs), label="Hermite L")
-    # axs[0].set_ylabel("$\\abs{(E - E_0)/E}$")
-    # axs[1].set_ylabel("$\\abs{(L - L_0)/L}$")
-    # for ax in axs:
-    #     ax.legend()
-    #     ax.set_xlabel("Time (arbitrary units)")
-    pass
+    h0=.01
+    fig, axs = plt.subplots(1, 2)
+    ts, xs = euler(second_order, *params, h=h0)
+    axs[0].plot(ts, E(xs), label="Euler E")
+    axs[1].plot(ts, L(xs), label="Euler L")
+    ts, xs = midpoint(second_order, *params, h=h0)
+    axs[0].plot(ts, E(xs), label="Midpoint E")
+    axs[1].plot(ts, L(xs), label="Midpoint L")
+    ts, xs = fourth_order(second_order, *params, h=h0)
+    axs[0].plot(ts, E(xs), label="Runge-Kutta 4 E")
+    axs[1].plot(ts, L(xs), label="Runge-Kutta 4 L")
+    ts, xs = leapfrog_KDK(G, *params_so, h=h0)
+    axs[0].plot(ts, E(xs), label="Leapfrog KDK E")
+    axs[1].plot(ts, L(xs), label="Leapfrog KDK L")
+    ts, xs = leapfrog_DKD(G, *params_so, h=h0)
+    axs[0].plot(ts, E(xs), label="Leapfrog DKD E")
+    axs[1].plot(ts, L(xs), label="Leapfrog DKD L")
+    ts, xs = hermite(G, Gp, *params_so, h=h0)
+    axs[0].plot(ts, E(xs), label="Hermite E")
+    axs[1].plot(ts, L(xs), label="Hermite L")
+    axs[0].set_ylabel("$\\abs{(E - E_0)/E}$")
+    axs[1].set_ylabel("$\\abs{(L - L_0)/L}$")
+    for ax in axs:
+        ax.legend()
+        ax.set_xlabel("Time (arbitrary units)")
+        ax.set_yscale("log")
+    plt.show()
