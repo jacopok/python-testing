@@ -34,7 +34,7 @@ functions = {
   'Hermite': (G, Gprime)
 }
 
-hs = np.logspace(-3.5, -0.5, num=50)
+hs = np.logspace(-1.5, -0.5, num=5)
 tmax = 30
 params_fo = (0, tmax, np.array([[[1., 1.], [-1., - 1.]], [[-.5, 0.], [0.5, 0.]]]))
 params_so = (0, tmax, np.array([[1., 1.], [-1., -1.]]), np.array([[-.5, 0], [0.5, 0]]))
@@ -57,7 +57,7 @@ th_order={
   'Hermite': 4.
 }
 
-def calculate_errors():
+def calculate_errors(hs=hs, methods=methods, params_fo=params_fo, params_so=params_so):
   Es_dict={}
   Ls_dict={}
   
@@ -106,3 +106,7 @@ def make_plot(Es_dict, Ls_dict, fit = True):
     ax.legend(loc='lower right')
     ax.set_xlabel('$h$')
   plt.show()
+
+if __name__ == "__main__":
+  E, L = calculate_errors()
+  make_plot(E, L)
