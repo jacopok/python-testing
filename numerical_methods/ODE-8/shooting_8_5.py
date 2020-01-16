@@ -1,5 +1,5 @@
 import numpy as np
-from diffeq_integrators import euler
+from diffeq_integrators import midpoint
 import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
 plt.style.use(astropy_mpl_style)
@@ -13,15 +13,15 @@ def cost_function(x_vec, final_pos=10):
 # GRADIENT DESCENT IMPLEMENTATION
 
 def shooting_gd(diffeq, diffeq_params, diffeq_h0, guess,
-    cost_function, eps=1e-3, threshold=1e-5, rate=20., integrator=euler, plot=False):
+    cost_function, eps=1e-3, threshold=1e-5, rate=20., integrator=midpoint, plot=False):
 
     x0 = guess
     ts, xs = integrator(diffeq, *diffeq_params, x0, h=diffeq_h0)
 
     iterations=0
     while (cost_function(xs) > threshold):
-        ts, xs = euler(grav, *diffeq_params, x0, h=diffeq_h0)
-        _, xs_eps = euler(grav, *diffeq_params, x0 + eps, h=diffeq_h0)
+        ts, xs = integrator(grav, *diffeq_params, x0, h=diffeq_h0)
+        _, xs_eps = integrator(grav, *diffeq_params, x0 + eps, h=diffeq_h0)
 
         grad_cost = cost_function(xs_eps) - cost_function(xs)
 
