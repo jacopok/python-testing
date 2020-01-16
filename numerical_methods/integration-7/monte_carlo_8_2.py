@@ -12,6 +12,8 @@ rc('text.latex', preamble=r'''\usepackage{amsmath}
 ''')
 
 def mc_integrate(f, a, b, N=int(1e6)):
+    
+    # We 
     x=np.linspace(a, b, num=int(np.sqrt(N)))
     fmax=np.max(f(x))
     fmin=np.min(f(x))
@@ -31,13 +33,16 @@ def mc_integrate(f, a, b, N=int(1e6)):
     A = (b - a) * (fmax - fmin)
     return (A * count / N)
 
-ns = np.logspace(4, 7, num=20)
-f = lambda x: np.sin(1 / (x * (2 - x)))** 2
+ns = np.logspace(3, 6, num=20)
+topologists_sine = lambda x: np.sin(1 / (x * (2 - x)))** 2
 edges = (1e-10, 2-1e-10)
 ints = []
 
 for n in ns:
-    i = mc_integrate(f, *edges, int(n))
+    i = mc_integrate(topologists_sine, *edges, int(n))
     ints.append(i)
 
-plt.plot(ns, ints)
+plt.semilogx(ns, ints)
+plt.xlabel("Number of points")
+plt.ylabel("Integral estimate")
+plt.show()
