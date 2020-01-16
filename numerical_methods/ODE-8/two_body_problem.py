@@ -10,10 +10,7 @@ rc('text.latex', preamble=r'''\usepackage{amsmath}
           \usepackage{siunitx}
           ''')
 
-from diffeq_integrators import euler, midpoint, fourth_order, leapfrog_KDK, leapfrog_DKD, hermite
-
 from functools import partial
-from matplotlib.cm import rainbow
 
 """
 The shape of the vectors in the N-body system is as follows: 
@@ -70,14 +67,17 @@ def second_order(x, t, G=G):
     vel = x[1]
     return (np.array([vel, G(pos)]))
     
-def fix_com(vel, masses = None):
+def fix_com(vel, masses=None):
+    # vel should have the shape vel[#body, coord]
+
     if masses is None:
         masses = np.ones_like(vel[:, 0])
-    
+
     mom = vel * masses[:, np.newaxis]
 
     p_tot = np.sum(mom, axis=0)
     m_tot = np.sum(masses)
     v_com = p_tot / m_tot
+
     return(vel - v_com[np.newaxis, :])
 

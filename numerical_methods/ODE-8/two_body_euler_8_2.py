@@ -10,11 +10,24 @@ tmax = 300
 h0 = .01
 x0 = [[1, 1], [-1, -1]]
 v0 = [[-.5, 0], [0.5, 0]]
+
 params = (0, tmax, np.array([x0, v0]))
 
 ts, xs = euler(second_order, *params, h=h0)
 
-for i in range(xs.shape[3]):
-    plt.plot(*np.rollaxis(xs[:, 0, i,:], -1))
+"""
+xs = xs[time, x/v, body#, coordinate]
+"""
 
-plt.show()
+if __name__ == '__main__':
+    for i, pos in enumerate(np.rollaxis(xs[:,0,:,:], 1)): # we loop through the positions the two particles
+        # pos = pos [time , coordinate]
+        # we need to plot the x and y coordinates
+        # which are on the second axis
+        # so we transpose
+        plt.plot(*pos.T, label=f"Body {i+1}")
+
+    plt.xlabel("$x$ coordinate")
+    plt.ylabel("$y$ coordinate")
+    plt.legend()
+    plt.show()
