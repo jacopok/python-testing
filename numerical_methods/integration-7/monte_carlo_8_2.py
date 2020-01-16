@@ -15,9 +15,9 @@ np.random.seed(3141592)
 
 def mc_integrate(f, a, b, vertical_edges=None, N=int(1e6)):
     
-    if vertical_edges == None:
+    if vertical_edges is None:
         # To generalize: we generate uniform numbers
-        # in a box which is found by sampling our function
+        # in a box whose edges are found by sampling our function
         x=np.linspace(a, b, num=int(np.sqrt(N)))
         fmax=np.max(f(x))
         fmin=np.min(f(x))
