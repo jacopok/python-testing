@@ -35,17 +35,17 @@ if __name__ == "__main__":
         
     singular = np.vectorize(lambda x:1, otypes=[np.float64])
     
-    NFW_consts = rho0_2 * r_s_2**3 * 4 * np.pi # solar_mass 
+    NFW_consts = rho0_2 * r_s_2**3 * 4 * np.pi # solar_masses
 
     def NFW(R):
         return(R /(1+R)**2)
     
     sing_int = []
-    sing_analytic = 4.65437e5 # solar mass
+    sing_analytic = 4.65e5 # solar mass
     NFW_int = []
     NFW_analytic = 4.56e12 # solar mass
 
-    hrange = np.logspace(0, -5)
+    hrange = np.logspace(0, -5, num=100)
     for h in hrange:
         sing_int.append(singular_consts * trapezoid_integrate(singular, 0, rmax_1, h))
         NFW_int.append(NFW_consts * trapezoid_integrate(NFW, 0, rmax_2, h))
@@ -55,6 +55,7 @@ if __name__ == "__main__":
     plt.xlabel('subdivisions divided by integration region: $h$')
     plt.ylabel('Relative difference between numerical result and given value')
     plt.legend()
+    plt.show()
     print(f'Singular: numeric {sing_int[-1]:.3e}, analytic {sing_analytic:.3e}')
     print(f'NFW: numeric {NFW_int[-1]:.3e}, analytic {NFW_analytic:.3e}')
 
