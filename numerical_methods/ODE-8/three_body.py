@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
 plt.style.use(astropy_mpl_style)
 from two_body_problem import G_mass, G_prime_mass, fix_com
-from diffeq_integrators import hermite
+from diffeq_integrators import midpoint
 from functools import partial
 
 from two_body_analysis import E, L
@@ -27,7 +27,8 @@ h = 1e3
 
 pars = [0., tmax, pos0, vel0, h]
 
-# ts, xs=hermite(G, G_prime, *pars)
+ts, xs=hermite(G, G_prime, *pars)
+
 def plot(xs):
   for i, pos in enumerate(np.rollaxis(xs[:,0,:,:], 1)): 
 
