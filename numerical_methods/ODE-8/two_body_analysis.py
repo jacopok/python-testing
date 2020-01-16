@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
 plt.style.use(astropy_mpl_style)
 from functools import partial
+from tqdm import tqdm
 
 from two_body_problem import G_prime_mass, second_order, G
 from diffeq_integrators import euler, midpoint, fourth_order, leapfrog_KDK, leapfrog_DKD, hermite
@@ -39,30 +40,25 @@ def single_L(x, masses=None):
     return(L)
 
 def E(xs,masses=None, calculate_average=True):
+    E0 = single_E(xs[0], masses)
+
     Es = []
-    for i,x in enumerate(xs):
-        if (i == 0):
-            E0 = single_E(x, masses)
-            Es.append(0)
-        else: 
-            Es.append(np.abs((single_E(x, masses) - E0) / E0))
+    for i,x in tqdm(enumerate(xs[1:]), desc="E deviation: ", total=np.shape(xs[1:])[0]):
+        Es.append(np.abs((single_E(x, masses) - E0) / E0))
     # print(f"Starting energy: {E0}")
     if(calculate_average):
         print(f"Average energy deviation: {np.average(Es)}")
     return (Es)
 
 def L(xs, masses=None, calculate_average=True):
+    L0 = single_L(xs[0], masses)
     Ls = []
-    for i,x in enumerate(xs):
-        if (i == 0):
-            L0 = single_L(x, masses)
-            Ls.append(0)
-        else: 
-            Ls.append(np.abs((single_L(x, masses)- L0)/L0))
+    for i,x in tqdm(enumerate(xs[1:]), desc="L deviation: ", total=np.shape(xs[1:])[0]):
+        Ls.append(np.abs((single_L(x, masses)- L0)/L0))
     # print(f"Starting angular momentum: {L0}")
     if(calculate_average):
         print(f"Average momentum deviation: {np.average(Ls)}")
-    return (Ls)
+    return (np.array(Ls))
     
 if __name__ == "__main__":
     tmax = 100
