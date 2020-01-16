@@ -27,8 +27,12 @@ h = 1e3
 
 pars = [0., tmax, pos0, vel0, h]
 
-ts, xs = hermite(G, G_prime, *pars)
-
+# ts, xs=hermite(G, G_prime, *pars)
 def plot(xs):
-  for i,_ in enumerate(masses):
-    plt.plot(xs[:,0,i,0], xs[:,0,i,1])
+  for i, pos in enumerate(np.rollaxis(xs[:,0,:,:], 1)): 
+
+    plt.plot(*pos.T, label=f"Body {i+1}", alpha = .7)
+    plt.xlabel("$x$ coordinate")
+    plt.ylabel("$y$ coordinate")
+  plt.legend()
+  plt.show()
