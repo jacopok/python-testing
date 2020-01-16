@@ -22,8 +22,8 @@ v0 = fix_com(v0)
 
 G = partial(G_mass, Gmasses=np.ones(N)*ac.GM_sun.value*1e4)
 
-dt = 1e9
-steps= int(1e5)
+dt = 8e9
+steps= int(1e6)
 
 def calculate(Nbodies=N, dt=dt, steps=steps):
   ts, xs = leapfrog_DKD(G, 0., steps * dt, p0[:N], v0[:N], dt)
