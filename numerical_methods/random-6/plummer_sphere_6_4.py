@@ -8,7 +8,7 @@ from scipy.integrate import quad
 M = 1e4  # solar masses
 a_scale = 5. # parsec
 sigma_speed = 5. # km/s
-N = int(2e3)  # number of simulated stars
+N = int(M)  # number of simulated stars
 
 np.random.seed(3141592)
 
@@ -20,13 +20,13 @@ class plummer_radius(stats.rv_continuous):
 
     def _pdf(self, r):
         R = r / self.scale
-        norm = 3 / (4 * np.pi * self.scale ** 3)
+        norm = 3 / (4 * np.pi * self.scale ** 3)  
         power = (1 + R**2 )**(-5/2) * R**2
-        return (norm * power)
+        return (power * 2/np.pi)
 
     def _cdf(self, r):
         R = r / self.scale
-        return (R ** 3 * (R ** 2 + 1)**(-3./2.))
+        return (R ** 3 * (R ** 2 + 1)**(-3./2.) * 2 * np.pi)
     
     def _ppf(self, x):
         R = np.sqrt(1 / (1 - x ** (2 / 3)) - 1)
@@ -119,16 +119,22 @@ if __name__ == "__main__":
     axs[0,1].set_xlabel('Velocity modulus [$\\SI{}{km/s}$]')
 
     r, br, _ = axs[0, 0].hist(x_moduli, bins = 1000, density = True)
-    axs[0, 0].set_xlim((0, 30))
-    axs[0, 0].set_xlabel('Coordinate modulus [$\\SI{}{pc}$]')
-    
+    rho, brho = np.histogram(x_moduli, bins=1000)
+
     axs[1, 1].scatter(*(coordinates[:, i] for i in [0,1]), s=1)
     axs[1, 1].set_xlabel('$x$ position [\\SI{}{pc}]')
     axs[1, 1].set_ylabel('$y$ position [\\SI{}{pc}]')
     axs[1, 1].set_xlim((-20, 20))
     axs[1, 1].set_ylim((-20, 20))
 
-    axs[1, 0].plot((br[1:]+br[:-1])/2, np.cumsum(r))
-    axs[0, 0].set_xlim((0, 30))
+    r_bins = (br[1:]+br[:-1])/2
+    axs[1, 0].plot(r_bins, np.cumsum(rho))
+    # axs[1, 0].plot(r_bins, r_p.cdf(r_bins))
+    # axs[0,0].plot(r_bins, r_p.pdf(r_bins))
+    for k in (0,1):
+        axs[k, 0].set_xlim((0, 30))
+        axs[k, 0].set_xlabel('Coordinate modulus [$\\SI{}{pc}$]')
+    axs[1,0].set_ylabel('Mass cdf [$M_\\odot$]')
+    axs[0,0].set_ylabel('Mass pdf [$M_\\odot / \\SI{}{pc}$]')
     
     plt.show()
