@@ -4,10 +4,17 @@ from tqdm import tqdm
 hdefault = .01
 
 def initialize(t0, tmax, start, h=hdefault):
+    # Returns arrays filled with the initial conditions 
+    # and then zero, of the right shape
+
     ts = np.arange(t0, tmax+h, h)
     xs = np.zeros(((len(ts),) + np.shape(start)))
     xs[0] = start
-    return(ts, xs)
+    return (ts, xs)
+    
+####
+#### FIRST ORDER ODE SOLVERS
+####
 
 def euler(f, t0, tmax, x0, h=hdefault):
     ts, xs = initialize(t0, tmax, x0, h)
@@ -40,6 +47,10 @@ def fourth_order(f, t0, tmax, x0, h=hdefault):
         k4 = h * f(x + k3, tnew)
         xs[i+1] = x + (2.*k1 + 4.*k2 + 2.*k3 + k4)/6.
     return (ts, xs)
+
+#### 
+#### SECOND ORDER ODE SOLVERS
+#### 
 
 def leapfrog_KDK(G, t0, tmax, x0, v0, h=hdefault):
     """
@@ -94,7 +105,7 @@ def hermite(G, Gprime, t0, tmax, x0, v0, h=hdefault):
     """
     ts, xs = initialize(t0, tmax, x0, h)
     _, vs = initialize(t0, tmax, v0, h)
-    _, a_s = initialize(t0, tmax, G(x0), h)
+    _, a_s = initialize(t0, tmax, G(x0), h) # "as" is a keyword... 
     _, js = initialize(t0, tmax, Gprime(x0, v0), h)
 
     for i, _ in tqdm(enumerate(ts[:-1]), total=int((tmax-t0)/h), desc = "Hermite"):
@@ -122,4 +133,4 @@ def hermite(G, Gprime, t0, tmax, x0, v0, h=hdefault):
         a_s[i + 1] = G(xs[i + 1])
         js[i + 1] = Gprime(xs[i + 1], vs[i + 1])
         
-    return(ts, np.stack((xs, vs), axis=1))
+    return (ts, np.stack((xs, vs), axis=1))
