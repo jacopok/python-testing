@@ -5,6 +5,7 @@ plt.style.use(astropy_mpl_style)
 from two_body_problem import G_mass, G_prime_mass, fix_com
 from diffeq_integrators import leapfrog_DKD
 from functools import partial
+from mpl_toolkits.mplot3d import Axes3D
 
 from two_body_analysis import E, L
 from scipy.constants import G
@@ -42,7 +43,30 @@ def plot(xs):
     if (i % 10 == 0):
       lab=f"Body {i+1}"
     plt.plot(*pos.T, label=lab, alpha = .7)
-    plt.xlabel("$x$ coordinate")
-    plt.ylabel("$y$ coordinate")
+  plt.xlabel("$x$ coordinate")
+  plt.ylabel("$y$ coordinate")
   plt.legend()
+  plt.show()
+
+def plot3d(xs):
+  max_plot = 1e3
+  times = np.shape(xs)[0]
+  if (times > max_plot):
+    divisions = int(times / max_plot)
+  else:
+    divisions = None
+
+  fig = plt.figure()
+  ax = fig.gca(projection='3d')
+
+  for i, pos in enumerate(np.rollaxis(xs[::divisions,0,:,:], 1)): 
+
+    lab = None
+    if (i % 10 == 0):
+      lab=f"Body {i+1}"
+    ax.plot(*pos.T, label=lab, alpha = .7)
+  ax.set_xlabel("$x$ coordinate")
+  ax.set_ylabel("$y$ coordinate")
+  ax.set_zlabel("$z$ coordinate")
+  ax.legend()
   plt.show()
