@@ -36,6 +36,8 @@ m1 = np.linspace(min(BH1), max(BH1), num=N)
 dm1 = m1[1] - m1[0]
 m2 = np.linspace(min(BH2), max(BH2), num=N)
 dm2 = m2[1] - m2[0]
+# fudge by one the number in any cell 
+# makes things much easier with the log
 z = np.ones((N, N))
 
 for bh1, bh2 in zip(np.array(BH1) - min(BH1), np.array(BH2)- min(BH2)):
