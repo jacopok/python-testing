@@ -15,3 +15,4 @@ numerical_methods/**/*.pdf
 *checkpoint.ipynb
 numerical_methods/basics-1/starlab_output.txt
 numerical_methods/ODE-8/Nbody/*.npy
+CNNs/*
