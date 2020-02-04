@@ -1,6 +1,7 @@
 import numpy as np
 import astropy.units as u
 u.set_enabled_equivalencies(u.spectral())
+from scipy.constants import physical_constants
 
 CENTRAL_A_FREQ = 440
 
@@ -28,3 +29,14 @@ def energy_to_note(x, verbose=True):
     print(f'{notes_dict[note]}{octave}')
   return (note, octave)
 
+if __name__ == '__main__':
+  R_H_p = physical_constants['Rydberg constant']
+  R_H = R_H_p[0] * u.Unit(R_H_p[1])
+  series=[]
+  for x in range(1, 7):
+    series.append(R_H * (1/x**2 - 1/np.arange(x+1, x+10)**2))
+  
+  for j, s in enumerate(series):
+    print(j+1)
+    for f in s:
+      energy_to_note(f)
