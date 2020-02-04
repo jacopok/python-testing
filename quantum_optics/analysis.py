@@ -35,37 +35,45 @@ def get_all_timediffs(names, resolution = RESOLUTION):
   return (u.Quantity(np.hstack(diffs), resolution))
 
 def get_n_window(name, window, resolution = RESOLUTION):
+  """
+  divide times found at location "name"
+  into "window" long intervals
+  and returns an array of integers, 
+  each entry of which is the number of photons detected
+  in that window
+  """
+
   t = get_ticks(name) * resolution
   tmax = t[-1]
   N = int((tmax / window).to(''))
   nums = np.zeros(N, dtype=int)
   
-  window = window.to(t.unit)
-  
+  adim_window = window.to(t.unit).value
+  adim_t = t.value
+
   n = 0
   i = 0
   
   while n < N:
-    while t[i] < (n + 1) * window:
+    while adim_t[i] < (n + 1) * adim_window:
       nums[n] += 1
       i += 1
     n += 1
   return (nums)
 
-def get_n_path(names, window):
+def get_n_from_names(names, window):
   all_ns = []
   for name in tqdm(names):
     ns = get_n_window(name, window)
     all_ns.append(ns)
 
   max_ns = max([len(x) for x in all_ns])
-  full_ns = np.zeros(len(all_ns), max_ns)
+  full_ns = np.zeros((len(all_ns), max_ns))
   for i, ns in enumerate(all_ns):
-    full_ns[:len(ns),i] = ns
+    full_ns[i,:len(ns)] = ns
 
-  return(np.sum(full_ns, axis=1))
+  return(full_ns.flatten())
 
-  
 def moment(b, v, n):
   m = np.average(b, weights=v)
   if (n == 1):
@@ -78,26 +86,30 @@ def analyze(b, v):
     print(m, ' = ', f'{moment(v, b, num):.3f}')
 
 if __name__ == '__main__':
-  timediffs = {}
-  timediffs['coherent'] = get_all_timediffs(COHERENT_NAMES)
-  timediffs['thermal'] = get_all_timediffs(THERMAL_NAMES)
+  # timediffs = {}
+  # timediffs['coherent'] = get_all_timediffs(COHERENT_NAMES)
+  # timediffs['thermal'] = get_all_timediffs(THERMAL_NAMES)
 
-  bins = {}
-  values = {}
+  # bins = {}
+  # values = {}
 
-  time_unit = u.us
-  max_time = 50
+  # time_unit = u.us
+  # max_time = 50
 
-  for x in timediffs:
-    times = timediffs[x].to(time_unit).value
-    mask = times < max_time
-    values[x], bins[x], _ = plt.hist(times[mask], label=x, bins=200, alpha=.6, density=True)
-  plt.xlabel(f'Time differences [{str(time_unit)}]')
-  plt.xlim(0, max_time)
-  plt.legend()
-  plt.show()
+  # for x in timediffs:
+  #   times = timediffs[x].to(time_unit).value
+  #   mask = times < max_time
+  #   values[x], bins[x], _ = plt.hist(times[mask], label=x, bins=200, alpha=.6, density=True)
+  # plt.xlabel(f'Time differences [{str(time_unit)}]')
+  # plt.xlim(0, max_time)
+  # plt.legend()
+  # plt.show()
 
-  for x in timediffs:
-    print(x)
-    b = bins[x]
-    analyze((b[1:]+b[:-1])/2., values[x])
+  # for x in timediffs:
+  #   print(x)
+  #   b = bins[x]
+  #   analyze((b[1:]+b[:-1])/2., values[x])
+
+  # for i in [10, 50, 100, 250, 1000]: 
+  #   n = get_n_from_names(THERMAL_NAMES, i*u.us) 
+  #   plt.plot(np.abs(np.fft.rfft(n)), alpha=.5, label=str(i) +' microseconds window') 
