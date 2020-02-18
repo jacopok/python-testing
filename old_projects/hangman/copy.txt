@@ -21821,9 +21821,6 @@ copulazione/S
 copule
 copyleft
 copyright
-CopyrightDavidePrina
-CopyrightGianlucaTurconi
-CopyrightGianlucaTurconiDavidePrinaLicenzaGPL
 coque
 coraggio
 coraggioso/oYW

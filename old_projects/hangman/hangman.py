@@ -9,7 +9,6 @@ vowels = ['a', 'e', 'i', 'o', 'u']
 
 shapes = {}
 
-
 for word in words:
   shape = ''
   for letter in word:
