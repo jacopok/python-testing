@@ -24,11 +24,13 @@ def dig(arr):
       return_arr.append(0.)
   return (return_arr)
 
+# for sorting a list of some floats and some masked array items
 def float_or(x, maximum):
   if np.ma.is_masked(x):
     return (maximum + 1)
   else:
     return(float(x))
+
 
 def find_candidate_ions(wavelengths, errors):
   ranges = []
@@ -72,8 +74,10 @@ def ion_goodness(ion, wls, N, verbose=False):
   
   return (dist)
 
+# use this!
 def find_ion(wavelengths, errors=None, N=None):
   if N is None:
+    # will look at the N most intense lines
     N = len(wavelengths) * 3
   print('Looking for candidate ions')
   candidate_ions = find_candidate_ions(wavelengths, errors)
@@ -86,7 +90,7 @@ def find_ion(wavelengths, errors=None, N=None):
     goodnesses[ion] = ion_goodness(ion, wavelengths, N)
     maximum = max(goodnesses[ion], maximum)
   
-  # sort dict
+  # sort dict of ion -> goodness
   goodnesses = {k: v for k, v in sorted(goodnesses.items(), key=lambda item: float_or(item[1], maximum))}
 
   i = next(iter(goodnesses))
