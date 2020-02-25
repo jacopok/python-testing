@@ -22,7 +22,13 @@ def dig(arr):
       return_arr.append(float(string))
     except (ValueError):
       return_arr.append(0.)
-  return(return_arr)
+  return (return_arr)
+
+def float_or(x, maximum):
+  if np.ma.is_masked(x):
+    return (maximum + 1)
+  else:
+    return(float(x))
 
 def find_candidate_ions(wavelengths, errors):
   ranges = []
@@ -51,7 +57,7 @@ def ion_goodness(ion, wls, N, verbose=False):
   table['Rel.'] = dig(table['Rel.'])
   max_int = max(table['Rel.'])
   table.sort('Rel.', reverse=True)
-  first_N_wls = list(table[:N]['Observed'])
+  first_N_wls = table[:N]['Observed']
 
   dist=0
   for w in wls.value:
@@ -62,7 +68,7 @@ def ion_goodness(ion, wls, N, verbose=False):
       print(first_N_wls[pos])
       print(f'with intensity {100 * table[pos]["Rel."] / max_int}% of the max')
       print()
-    first_N_wls.pop(pos)
+    first_N_wls.mask[pos] = True 
   
   return (dist)
 
@@ -74,15 +80,18 @@ def find_ion(wavelengths, errors=None, N=None):
   print(f'Found {len(candidate_ions)} candidates')
 
   print('Checking goodness')
+  maximum = 0.
   goodnesses = {}
   for ion in tqdm(candidate_ions):
     goodnesses[ion] = ion_goodness(ion, wavelengths, N)
+    maximum = max(goodnesses[ion], maximum)
   
   # sort dict
-  goodnesses = {k: v for k, v in sorted(goodnesses.items(), key=lambda item: item[1])}
+  goodnesses = {k: v for k, v in sorted(goodnesses.items(), key=lambda item: float_or(item[1], maximum))}
 
   i = next(iter(goodnesses))
   print(f'Best ion: {i}')
   ion_goodness(i, wavelengths, N, verbose=True)
 
-  return(goodnesses)
+  print(goodnesses)
+  return(i)
