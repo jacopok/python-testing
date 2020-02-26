@@ -53,6 +53,8 @@ def find_candidate_ions(wavelengths, errors):
 
 def ion_goodness(ion, wls, N, verbose=False):
   delta = max(wls) - min(wls)
+  if delta == 0:
+    delta = max(wls) / 20
   range = (min(wls) - delta / 5, max(wls) + delta / 5)
 
   table = Nist.query(*range, linename=ion)
@@ -66,9 +68,9 @@ def ion_goodness(ion, wls, N, verbose=False):
     pos = np.argmin(np.abs(first_N_wls - w))
     dist += np.abs(first_N_wls - w)[pos]
     if (verbose):
-      print(f'For wavelength {w} found line at:')
-      print(first_N_wls[pos])
-      print(f'with intensity {100 * table[pos]["Rel."] / max_int}% of the max')
+      print(f'For wavelength {w} nm found line at:')
+      print(f'{first_N_wls[pos]} nm')
+      print(f'with intensity {100 * table[pos]["Rel."] / max_int:.4f}% of the max')
       print()
     first_N_wls.mask[pos] = True 
   
@@ -76,12 +78,39 @@ def ion_goodness(ion, wls, N, verbose=False):
 
 # use this!
 def find_ion(wavelengths, errors=None, N=None):
+  """
+  Finds the ion which most likely explains the spectral lines given.
+
+  Arguments:
+  wavelengths: array of Quantity from astropy.
+  Must be convertible to wavelength with the "spectral" astropy equivalencies
+  wavelengths of the lines observed
+
+  errors: array of Quantity from astropy, with the same length as wavelengths
+  Must be convertible to wavelength with the "spectral" astropy equivalencies
+  in the first search, lines are sought between 
+  wavelength +- error
+  if None (default), errors is set as wavelengths / 200
+
+  N: for each ion, we look at the N brightest lines in the range of interest
+  if None (default), N is set to three times the number of wavelengths given
+  """
   if N is None:
     # will look at the N most intense lines
     N = len(wavelengths) * 3
   print('Looking for candidate ions')
+  wavelengths = wavelengths.to(u.nm, equivalencies=u.spectral())
+  if errors is not None:
+    errors = errors.to(u.nm, equivalencies=u.spectral())
   candidate_ions = find_candidate_ions(wavelengths, errors)
-  print(f'Found {len(candidate_ions)} candidates')
+  num = len(candidate_ions)
+  if num>1:
+    print(f'Found {num} candidates')
+  elif num == 1:
+    print('Found one candidate: the following comparison is not meaningful')
+  else:
+    print('Found no candidates')
+    return(None)
 
   print('Checking goodness')
   maximum = 0.
