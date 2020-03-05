@@ -11,11 +11,18 @@ import uncertainties as un
 
 dt = lambda t : Time(datetime.strptime(t, '%m/%d/%y'))
 
-# import sys
-# file_name = sys.argv[1]
+import sys
 
-COUNTRY = 'Italy'
-IGN_FIRST= 31
+if (len(sys.argv)>1):
+    file_name = sys.argv[1]
+    COUNTRY = file_name
+    if (len(sys.argv) > 2):
+        region = sys.argv[2]
+    else:
+        region = None
+else:
+    COUNTRY = 'Italy'
+IGN_FIRST= 30
 
 base_path = '../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-'
 
@@ -29,8 +36,11 @@ TS = {}
 def get_series(name, country=COUNTRY):
 
     data = pd.read_csv(base_path + datasets[name])
-    italy = data.loc[data['Country/Region']==country]
-    timeseries = italy.iloc[0,4:]
+    if region is not None:
+        data_country = data.loc[(data['Country/Region'] == country) & (data['Province/State'] == region)]
+    else:
+        data_country = data.loc[data['Country/Region']==country]
+    timeseries = data_country.iloc[0,4:]
 
     return (timeseries)
 
