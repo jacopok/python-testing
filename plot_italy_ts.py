@@ -41,7 +41,10 @@ def convert_timeseries(timeseries, name):
     return(TimeSeries(data=vals, time=times_array))
     # return((times_array, vals))
 
-model = lambda x, C, a : C * np.exp(a*x)
+model = lambda x, C, a: C * np.exp(a * x)
+# model = lambda x, C, mean, std: C / np.sqrt(2 * np.pi) / std * np.exp(-(x - mean)** 2 / 2 / std ** 2)
+# p0=[1e2, 25, 25]
+
 
 fig, ax = plt.subplots()
 
@@ -50,7 +53,7 @@ for name in datasets:
     c= next(color)
     timeseries = get_series(name)
     TS[name] = convert_timeseries(timeseries, name)
-    numbers = np.arange(0,len(timeseries[IGN_FIRST:]))
+    numbers = np.arange(0, len(timeseries[IGN_FIRST:]))
     popt, pcov = curve_fit(model, numbers, timeseries[IGN_FIRST:])
     
     a = un.ufloat(popt[1], pcov[1, 1])
