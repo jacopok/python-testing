@@ -16,12 +16,14 @@ import sys
 if (len(sys.argv)>1):
     file_name = sys.argv[1]
     COUNTRY = file_name
-    if (len(sys.argv) > 2):
-        region = sys.argv[2]
-    else:
-        region = None
 else:
     COUNTRY = 'Italy'
+
+if (len(sys.argv) > 2):
+    region = sys.argv[2]
+else:
+    region = None
+
 IGN_FIRST= 30
 
 base_path = '../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-'
