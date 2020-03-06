@@ -74,7 +74,9 @@ for name in datasets:
     plt.semilogy(timeseries[IGN_FIRST:], label=name + f': doubling time = {doubling_time.n:.2f} days', c=c)
     plt.semilogy(numbers, model(numbers, *popt), c=c, linestyle=':')
     next_day_prediction = model(len(timeseries[IGN_FIRST:]), *popt)
-    next_day = (TS[name].time[-1]+1).strftime('%d %b %Y')
+    today = (TS[name].time[-1]).strftime('%d %b %Y')
+    next_day = (TS[name].time[-1] + 1).strftime('%d %b %Y')
+    print(f'Today, {today}, {name} equals: {timeseries[-1]}')
     print(f'Expected {name} for {next_day}: {next_day_prediction:.0f}')
 
 
