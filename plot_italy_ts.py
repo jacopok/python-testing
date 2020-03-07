@@ -67,8 +67,7 @@ for name in datasets:
     TS[name] = convert_timeseries(timeseries, name)
     numbers = np.arange(0, len(timeseries[IGN_FIRST:]))
 
-    errors = np.sqrt(numbers[::-1]+1) 
-    # print(errors)
+    errors = numbers[::-1]+1
 
     popt, pcov = curve_fit(model, numbers, timeseries[IGN_FIRST:], sigma=errors)
     
