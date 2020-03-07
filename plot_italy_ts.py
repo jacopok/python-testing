@@ -66,7 +66,11 @@ for name in datasets:
     timeseries = get_series(name)
     TS[name] = convert_timeseries(timeseries, name)
     numbers = np.arange(0, len(timeseries[IGN_FIRST:]))
-    popt, pcov = curve_fit(model, numbers, timeseries[IGN_FIRST:])
+
+    errors = np.sqrt(numbers[::-1]+1) 
+    # print(errors)
+
+    popt, pcov = curve_fit(model, numbers, timeseries[IGN_FIRST:], sigma=errors)
     
     a = un.ufloat(popt[1], pcov[1, 1])
     doubling_time = np.log(2) / a
