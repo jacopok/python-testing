@@ -82,6 +82,12 @@ for name in datasets:
     print(f'Today, {today}, {name} equals: {timeseries[-1]}')
     print(f'Expected {name} for {next_day}: {next_day_prediction:.0f}')
 
+def plot_growth_ratio(name='Confirmed'):
+    x = TS[name][name][IGN_FIRST:]
+    differences = np.ediff1d(x)
+    ratios = differences[1:] / differences[:-1]
+    plt.plot(ratios)
+    plt.show()
 
 plt.title(COUNTRY + ' contagion spread and exponential fits')
 
