@@ -82,14 +82,13 @@ for name in datasets:
     print(f'Today, {today}, {name} equals: {timeseries[-1]}')
     print(f'Expected {name} for {next_day}: {next_day_prediction:.0f}')
 
-def plot_growth_ratio(name='Confirmed'):
-    x = TS[name][name][IGN_FIRST:]
+def plot_growth_ratio(name='Confirmed', first=IGN_FIRST, N = 3):
+    x = TS[name][name][first:]
     differences = np.ediff1d(x)
     ratios = differences[1:] / differences[:-1]
     nums = np.arange(len(ratios))[::-1]
     today = (TS[name].time[-1]).strftime('%d %b %Y')
     
-    N = 3
     ratios_running = np.convolve(ratios, np.ones((N,))/N, mode='valid')
 
     plt.plot(nums[N-1:], ratios_running)
