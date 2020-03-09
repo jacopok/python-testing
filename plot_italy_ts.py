@@ -86,7 +86,15 @@ def plot_growth_ratio(name='Confirmed'):
     x = TS[name][name][IGN_FIRST:]
     differences = np.ediff1d(x)
     ratios = differences[1:] / differences[:-1]
-    plt.plot(ratios)
+    nums = np.arange(len(ratios))[::-1]
+    today = (TS[name].time[-1]).strftime('%d %b %Y')
+    plt.plot(nums, ratios)
+    a, b = plt.xlim()
+    plt.xlim(b, a)
+    plt.xlabel(f'Days before {today}')
+    plt.ylabel('Growth factor $\\Delta N_d / \\Delta N_{d-1}$')
+    plt.axhline(y=1)
+    plt.title(f'{COUNTRY} growth factor for {name} numbers')
     plt.show()
 
 plt.title(COUNTRY + ' contagion spread and exponential fits')
