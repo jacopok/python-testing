@@ -24,7 +24,7 @@ if (len(sys.argv) > 2):
 else:
     region = None
 
-IGN_FIRST= 30
+# IGN_FIRST= 30
 
 base_path = '../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-'
 
@@ -45,6 +45,14 @@ def get_series(name, country=COUNTRY):
     timeseries = data_country.iloc[0,4:]
 
     return (timeseries)
+
+IGN_FIRST=0
+for name in datasets:
+    for i, num in enumerate(get_series(name)):
+        if (num == 0):
+            IGN_FIRST = max(i, IGN_FIRST)
+IGN_FIRST += 1
+print(f'No significant infection in the first {IGN_FIRST} days')
 
 def convert_timeseries(timeseries, name):
     vals = Table(data=[timeseries.values], dtype=[int], names=[name])
@@ -69,21 +77,40 @@ for name in datasets:
 
     errors = numbers[::-1]+1
 
-    popt, pcov = curve_fit(model, numbers, timeseries[IGN_FIRST:], sigma=errors)
-    
-    a = un.ufloat(popt[1], pcov[1, 1])
-    doubling_time = np.log(2) / a
+    fit_succeeded = True
+    try:
+        popt, pcov = curve_fit(model, numbers, timeseries[IGN_FIRST:], sigma=errors)
+    except (RuntimeError):
+        fit_succeeded = False
 
-    plt.semilogy(timeseries[IGN_FIRST:], label=name + f': doubling time = {doubling_time.n:.2f} days', c=c)
-    plt.semilogy(numbers, model(numbers, *popt), c=c, linestyle=':')
-    next_day_prediction = model(len(timeseries[IGN_FIRST:]), *popt)
+    if(fit_succeeded):
+        a = un.ufloat(popt[1], pcov[1, 1])
+        doubling_time = np.log(2) / a
+        lab = name + f': doubling time = {doubling_time.n:.2f} days'
+    else:
+        lab = name
+
+    plt.semilogy(timeseries[IGN_FIRST:], label=lab, c=c)
     today = (TS[name].time[-1]).strftime('%d %b %Y')
     next_day = (TS[name].time[-1] + 1).strftime('%d %b %Y')
+    next_day_growth_1 = timeseries[-1]*2 - timeseries[-2]
     print(f'Today, {today}, {name} equals: {timeseries[-1]}')
-    print(f'Expected {name} for {next_day}: {next_day_prediction:.0f}')
+    
+    if(fit_succeeded):
+        plt.semilogy(numbers, model(numbers, *popt), c=c, linestyle=':')
+        next_day_prediction = model(len(timeseries[IGN_FIRST:]), *popt)
+    
+        print(f'Expected {name} for {next_day}: {next_day_prediction:.0f}')
+    
+    print(f'{name} for {next_day} needed to have growth factor 1: {next_day_growth_1:.0f}')
+    print()
 
-def plot_growth_ratio(name='Confirmed', first=IGN_FIRST, N = 3):
+def plot_growth_ratio(name='Confirmed', first=IGN_FIRST, N=3):
+
     x = TS[name][name][first:]
+    if (len(x) - N) < 4:
+        print('Not enough data')
+        return None 
     differences = np.ediff1d(x)
     ratios = differences[1:] / differences[:-1]
     nums = np.arange(len(ratios))[::-1]
@@ -98,7 +125,7 @@ def plot_growth_ratio(name='Confirmed', first=IGN_FIRST, N = 3):
     plt.ylabel('Growth factor $\\Delta N_d / \\Delta N_{d-1}$'+f', running average over {N} days')
     plt.axhline(y=1)
     plt.title(f'{COUNTRY} growth factor for {name} numbers')
-    plt.show()
+    plt.show(block=False)
 
 plt.title(COUNTRY + ' contagion spread and exponential fits')
 
@@ -106,4 +133,4 @@ plt.grid('on', which='both')
 for label in ax.xaxis.get_ticklabels()[::2]:
     label.set_visible(False)
 plt.legend(loc ='upper left')
-plt.show()
+plt.show(block=False)
