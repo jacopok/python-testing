@@ -88,11 +88,15 @@ def plot_growth_ratio(name='Confirmed'):
     ratios = differences[1:] / differences[:-1]
     nums = np.arange(len(ratios))[::-1]
     today = (TS[name].time[-1]).strftime('%d %b %Y')
-    plt.plot(nums, ratios)
+    
+    N = 3
+    ratios_running = np.convolve(ratios, np.ones((N,))/N, mode='valid')
+
+    plt.plot(nums[N-1:], ratios_running)
     a, b = plt.xlim()
     plt.xlim(b, a)
     plt.xlabel(f'Days before {today}')
-    plt.ylabel('Growth factor $\\Delta N_d / \\Delta N_{d-1}$')
+    plt.ylabel('Growth factor $\\Delta N_d / \\Delta N_{d-1}$'+f', running average over {N} days')
     plt.axhline(y=1)
     plt.title(f'{COUNTRY} growth factor for {name} numbers')
     plt.show()
