@@ -105,7 +105,7 @@ for name in datasets:
     print(f'{name} for {next_day} needed to have growth factor 1: {next_day_growth_1:.0f}')
     print()
 
-def plot_growth_ratio(name='Confirmed', first=IGN_FIRST, N=3):
+def plot_growth_ratio(name='Confirmed', first=IGN_FIRST, N=4):
 
     x = TS[name][name][first:]
     if (len(x) - N) < 4:
@@ -116,16 +116,19 @@ def plot_growth_ratio(name='Confirmed', first=IGN_FIRST, N=3):
     nums = np.arange(len(ratios))[::-1]
     today = (TS[name].time[-1]).strftime('%d %b %Y')
     
-    ratios_running = np.convolve(ratios, np.ones((N,))/N, mode='valid')
+    # geometric running mean: this way, the product of the ratios is closer to being preserved
+    ratios_running = np.exp(np.convolve(np.log(ratios), np.ones((N,)) / N, mode='valid'))
+    # ratios_running = np.convolve(ratios, np.ones((N,)) / N, mode='valid')
 
     plt.plot(nums[N-1:], ratios_running)
     a, b = plt.xlim()
     plt.xlim(b, a)
     plt.xlabel(f'Days before {today}')
-    plt.ylabel('Growth factor $\\Delta N_d / \\Delta N_{d-1}$'+f', running average over {N} days')
+    plt.ylabel('Growth factor $\\Delta N_d / \\Delta N_{d-1}$'+f', running geometric mean over {N} days')
     plt.axhline(y=1)
     plt.title(f'{COUNTRY} growth factor for {name} numbers')
     plt.show(block=False)
+    return(ratios)
 
 plt.title(COUNTRY + ' contagion spread and exponential fits')
 
