@@ -35,14 +35,24 @@ datasets = {
 }
 TS = {}
 
+corrected_datum = {
+    'Recovered': 1258,
+    'Deaths': 1016,
+    'Confirmed': 15113
+}
+
 def get_series(name, country=COUNTRY):
 
     data = pd.read_csv(base_path + datasets[name])
+
     if region is not None:
         data_country = data.loc[(data['Country/Region'] == country) & (data['Province/State'] == region)]
     else:
         data_country = data.loc[data['Country/Region']==country]
-    timeseries = data_country.iloc[0,4:]
+    timeseries = data_country.iloc[0, 4:]
+    
+    if (country == 'Italy'):
+        timeseries.loc['3/12/20'] = corrected_datum[name]
 
     return (timeseries)
 
