@@ -35,11 +35,22 @@ datasets = {
 }
 TS = {}
 
-corrected_datum = {
+corrected_datum_031220 = {
     'Recovered': 1258,
     'Deaths': 1016,
     'Confirmed': 15113
 }
+corrected_datum_021220 = {
+    'Confirmed': 43000
+}
+corrected_datum_012920 = {
+    'Confirmed': 4000
+}
+corrected_datum_022220 = {
+    'Confirmed': 63200
+}
+
+
 
 def get_series(name, country=COUNTRY):
 
@@ -52,7 +63,14 @@ def get_series(name, country=COUNTRY):
     timeseries = data_country.iloc[0, 4:]
     
     if (country == 'Italy'):
-        timeseries.loc['3/12/20'] = corrected_datum[name]
+        timeseries.loc['3/12/20'] = corrected_datum_031220[name]
+    if (country == 'China' and name == 'Confirmed'):
+        timeseries.loc['2/12/20'] = corrected_datum_021220[name]
+    if (country == 'China' and name == 'Confirmed'):
+        timeseries.loc['1/29/20'] = corrected_datum_012920[name]
+    if (country == 'China' and name == 'Confirmed'):
+        timeseries.loc['2/22/20'] = corrected_datum_022220[name]
+    
 
     return (timeseries)
 
