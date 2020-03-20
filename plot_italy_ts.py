@@ -50,11 +50,13 @@ corrected_datum_022220 = {
     'Confirmed': 63200
 }
 
-
-
 def get_series(name, country=COUNTRY, region=REGION):
 
     data = pd.read_csv(base_path + datasets[name])
+
+    if country == 'All':
+        timeseries = data.iloc[:, 4:].sum(axis=0)
+        return(timeseries)
 
     if region is not None:
         data_country = data.loc[(data['Country/Region'] == country) & (data['Province/State'] == region)]
@@ -75,6 +77,7 @@ def get_series(name, country=COUNTRY, region=REGION):
     # return (data_country)
     return (timeseries)
 
+
 IGN_FIRST=0
 for name in datasets:
     for i, num in enumerate(get_series(name)):
@@ -83,56 +86,6 @@ for name in datasets:
 IGN_FIRST += 1
 print(f'No significant infection in the first {IGN_FIRST} days')
 
-def convert_timeseries(timeseries, name):
-    vals = Table(data=[timeseries.values], dtype=[int], names=[name])
-    str_times = timeseries.index.values
-    times_array = [Time(dt(t)) for t in str_times]
-    return(TimeSeries(data=vals, time=times_array))
-    # return((times_array, vals))
-
-model = lambda x, C, a: C * np.exp(a * x)
-# model = lambda x, C, mean, std: C / np.sqrt(2 * np.pi) / std * np.exp(-(x - mean)** 2 / 2 / std ** 2)
-# p0=[1e2, 25, 25]
-
-
-fig, ax = plt.subplots()
-
-color=iter(cm.rainbow(np.linspace(0,1,3)))
-for name in datasets:
-    c= next(color)
-    timeseries = get_series(name)
-    TS[name] = convert_timeseries(timeseries, name)
-    numbers = np.arange(0, len(timeseries[IGN_FIRST:]))
-
-    errors = numbers[::-1]+1
-
-    fit_succeeded = True
-    try:
-        popt, pcov = curve_fit(model, numbers, timeseries[IGN_FIRST:], sigma=errors)
-    except (RuntimeError, ValueError):
-        fit_succeeded = False
-
-    if(fit_succeeded):
-        a = un.ufloat(popt[1], pcov[1, 1])
-        doubling_time = np.log(2) / a
-        lab = name + f': doubling time = {doubling_time.n:.2f} days'
-    else:
-        lab = name
-
-    plt.semilogy(timeseries[IGN_FIRST:], label=lab, c=c)
-    today = (TS[name].time[-1]).strftime('%d %b %Y')
-    next_day = (TS[name].time[-1] + 1).strftime('%d %b %Y')
-    next_day_growth_1 = timeseries[-1]*2 - timeseries[-2]
-    print(f'Today, {today}, {name} equals: {timeseries[-1]}')
-    
-    if(fit_succeeded):
-        plt.semilogy(numbers, model(numbers, *popt), c=c, linestyle=':')
-        next_day_prediction = model(len(timeseries[IGN_FIRST:]), *popt)
-    
-        print(f'Expected {name} for {next_day}: {next_day_prediction:.0f}')
-    
-    print(f'{name} for {next_day} needed to have growth factor 1: {next_day_growth_1:.0f}')
-    print()
 
 def plot_growth_ratio(name='Confirmed', first=IGN_FIRST, N=4):
 
@@ -159,10 +112,74 @@ def plot_growth_ratio(name='Confirmed', first=IGN_FIRST, N=4):
     plt.show(block=False)
     return(ratios)
 
-plt.title(COUNTRY + ' contagion spread and exponential fits')
+def convert_timeseries(timeseries, name):
+    vals = Table(data=[timeseries.values], dtype=[int], names=[name])
+    str_times = timeseries.index.values
+    times_array = [Time(dt(t)) for t in str_times]
+    return(TimeSeries(data=vals, time=times_array))
+    # return((times_array, vals))
 
-plt.grid('on', which='both')
-for label in ax.xaxis.get_ticklabels()[::2]:
-    label.set_visible(False)
-plt.legend(loc ='upper left')
-plt.show(block=False)
+def plot_lethality(first=IGN_FIRST):
+
+    confirmed = np.array(TS['Confirmed']['Confirmed'][first:])
+    dead = np.array(TS['Deaths']['Deaths'][first:])
+    nums = np.arange(len(dead))[::-1]
+
+    plt.plot(nums, dead / confirmed)
+    a, b = plt.xlim()
+    plt.xlim(b, a)
+    plt.xlabel(f'Days before {today}')
+    plt.ylabel('Ratio of dead to confirmed')
+    plt.show(block=False)
+
+if __name__ == "__main__":
+
+    model = lambda x, C, a: C * np.exp(a * x)
+
+    fig, ax = plt.subplots()
+
+    color=iter(cm.rainbow(np.linspace(0,1,3)))
+    for name in datasets:
+        c= next(color)
+        timeseries = get_series(name)
+        TS[name] = convert_timeseries(timeseries, name)
+        numbers = np.arange(0, len(timeseries[IGN_FIRST:]))
+
+        errors = numbers[::-1]+1
+
+        fit_succeeded = True
+        try:
+            popt, pcov = curve_fit(model, numbers, timeseries[IGN_FIRST:], sigma=errors)
+        except (RuntimeError, ValueError):
+            fit_succeeded = False
+
+        if(fit_succeeded):
+            a = un.ufloat(popt[1], pcov[1, 1])
+            doubling_time = np.log(2) / a
+            lab = name + f': doubling time = {doubling_time.n:.2f} days'
+        else:
+            lab = name
+
+        plt.semilogy(timeseries[IGN_FIRST:], label=lab, c=c)
+        today = (TS[name].time[-1]).strftime('%d %b %Y')
+        next_day = (TS[name].time[-1] + 1).strftime('%d %b %Y')
+        next_day_growth_1 = timeseries[-1]*2 - timeseries[-2]
+        print(f'Today, {today}, {name} equals: {timeseries[-1]}')
+        
+        if(fit_succeeded):
+            plt.semilogy(numbers, model(numbers, *popt), c=c, linestyle=':')
+            next_day_prediction = model(len(timeseries[IGN_FIRST:]), *popt)
+        
+            print(f'Expected {name} for {next_day}: {next_day_prediction:.0f}')
+        
+        print(f'{name} for {next_day} needed to have growth factor 1: {next_day_growth_1:.0f}')
+        print()
+
+
+    plt.title(COUNTRY + ' contagion spread and exponential fits')
+
+    plt.grid('on', which='both')
+    for label in ax.xaxis.get_ticklabels()[::2]:
+        label.set_visible(False)
+    plt.legend(loc ='upper left')
+    plt.show(block=False)
