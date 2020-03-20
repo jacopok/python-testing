@@ -20,16 +20,16 @@ else:
     COUNTRY = 'Italy'
 
 if (len(sys.argv) > 2):
-    region = sys.argv[2]
+    REGION = sys.argv[2]
 else:
-    region = None
+    REGION = None
 
 # IGN_FIRST= 30
 
 base_path = '../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-'
 
 datasets = {
-    'Recovered': 'Recovered.csv',
+    # 'Recovered': 'Recovered.csv',
     'Deaths': 'Deaths.csv',
     'Confirmed': 'Confirmed.csv'
 }
@@ -52,26 +52,27 @@ corrected_datum_022220 = {
 
 
 
-def get_series(name, country=COUNTRY):
+def get_series(name, country=COUNTRY, region=REGION):
 
     data = pd.read_csv(base_path + datasets[name])
 
     if region is not None:
         data_country = data.loc[(data['Country/Region'] == country) & (data['Province/State'] == region)]
+        timeseries = data_country.iloc[0, 4:]
     else:
         data_country = data.loc[data['Country/Region']==country]
-    timeseries = data_country.iloc[0, 4:]
+        timeseries = data_country.iloc[:, 4:].sum(axis=0)
     
     if (country == 'Italy'):
         timeseries.loc['3/12/20'] = corrected_datum_031220[name]
-    if (country == 'China' and name == 'Confirmed'):
+    if (country == 'China' and name == 'Confirmed' and region == 'Hubei'):
         timeseries.loc['2/12/20'] = corrected_datum_021220[name]
-    if (country == 'China' and name == 'Confirmed'):
+    if (country == 'China' and name == 'Confirmed' and region == 'Hubei'):
         timeseries.loc['1/29/20'] = corrected_datum_012920[name]
-    if (country == 'China' and name == 'Confirmed'):
+    if (country == 'China' and name == 'Confirmed' and region == 'Hubei'):
         timeseries.loc['2/22/20'] = corrected_datum_022220[name]
     
-
+    # return (data_country)
     return (timeseries)
 
 IGN_FIRST=0
@@ -108,7 +109,7 @@ for name in datasets:
     fit_succeeded = True
     try:
         popt, pcov = curve_fit(model, numbers, timeseries[IGN_FIRST:], sigma=errors)
-    except (RuntimeError):
+    except (RuntimeError, ValueError):
         fit_succeeded = False
 
     if(fit_succeeded):
