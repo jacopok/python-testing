@@ -8,6 +8,7 @@ import numpy as np
 from scipy.optimize import curve_fit
 from matplotlib import cm
 import uncertainties as un
+from scipy.stats import linregress
 
 dt = lambda t : Time(datetime.strptime(t, '%m/%d/%y'))
 
@@ -102,13 +103,17 @@ def plot_growth_ratio(name='Confirmed', first=IGN_FIRST, N=4):
     ratios_running = np.exp(np.convolve(np.log(ratios), np.ones((N,)) / N, mode='valid'))
     # ratios_running = np.convolve(ratios, np.ones((N,)) / N, mode='valid')
 
-    plt.plot(nums[N-1:], ratios_running)
+    s, i, *_ = linregress(nums[N - 1:], ratios_running)
+
+    plt.plot(nums[N - 1:], ratios_running)
+    plt.plot(nums[N-1:], nums[N-1:] * s + i, ls=':', label=f'Linear fit: {s=:.2f}, {i=:.2f}, one in {(i-1)/s=:.2f} days')
     a, b = plt.xlim()
     plt.xlim(b, a)
     plt.xlabel(f'Days before {today}')
     plt.ylabel('Growth factor $\\Delta N_d / \\Delta N_{d-1}$'+f', running geometric mean over {N} days')
     plt.axhline(y=1)
     plt.title(f'{COUNTRY} growth factor for {name} numbers')
+    plt.legend()
     plt.show(block=False)
     return(ratios)
 
