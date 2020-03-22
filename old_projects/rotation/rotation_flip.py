@@ -17,7 +17,7 @@ I = np.array([
   [0, 0, 3]
 ])
 
-tmax = 100
+tmax = 200
 step = .01
 tspan = [0,tmax]
 L0 = [1e-8, 1, 0]
@@ -25,7 +25,9 @@ L0 = [1e-8, 1, 0]
 Iinv = np.linalg.inv(I)
 def func(t, L, Iinv=Iinv):
   # dirty the ODE a bit to see what stability looks like
-  return (np.cross(L, Iinv @ L) + random((3,))*1e-3 - 5e-4)
+  return (np.cross(L, Iinv @ L)
+  #  + random((3,)) * 1e-3 - 5e-4
+   )
 
 sol = solve_ivp(func, t_span=tspan, y0=L0, max_step=step)
 
@@ -33,9 +35,24 @@ fig = plt.figure()
 ax = fig.gca(projection='3d')
 
 omegas = Iinv @ sol.y
+
+x_initial = np.array([0,1 , .1])
+x = np.zeros_like(omegas.T)
+x[0] = x_initial
+t = sol.t
+n = len(x)
+
+for i, omega in enumerate(omegas.T):
+  if i >= n-1:
+    break
+  x[i+1] = x[i] + (t[i+1]-t[i]) * np.cross(omega, x[i])
+
 max_points_plotted = 10000
 every = int(max(tmax / step / max_points_plotted, 1))
-ax.plot(*omegas[:,::every])
+# ax.plot(*omegas[:,::every])
+ax.plot(*x.T[:,::every])
+
+
 # for i in range(3):
   # plt.plot(sol.t, omegas[i])
 
