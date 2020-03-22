@@ -17,7 +17,7 @@ I = np.array([
   [0, 0, 3]
 ])
 
-tmax = 200
+tmax = 1000
 step = .01
 tspan = [0,tmax]
 L0 = [1e-8, 1, 0]
@@ -49,7 +49,7 @@ for i, omega in enumerate(omegas.T):
 
 max_points_plotted = 10000
 every = int(max(tmax / step / max_points_plotted, 1))
-# ax.plot(*omegas[:,::every])
+ax.plot(*omegas[:,::every])
 ax.plot(*x.T[:,::every])
 
 
