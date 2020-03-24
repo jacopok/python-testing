@@ -27,12 +27,12 @@ else:
 
 # IGN_FIRST= 30
 
-base_path = '../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-'
+base_path = '../COVID-19/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_'
 
 datasets = {
     # 'Recovered': 'Recovered.csv',
-    'Deaths': 'Deaths.csv',
-    'Confirmed': 'Confirmed.csv'
+    'Deaths': 'deaths_global.csv',
+    'Confirmed': 'confirmed_global.csv'
 }
 TS = {}
 

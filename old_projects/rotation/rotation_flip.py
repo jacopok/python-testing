@@ -52,7 +52,6 @@ every = int(max(tmax / step / max_points_plotted, 1))
 ax.plot(*omegas[:,::every])
 ax.plot(*x.T[:,::every])
 
-
 # for i in range(3):
   # plt.plot(sol.t, omegas[i])
 
