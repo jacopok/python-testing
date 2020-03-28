@@ -115,6 +115,35 @@ def plot_base_ratio(name='Confirmed', first=IGN_FIRST, N=4):
     plt.show(block=False)
     return(ratios)
 
+
+def plot_new_over_total(name='Confirmed', first=IGN_FIRST, N=4):
+
+    x = TS[name][name][first:]
+    if (len(x) - N) < 4:
+        print('Not enough data')
+        return None 
+    new = x[1:] - x[:-1]
+    totals = x[1:]
+    nums = np.arange(len(new))[::-1]
+    today = (TS[name].time[-1]).strftime('%d %b %Y')
+    ratios = new / totals
+    
+    # geometric running mean: this way, the product of the ratios is closer to being preserved
+    ratios_running = np.exp(np.convolve(np.log(ratios), np.ones((N,)) / N, mode='valid'))
+    # ratios_running = np.convolve(ratios, np.ones((N,)) / N, mode='valid')
+
+    # s, i, *_ = linregress(nums[N - 1:], ratios_running)
+
+    plt.plot(nums[N - 1:], ratios_running)
+    a, b = plt.xlim()
+    plt.xlim(b, a)
+    plt.xlabel(f'Days before {today}')
+    plt.ylabel('Ratio $ \\Delta N_d / N_d$'+f', running geometric mean over {N} days')
+    plt.title(f'{COUNTRY} ratio for {name} numbers')
+    plt.legend()
+    plt.show(block=False)
+    return(ratios)
+
 def plot_growth_ratio(name='Confirmed', first=IGN_FIRST, N=4):
 
     x = TS[name][name][first:]
