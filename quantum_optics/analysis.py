@@ -9,6 +9,8 @@ import pandas as pd
 
 from collections import defaultdict
 
+from scipy.stats import describe 
+
 THERMAL_PATH = 'data/24, Jan, 2020 - Thermal/'
 COHERENT_PATH = 'data/24, Jan, 2020 - Coherent/'
 RESOLUTION = 81 * u.picosecond
@@ -33,6 +35,14 @@ def get_all_timediffs(names, resolution = RESOLUTION):
     diffs.append(dt)
 
   return (u.Quantity(np.hstack(diffs), resolution))
+
+def get_all_ticks(names, resolution = RESOLUTION):
+  total_ticks = []
+  for name in names:
+    t = get_ticks(name)
+    total_ticks.append(t)
+
+  return (u.Quantity(np.hstack(total_ticks), resolution))
 
 def get_n_window(name, window, resolution = RESOLUTION):
   """
@@ -62,6 +72,7 @@ def get_n_window(name, window, resolution = RESOLUTION):
   return (nums)
 
 def get_n_from_names(names, window):
+  print(f'Analyzing window size {window}')
   all_ns = []
   for name in tqdm(names):
     ns = get_n_window(name, window)
@@ -86,15 +97,15 @@ def analyze(b, v):
     print(m, ' = ', f'{moment(v, b, num):.3f}')
 
 if __name__ == '__main__':
-  # timediffs = {}
-  # timediffs['coherent'] = get_all_timediffs(COHERENT_NAMES)
-  # timediffs['thermal'] = get_all_timediffs(THERMAL_NAMES)
+  timediffs = {}
+  timediffs['coherent'] = get_all_timediffs(COHERENT_NAMES)
+  timediffs['thermal'] = get_all_timediffs(THERMAL_NAMES)
 
-  # bins = {}
-  # values = {}
+  bins = {}
+  values = {}
 
-  # time_unit = u.us
-  # max_time = 50
+  time_unit = u.us
+  max_time = 50
 
   # for x in timediffs:
   #   times = timediffs[x].to(time_unit).value
@@ -110,6 +121,25 @@ if __name__ == '__main__':
   #   b = bins[x]
   #   analyze((b[1:]+b[:-1])/2., values[x])
 
-  # for i in [10, 50, 100, 250, 1000]: 
-  #   n = get_n_from_names(THERMAL_NAMES, i*u.us) 
-  #   plt.plot(np.abs(np.fft.rfft(n)), alpha=.5, label=str(i) +' microseconds window') 
+  # windows = [10, 20, 30, 40, 50, 60, 100] * u.us
+  windows = [2, 5, 10, 20] * u.us
+  descriptions = defaultdict(list)
+
+  for window in windows:
+    photon_counts = {}
+    photon_counts['thermal'] = get_n_from_names(THERMAL_NAMES, window)
+    photon_counts['coherent'] = get_n_from_names(COHERENT_NAMES, window)
+
+    for name, distribution in photon_counts.items():
+      # plt.hist(distribution, label=name, bins=np.arange(0, max(distribution)), alpha=.5)
+      descriptions[name].append(describe(distribution))
+  
+  fix, axs = plt.subplots(1, 2)
+
+  for i, (name, description) in enumerate(descriptions.items()):
+    axs[i].semilogx(windows, [x.mean for x in description], label='mean')
+    axs[i].semilogx(windows, [x.variance for x in description], label='variance')
+    axs[i].set_title(name)
+    axs[i].legend()
+
+  plt.show()
