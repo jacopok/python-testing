@@ -6,11 +6,13 @@ from astropy import units as u
 from tqdm import tqdm
 import pandas as pd
 from collections import defaultdict
+from multiprocessing import Pool
+from functools import partial
 
 THERMAL_PATH = 'data/24, Jan, 2020 - Thermal/'
 COHERENT_PATH = 'data/24, Jan, 2020 - Coherent/'
 RESOLUTION = 81 * u.picosecond
-MAX_TICKS = 1000
+MAX_TICKS = int(1e4)
 
 THERMAL_NAMES = [THERMAL_PATH + 'Part_' + str(i) + '.txt' for i in range(10)]
 COHERENT_NAMES = [COHERENT_PATH + 'Part_' + str(i) + '.txt' for i in range(10)]
@@ -80,10 +82,13 @@ def get_n_in_window_from_ticks(ticks, window, resolution = RESOLUTION):
 def get_n_in_window_from_all_ticks(all_ticks, window):
 
   print(f'Analyzing window size {window}')
-  all_ns = []
-  for ticks in all_ticks:
-    ns = get_n_in_window_from_ticks(ticks, window)
-    all_ns.append(ns)
+  pool = Pool(6)
+  # all_ns = []
+  # for ticks in all_ticks:
+  #   ns = get_n_in_window_from_ticks(ticks, window)
+  #   all_ns.append(ns)
+  func = partial(get_n_in_window_from_ticks, window=window)
+  all_ns = pool.map(func, all_ticks)
 
   return (sum_arrays(all_ns))
   
@@ -97,7 +102,7 @@ def moment(b, v, n):
   m = np.average(b, weights=v)
   if (n == 1):
     return(m)
-  return (np.sum((b - m)**n * v))
+  return (np.sum((b - m)**n * v / np.sum(v)))
 
 def describe(distribution):
   description = {}
@@ -117,25 +122,25 @@ def plot_descriptions(descriptions):
       axs[i].semilogx(windows, [y[characteristic] for y in description], label=characteristic)
     axs[i].set_title(name)
     axs[i].legend()
+    axs[i].set_xlabel(f'window size [{windows.unit}]')
 
   plt.show()
 
 if __name__ == '__main__':
-  # pass
-  windows = np.logspace(-1.5, 1.5, num=10) * u.us
+  windows = np.logspace(-2, 2, num=30) * u.us
   # windows = [10] * u.us
-  # descriptions = defaultdict(list)
+  descriptions = defaultdict(list)
 
-  # for window in windows:
-  #   photon_counts = get_photon_counts(thermal_ticks, coherent_ticks, window)
+  for window in windows:
+    photon_counts = get_photon_counts(thermal_ticks, coherent_ticks, window)
 
-  #   for name, distribution in photon_counts.items():
-  #     description = describe(distribution)
-  #     descriptions[name].append(description)
+    for name, distribution in photon_counts.items():
+      description = describe(distribution)
+      descriptions[name].append(description)
 
-  # photon_counts = get_photon_counts(thermal_ticks, coherent_ticks, 10*u.us)
-  # 
-  # for name, distribution in photon_counts.items():
-  #   plt.bar(range(len(distribution)), distribution, label=name, alpha=.5)   
-  # 
-  # plt.show()
+  photon_counts = get_photon_counts(thermal_ticks, coherent_ticks, 10*u.us)
+  
+  for name, distribution in photon_counts.items():
+    plt.bar(range(len(distribution)), distribution, label=name, alpha=.5)   
+  
+  plt.show()
