@@ -190,6 +190,8 @@ def get_rate(descriptions, windows, unit = u.kHz):
     rates[name] = np.average(distribution_rates) / windows.unit
     if unit is not None:
       rates[name] = rates[name].to(unit)
+  rates['ratio'] = (rates['thermal'] / rates['coherent']).to(u.percent)
+
   return(rates)
 
 if __name__ == '__main__':
