@@ -119,28 +119,29 @@ def plot_descriptions(descriptions):
 
   for i, (name, description) in enumerate(descriptions.items()):
     for characteristic in description[0]:
-      axs[i].semilogx(windows, [y[characteristic] for y in description], label=characteristic)
+      axs[i].loglog(windows, [y[characteristic] for y in description], label=characteristic)
     axs[i].set_title(name)
     axs[i].legend()
     axs[i].set_xlabel(f'window size [{windows.unit}]')
-
-  plt.show()
+  plt.tight_layout()
+  plt.savefig('descriptions.pdf', format = 'pdf')
+  plt.show(block=False)
 
 if __name__ == '__main__':
   windows = np.logspace(-2, 2, num=30) * u.us
   # windows = [10] * u.us
-  descriptions = defaultdict(list)
+  # descriptions = defaultdict(list)
 
-  for window in windows:
-    photon_counts = get_photon_counts(thermal_ticks, coherent_ticks, window)
+  # for window in windows:
+  #   photon_counts = get_photon_counts(thermal_ticks, coherent_ticks, window)
 
-    for name, distribution in photon_counts.items():
-      description = describe(distribution)
-      descriptions[name].append(description)
+  #   for name, distribution in photon_counts.items():
+  #     description = describe(distribution)
+  #     descriptions[name].append(description)
 
-  photon_counts = get_photon_counts(thermal_ticks, coherent_ticks, 10*u.us)
+  # photon_counts = get_photon_counts(thermal_ticks, coherent_ticks, 10*u.us)
   
-  for name, distribution in photon_counts.items():
-    plt.bar(range(len(distribution)), distribution, label=name, alpha=.5)   
+  # for name, distribution in photon_counts.items():
+  #   plt.bar(range(len(distribution)), distribution, label=name, alpha=.5)   
   
-  plt.show()
+  # plt.show()
