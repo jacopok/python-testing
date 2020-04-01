@@ -8,6 +8,7 @@ import pandas as pd
 from collections import defaultdict
 from multiprocessing import Pool
 from functools import partial
+import numba
 
 THERMAL_PATH = 'data/24, Jan, 2020 - Thermal/'
 COHERENT_PATH = 'data/24, Jan, 2020 - Coherent/'
@@ -42,6 +43,20 @@ def sum_arrays(arrays):
     result[:len(a)] += a
   return(result)
 
+@numba.jit(nopython=True)
+def base_get_n_in_window(ticks, adim_window):
+  tmax = ticks[-1]
+  N = int(tmax / adim_window)
+  nums = np.zeros(N)
+
+  indices = np.searchsorted(ticks, np.arange(N+1)*adim_window)
+  nums = np.ediff1d(indices)
+  n = np.zeros(max(nums)+1)
+  for num in nums:
+    n[num] += 1
+  return (n)
+
+
 def get_n_in_window_from_ticks(ticks, window, resolution = RESOLUTION):
   """
   divide the ticks (which must start at zero!)
@@ -53,40 +68,28 @@ def get_n_in_window_from_ticks(ticks, window, resolution = RESOLUTION):
 
   len_ticks = len(ticks)
   # print(len_ticks)
-  number_subdivisions = len_ticks //  MAX_TICKS 
+  additional_factor_small_windows = int(max( (np.sqrt(1*u.us / window)).to(u.dimensionless_unscaled).value, 1))
+  total_ticks = int(MAX_TICKS * additional_factor_small_windows)
+
+  number_subdivisions = len_ticks // total_ticks
   adim_window = (window/resolution).to(u.dimensionless_unscaled).value
 
-  if number_subdivisions < 2:
-    tmax = ticks[-1]
-    N = int(tmax / adim_window)
-    nums = np.zeros(N, dtype=int)
+  all_nums = []
+  for n in range(number_subdivisions):
+    current_ticks = ticks[n * total_ticks:(n + 1) * total_ticks]
+    nums = base_get_n_in_window(current_ticks - current_ticks[0], adim_window)
+    all_nums.append(nums)
 
-    indices = np.searchsorted(ticks, np.arange(N+1)*adim_window)
-    nums = np.ediff1d(indices)
-    n = np.zeros(max(nums)+1)
-    for num in nums:
-      n[num]+=1
-    return (n)
-  
-  else:
-    all_nums = []
-    max_n = 0
-    for n in tqdm(range(number_subdivisions)):
-      current_ticks = ticks[n * MAX_TICKS:(n + 1) * MAX_TICKS]
-      nums = get_n_in_window_from_ticks(current_ticks - current_ticks[0], window, resolution)
-      max_n = max(max_n, max(nums))
-      all_nums.append(nums)
-
-    return(sum_arrays(all_nums))
+  return(sum_arrays(all_nums))
 
 def get_n_in_window_from_all_ticks(all_ticks, window):
 
   print(f'Analyzing window size {window}')
-  pool = Pool(6)
   # all_ns = []
   # for ticks in all_ticks:
   #   ns = get_n_in_window_from_ticks(ticks, window)
   #   all_ns.append(ns)
+  pool = Pool(6)
   func = partial(get_n_in_window_from_ticks, window=window)
   all_ns = pool.map(func, all_ticks)
 
@@ -128,16 +131,16 @@ def plot_descriptions(descriptions):
   plt.show(block=False)
 
 if __name__ == '__main__':
-  windows = np.logspace(-2, 2, num=30) * u.us
+  windows = np.logspace(-2, 2, num=15) * u.us
   # windows = [10] * u.us
-  # descriptions = defaultdict(list)
+  descriptions = defaultdict(list)
 
-  # for window in windows:
-  #   photon_counts = get_photon_counts(thermal_ticks, coherent_ticks, window)
+  for window in windows:
+    photon_counts = get_photon_counts(thermal_ticks, coherent_ticks, window)
 
-  #   for name, distribution in photon_counts.items():
-  #     description = describe(distribution)
-  #     descriptions[name].append(description)
+    for name, distribution in photon_counts.items():
+      description = describe(distribution)
+      descriptions[name].append(description)
 
   # photon_counts = get_photon_counts(thermal_ticks, coherent_ticks, 10*u.us)
   
