@@ -179,9 +179,21 @@ def get_descriptions(windows):
 
   return(descriptions)
 
+def get_rate(descriptions, windows, unit = u.kHz):
+  rates = {}
+  for name, description in descriptions.items():
+    distribution_rates = []
+    for w, d in zip(windows.value, description):
+      mean = d['mean']
+      rate = mean / w
+      distribution_rates.append(rate)
+    rates[name] = np.average(distribution_rates) / windows.unit
+    if unit is not None:
+      rates[name] = rates[name].to(unit)
+  return(rates)
+
 if __name__ == '__main__':
   windows = np.logspace(-2, 3.5, num=40) * u.us
-  # windows = [10] * u.us
 
   # photon_counts = get_photon_counts(thermal_ticks, coherent_ticks, 10*u.us)
   
