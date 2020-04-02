@@ -3,6 +3,17 @@ import matplotlib.pyplot as plt
 import numba
 SAMPLE_SIZE = int(1e6)
 
+@numba.njit(parallel=True)
+def box_muller(uniform, std):
+    uniform_1 = uniform[::2]
+    uniform_2 = uniform[1::2]
+    r = np.sqrt(-2 * std**2 * np.log(1 - uniform_1))
+    theta = 2 * np.pi * uniform_2
+    gaussian = np.zeros_like(uniform)
+    gaussian[::2] = r * np.sin(theta)
+    gaussian[1::2] = r * np.cos(theta)
+    return (gaussian)
+
 
 @numba.njit(parallel=True)
 def generate_distribution_classical(error_rate, probability_rate, gate_count):
@@ -10,12 +21,9 @@ def generate_distribution_classical(error_rate, probability_rate, gate_count):
     error_rate_1 = gate_count * error_rate
     error_rate_12 = gate_count * error_rate**2
 
-    error_1 = np.random.random(
-        size=SAMPLE_SIZE) * 2 * error_rate_1 - error_rate_1
-    error_2 = np.random.random(
-        size=SAMPLE_SIZE) * 2 * error_rate_1 - error_rate_1
-    error_12 = np.random.random(
-        size=SAMPLE_SIZE) * 2 * error_rate_12 - error_rate_12
+    error_1 = box_muller(np.random.random(size=SAMPLE_SIZE), error_rate_1)
+    error_2 = box_muller(np.random.random(size=SAMPLE_SIZE), error_rate_1)
+    error_12 = box_muller(np.random.random(size=SAMPLE_SIZE), error_rate_12)
     distribution_1 = (np.random.binomial(
         n=gate_count, p=probability_rate, size=SAMPLE_SIZE) + error_1)
     distribution_2 = (np.random.binomial(
@@ -51,12 +59,9 @@ def generate_distribution_quantum(error_rate, probability_rate, gate_count):
     error_rate_1 = gate_count * error_rate
     error_rate_12 = gate_count * error_rate**2
 
-    error_1 = np.random.random(
-        size=SAMPLE_SIZE) * 2 * error_rate_1 - error_rate_1
-    error_2 = np.random.random(
-        size=SAMPLE_SIZE) * 2 * error_rate_1 - error_rate_1
-    error_12 = np.random.random(
-        size=SAMPLE_SIZE) * 2 * error_rate_12 - error_rate_12
+    error_1 = box_muller(np.random.random(size=SAMPLE_SIZE), error_rate_1)
+    error_2 = box_muller(np.random.random(size=SAMPLE_SIZE), error_rate_1)
+    error_12 = box_muller(np.random.random(size=SAMPLE_SIZE), error_rate_12)
     distribution_1 = (np.random.binomial(
         n=gate_count, p=probability_rate, size=SAMPLE_SIZE) + error_1)
     distribution_2 = (np.random.binomial(
@@ -95,10 +100,8 @@ def plot_both_distributions(*args):
 
     print(f'Quantum std: {np.std(g_q)}')
     print(f'Classical std: {np.std(g_c)}')
-    plt.title(
-        f'Pdfs with error {error_rate}, rate {probability_rate},'
-        f' number of particles in gate {gate_count}'
-    )
+    plt.title(f'Pdfs with error {error_rate}, rate {probability_rate},'
+              f' number of particles in gate {gate_count}')
     plt.xlabel('$g^{(2)}$')
     plt.legend()
     plt.show(block=False)
