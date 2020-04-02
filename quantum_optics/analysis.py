@@ -18,7 +18,7 @@ COHERENT_PATH = 'data/24, Jan, 2020 - Coherent/'
 RESOLUTION = 81 * u.picosecond
 MAX_TICKS = int(1e4)
 
-WINDOWS = np.logspace(-2, 3.5, num=40) * u.us
+WINDOWS = np.logspace(-2, 3.5, num=20) * u.us
 
 THERMAL_NAMES = [THERMAL_PATH + 'Part_' + str(i) + '.txt' for i in range(10)]
 COHERENT_NAMES=[COHERENT_PATH + 'Part_' + str(i) + '.txt' for i in range(10)]
@@ -163,7 +163,7 @@ def get_n_in_window_from_all_ticks(all_ticks, window, resolution=RESOLUTION):
 
     return sum_arrays(all_ns)
 
-def get_photon_counts(window, ticks_dict=ALL_TICKS_ARRAYS):
+def get_photon_counts(window, ticks_dict):
     """Given a dictionary of lists of arrays of ticks and a window size,
     returns a dictionary of event counts, computed with
     `get_n_in_window_from_all_ticks`.
@@ -245,6 +245,24 @@ def describe(distribution, dist_type, bins=None):
     return description
 
 def plot_descriptions(windows, descriptions, colors=None):
+    """Given a dictionary of lists of descriptions, 
+    obtained with window sizes given in the list `windows`,
+    plot them.
+
+    Arguments:
+    `windows` -- an array of u.Quantity, the window sizes
+    at which the descriptions were computed.
+
+    `descriptions` -- a dictionary, indexed by the physical type of distribution ('thermal', 'coherent'),
+    of lists, with varying window size,
+    of descriptions: dictionaries, indexed by the descriptor ('mean', 'variance' and so on)
+    of the values of the descriptors.
+
+    Keyword arguments:
+    colors -- a dictionary, with indices corresponding to the names of the descriptors,
+    of strings representing the colors with which the descriptors should be plotted.
+    """
+
     _, axs = plt.subplots(1, 2)
 
     if colors is None:
@@ -266,14 +284,32 @@ def plot_descriptions(windows, descriptions, colors=None):
         axs[i].set_xlabel(f'window size [{windows.unit}]')
 
     plt.tight_layout()
-    plt.savefig('descriptions.pdf', format = 'pdf')
+    plt.savefig('descriptions.pdf', format='pdf')
     plt.show(block=False)
 
-def get_descriptions(windows):
+def get_descriptions(windows=None, ticks_arrays=None):
+    """Returns a dictionary of lists of descriptions.
+
+    Arguments:
+    `windows` -- an array of u.Quantity, the window sizes
+    at which the descriptions are to be computed.
+    Defaults to WINDOWS.
+
+    `ticks_arrays` --  a dictionary, indexed by the distribution type,
+    of lists of ticks coming from different files.
+    Defaults to ALL_TICKS_ARRAYS.
+    """
+
+    if ticks_arrays is None:
+        ticks_arrays = ALL_TICKS_ARRAYS
+    if windows is None:
+        windows = WINDOWS
+
+
     descriptions = defaultdict(list)
 
     for window in windows:
-        photon_counts = get_photon_counts(window)
+        photon_counts = get_photon_counts(window, ticks_arrays)
 
         for name, distribution in photon_counts.items():
             description = describe(distribution, name)
@@ -282,6 +318,17 @@ def get_descriptions(windows):
     return descriptions
 
 def get_rate(descriptions, windows, unit=u.kHz):
+    """ Given the `descriptions` (a dictionary of lists of dictionaries of characteristics)
+    and `windows`, the list of window sizes, returns a dictionary of estimates of the rates of events,
+    as well as the ratio of the 'thermal' to the 'coherent' rates.
+
+    Arguments:
+    `descriptions` -- a dictionary, indexed by the physical type of distribution ('thermal', 'coherent'),
+    of lists, with varying window size,
+    of descriptions: dictionaries, indexed by the descriptor ('mean', 'variance' and so on)
+    of the values of the descriptors.
+    """
+
     rates = {}
     for name, description in descriptions.items():
         distribution_rates = []
