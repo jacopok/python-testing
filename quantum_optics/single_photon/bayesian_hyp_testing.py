@@ -1,7 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import numba
-SAMPLE_SIZE = int(1e6)
+
+from simulation import simulate_detections
+from simulation import g_from_detections
+from simulation import detections
+
+SAMPLE_SIZE = int(1e5)
+
 
 @numba.njit(parallel=True)
 def box_muller(uniform, std):
@@ -12,28 +18,35 @@ def box_muller(uniform, std):
     gaussian = np.zeros_like(uniform)
     gaussian[::2] = r * np.sin(theta)
     gaussian[1::2] = r * np.cos(theta)
-    return (gaussian)
+    return gaussian
 
 
 @numba.njit(parallel=True)
-def generate_distribution_classical(error_rate, probability_rate, gate_count):
+def _generate_detections_classical(error_rate, probability_rate, gate_count):
 
     error_rate_1 = gate_count * error_rate
-    error_rate_12 = gate_count * error_rate**2
+    error_rate_12 = gate_count * error_rate * probability_rate
 
     error_1 = box_muller(np.random.random(size=SAMPLE_SIZE), error_rate_1)
     error_2 = box_muller(np.random.random(size=SAMPLE_SIZE), error_rate_1)
-    error_12 = box_muller(np.random.random(size=SAMPLE_SIZE), error_rate_12)
+    error_12 = 0 * np.abs(
+        box_muller(np.random.random(size=SAMPLE_SIZE), error_rate_12))
     distribution_1 = (np.random.binomial(
         n=gate_count, p=probability_rate, size=SAMPLE_SIZE) + error_1)
     distribution_2 = (np.random.binomial(
         n=gate_count, p=probability_rate, size=SAMPLE_SIZE) + error_2)
-    distribution_12 = np.maximum((np.random.binomial(
-        n=gate_count, p=probability_rate**2, size=SAMPLE_SIZE) + error_12), 0)
+    distribution_12 = (np.random.binomial(
+        n=gate_count, p=probability_rate**2, size=SAMPLE_SIZE) + error_12) + error_rate_12
 
-    g = distribution_12 * gate_count / distribution_1 / distribution_2
+    return (distribution_1, distribution_2, distribution_12, gate_count)
 
-    return g
+
+def generate_detections_classical(*args):
+    return (detections(*_generate_detections_classical(*args)))
+
+
+def generate_distribution_classical(*args):
+    return (g_from_detections(*generate_detections_classical(*args)))
 
 
 def plot_distribution_classical(*args):
@@ -54,7 +67,7 @@ def plot_distribution_classical(*args):
 
 
 @numba.njit(parallel=True)
-def generate_distribution_quantum(error_rate, probability_rate, gate_count):
+def _generate_detections_quantum(error_rate, probability_rate, gate_count):
 
     error_rate_1 = gate_count * error_rate
     error_rate_12 = gate_count * error_rate**2
@@ -68,9 +81,15 @@ def generate_distribution_quantum(error_rate, probability_rate, gate_count):
         n=gate_count, p=probability_rate, size=SAMPLE_SIZE) + error_2)
     distribution_12 = np.maximum(error_12, 0)
 
-    g = distribution_12 * gate_count / distribution_1 / distribution_2
+    return (distribution_1, distribution_2, distribution_12, gate_count)
 
-    return g
+
+def generate_detections_quantum(*args):
+    return (detections(*_generate_detections_quantum(*args)))
+
+
+def generate_distribution_quantum(*args):
+    return (g_from_detections(*generate_detections_quantum(*args)))
 
 
 def plot_distribution_quantum(*args):
