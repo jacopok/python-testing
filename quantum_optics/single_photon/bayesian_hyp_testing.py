@@ -131,7 +131,7 @@ def plot_both_distributions(*args):
 
     print(f'Quantum std: {np.std(g_q)}')
     print(f'Classical std: {np.std(g_c)}')
-    plt.title(f'Pdfs with error {error_rate}, rate {probability_rate}'
+    plt.title(f'Pdfs with error {error_rate:.4f}, rate {probability_rate:.4f}'
               f', sample size {sample_size}')
     plt.xlabel('$g^{(2)}$')
     plt.legend()

@@ -8,7 +8,6 @@ SAMPLE_SIZE_OUTER = int(1e2)
 SAMPLE_SIZE_INNER = int(1e3)
 RATES = np.logspace(-4, -1, num=int(1e1))
 statistics = namedtuple('Statistics', ['average', 'std'])
-
 detections = namedtuple('Detections', ['N_1', 'N_2', 'N_12', 'N_gate'])
 
 
@@ -42,8 +41,8 @@ def _simulate_detection_classical(rate_1,
         e_bool1 = err1 < e_rate_1
         e_bool2 = err2 < e_rate_2
 
-        bool1 = np.logical_xor(bool1, e_bool1)
-        bool2 = np.logical_xor(bool2, e_bool2)
+        bool1 = np.logical_or(bool1, e_bool1)
+        bool2 = np.logical_or(bool2, e_bool2)
 
         n_1 += np.sum(bool1)
         n_2 += np.sum(bool2)
@@ -84,8 +83,8 @@ def _simulate_detection_quantum(rate_1,
         e_bool1 = err1 < e_rate_1
         e_bool2 = err2 < e_rate_2
 
-        bool1 = np.logical_xor(bool1, e_bool1)
-        bool2 = np.logical_xor(bool2, e_bool2)
+        bool1 = np.logical_or(bool1, e_bool1)
+        bool2 = np.logical_or(bool2, e_bool2)
 
         n_1 += np.sum(bool1)
         n_2 += np.sum(bool2)
