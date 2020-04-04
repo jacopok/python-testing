@@ -138,6 +138,7 @@ def simulate_detections_quantum(size, *args):
 
 
 def g_from_detections(*detections):
+
     n_1, n_2, n_12, n_gate = detections
 
     return n_12 * n_gate / n_1 / n_2
