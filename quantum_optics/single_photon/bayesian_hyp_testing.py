@@ -132,7 +132,6 @@ def plot_both_distributions(*args):
     plt.semilogy(bins, gaussian_kde(g_q).pdf(bins), label='Quantum')
     plt.semilogy(bins, gaussian_kde(g_c).pdf(bins), label='Classical')
     # plt.plot(bins, gaussian_kde(g_q).pdf(bins) / gaussian_kde(g_c).pdf(bins), label='Ratio')
-    
 
     # plt.hist(g_q, bins=bins, density=True, alpha=.5, label='Quantum')
     # plt.hist(g_c, bins=bins, density=True, alpha=.5, label='Classical')
@@ -174,3 +173,33 @@ def get_bayes_factor(g_measurement, sample_size, rate, e_rate, N_gate):
     bayes_ratio = bayes_ratio_nepers / np.log(10) * u.dex(1)
 
     return bayes_ratio
+
+
+def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
+                                parameters_prior, N_gate):
+    """the shape if parameters_prior should be (len(rate), len(e_rate))
+    """
+
+    data_given_model_classical = np.zeros_like(parameters_prior)
+
+    for i, r in enumerate(rate):
+        for j, e in enumerate(e_rate):
+            g_distribution_classical = g_from_detections(
+                *simulate_detections_classical(sample_size, r, r, e, e,
+                                               int(np.sqrt(N_gate)),
+                                               int(np.sqrt(N_gate))))
+            data_given_model_classical[i, j] = gaussian_kde(
+                g_distribution_classical).pdf(g_measurement)
+
+    data_given_model_quantum = np.zeros_like(parameters_prior)
+
+    for i, r in enumerate(rate):
+        for j, e in enumerate(e_rate):
+            g_distribution_quantum = g_from_detections(
+                *simulate_detections_quantum(sample_size, r, r, e, e,
+                                               int(np.sqrt(N_gate)),
+                                               int(np.sqrt(N_gate))))
+            data_given_model_quantum[i, j] = gaussian_kde(
+                g_distribution_quantum).pdf(g_measurement)
+    
+    
