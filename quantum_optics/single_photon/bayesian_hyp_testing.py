@@ -126,15 +126,18 @@ def plot_distribution_quantum(*args):
 def plot_both_distributions(*args):
     g_q = g_from_detections(*simulate_detections_quantum(*args))
     g_c = g_from_detections(*simulate_detections_classical(*args))
-    bins = np.linspace(0, 2, num=1000)
-    sample_size, probability_rate, error_rate = args
+    bins = np.logspace(-5, .5, num=1000)
+    bins[0] = 0
+    sample_size, probability_rate, error_rate, *_ = args
 
-    plt.semilogy(bins, gaussian_kde(g_q).pdf(bins), label='Quantum')
-    plt.semilogy(bins, gaussian_kde(g_c).pdf(bins), label='Classical')
+    # plt.semilogy(bins, gaussian_kde(g_q).pdf(bins), label='Quantum')
+    # plt.semilogy(bins, gaussian_kde(g_c).pdf(bins), label='Classical')
     # plt.plot(bins, gaussian_kde(g_q).pdf(bins) / gaussian_kde(g_c).pdf(bins), label='Ratio')
 
-    # plt.hist(g_q, bins=bins, density=True, alpha=.5, label='Quantum')
-    # plt.hist(g_c, bins=bins, density=True, alpha=.5, label='Classical')
+    plt.hist(g_q, bins=bins, density=True, alpha=.5, label='Quantum')
+    plt.hist(g_c, bins=bins, density=True, alpha=.5, label='Classical')
+    plt.xscale('symlog', linthreshx=1e-5)
+    plt.yscale('symlog')
 
     print(f'Quantum std: {np.std(g_q)}')
     print(f'Classical std: {np.std(g_c)}')
@@ -157,11 +160,11 @@ def check_simulation(e_rate, rate, N_gate):
 
 def get_bayes_factor(g_measurement, sample_size, rate, e_rate, N_gate):
     g_distribution_classical = g_from_detections(
-        *simulate_detections_classical(sample_size, rate, rate, e_rate, e_rate,
+        *simulate_detections_classical(sample_size, rate, e_rate, rate, e_rate,
                                        int(np.sqrt(N_gate)),
                                        int(np.sqrt(N_gate))))
     g_distribution_quantum = g_from_detections(*simulate_detections_quantum(
-        sample_size, rate, rate, e_rate, e_rate, int(np.sqrt(N_gate)),
+        sample_size, rate, e_rate, rate, e_rate, int(np.sqrt(N_gate)),
         int(np.sqrt(N_gate))))
 
     classical_logpdf = gaussian_kde(g_distribution_classical).logpdf(
