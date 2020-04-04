@@ -152,7 +152,8 @@ def plot_growth_ratio(name='Confirmed', first=IGN_FIRST, N=4):
         return None 
     differences = np.ediff1d(x)
     ratios = differences[1:] / differences[:-1]
-    nums = np.arange(len(ratios))[::-1]
+    days_delay = N//2
+    nums = np.arange(len(ratios))[::-1] + days_delay
     today = (TS[name].time[-1]).strftime('%d %b %Y')
     
     # geometric running mean: this way, the product of the ratios is closer to being preserved
