@@ -8,10 +8,10 @@ from simulation import simulate_detections_classical
 from simulation import simulate_detections_quantum
 from scipy.stats import gaussian_kde
 import astropy.units as u
+from tqdm import tqdm
 
 from scipy.integrate import trapz
 from scipy.stats import lognorm
-
 
 SAMPLE_SIZE = int(1e5)
 
@@ -192,10 +192,17 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
     """the shape if parameters_prior should be (len(rate), len(e_rate))
     """
 
+    to_sim = sample_size * parameters_prior.size * N_gate
+
+    print(f'Need to compute {sample_size=} times '
+          f'{parameters_prior.size=} times {N_gate=}')
+    print(f'detections, which means 10 to the {np.log10(to_sim):.1f}')
+
     data_given_model_classical = np.zeros_like(parameters_prior)
+    print('Estimating classical data-given-model')
 
     for i, r in enumerate(rate):
-        for j, e in enumerate(e_rate):
+        for j, e in tqdm(enumerate(e_rate)):
             g_distribution_classical = g_from_detections(
                 *simulate_detections_classical(sample_size, r, e, r, e,
                                                int(np.sqrt(N_gate)),
@@ -210,9 +217,10 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
                     data_given_model_classical[i, j] = 0
 
     data_given_model_quantum = np.zeros_like(parameters_prior)
+    print('Estimating quantum data-given-model')
 
     for i, r in enumerate(rate):
-        for j, e in enumerate(e_rate):
+        for j, e in tqdm(enumerate(e_rate)):
             g_distribution_quantum = g_from_detections(
                 *simulate_detections_quantum(sample_size, r, e, r, e,
                                              int(np.sqrt(N_gate)),
@@ -226,10 +234,11 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
                 else:
                     data_given_model_quantum[i, j] = 0
 
+    print('Integrating')
     rate_len, e_rate_len = np.shape(parameters_prior)
     integrand_classical = parameters_prior * data_given_model_classical
     integrand_quantum = parameters_prior * data_given_model_quantum
-    
+
     if rate_len > 1:
         integrand_classical = trapz(y=integrand_classical, x=rate, axis=0)
         integrand_quantum = trapz(y=integrand_quantum, x=rate, axis=0)
@@ -238,16 +247,19 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
         integrand_classical = trapz(y=integrand_classical, x=e_rate, axis=1)
         integrand_quantum = trapz(y=integrand_quantum, x=e_rate, axis=1)
 
-    return(integrand_classical, integrand_quantum)
+    return (integrand_classical, integrand_quantum, data_given_model_classical,
+            data_given_model_quantum)
 
 
 def define_parameter_prior(mean, std, num=40):
-    
     def dist(x):
         n = 1 / x / std / np.sqrt(2 * np.pi)
-        a = -(np.log(x) - mean)** 2 / 2 / std ** 2
-        return(n * np.exp(a))
-    
-    param = np.logspace(mean - 3 * std, min(mean + 3 * std, 0), base=np.e, num=num)
-    
+        a = -(np.log(x) - mean)**2 / 2 / std**2
+        return (n * np.exp(a))
+
+    param = np.logspace(mean - 3 * std,
+                        min(mean + 3 * std, 0),
+                        base=np.e,
+                        num=num)
+
     return (param, dist(param))
