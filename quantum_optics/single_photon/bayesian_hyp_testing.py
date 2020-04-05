@@ -251,7 +251,7 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
             data_given_model_quantum)
 
 
-def define_parameter_prior(mean, std, num=40):
+def lognormal_dist(mean, std, num=40):
     def dist(x):
         n = 1 / x / std / np.sqrt(2 * np.pi)
         a = -(np.log(x) - mean)**2 / 2 / std**2
@@ -263,3 +263,17 @@ def define_parameter_prior(mean, std, num=40):
                         num=num)
 
     return (param, dist(param))
+
+
+def loguniform_dist(mean, std, num=40):
+
+    param = np.logspace(mean - 3 * std,
+                        min(mean + 3 * std, 0),
+                        base=np.e,
+                        num=num)
+    
+    dist = np.ones_like(param)
+    norm = trapz(y=dist, x=param)
+    # = 1, but just to be sure
+
+    return (param, dist/norm)
