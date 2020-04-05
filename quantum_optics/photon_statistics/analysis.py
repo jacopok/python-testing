@@ -21,7 +21,7 @@ MAX_TICKS = int(1e4)
 WINDOWS = np.logspace(-2, 3.5, num=20) * u.us
 
 THERMAL_NAMES = [THERMAL_PATH + 'Part_' + str(i) + '.txt' for i in range(10)]
-COHERENT_NAMES=[COHERENT_PATH + 'Part_' + str(i) + '.txt' for i in range(10)]
+COHERENT_NAMES = [COHERENT_PATH + 'Part_' + str(i) + '.txt' for i in range(10)]
 
 COLORS = {
     'mode': 'purple',
@@ -32,19 +32,26 @@ COLORS = {
     'theoretical skewness': 'blue',
     'kurtosis': 'green',
     'theoretical kurtosis': 'green'
-        }
+}
+
 
 def read_file(name):
     """Returns a pandas dataframe from the comma-separated file at name"""
 
-    data = pd.read_csv(name, sep=',', header=None, names=['ticks', 'channel'], dtype=np.int)
+    data = pd.read_csv(name,
+                       sep=',',
+                       header=None,
+                       names=['ticks', 'channel'],
+                       dtype=np.int)
     return data
+
 
 def get_ticks(name):
     """Returns the array of times contained in the file at name"""
     data = read_file(name)
     ticks = data['ticks'].values
     return ticks
+
 
 def get_ticks_names(names):
     """Returns a list of arrays of times from a list of names.
@@ -56,10 +63,12 @@ def get_ticks_names(names):
         all_ticks.append(get_ticks(name))
     return [x - x[0] for x in all_ticks]
 
+
 ALL_TICKS_ARRAYS = {
     'thermal': get_ticks_names(THERMAL_NAMES),
     'coherent': get_ticks_names(COHERENT_NAMES)
 }
+
 
 def sum_arrays(arrays):
     """Given a list of arrays, returns an array as long as the
@@ -72,6 +81,7 @@ def sum_arrays(arrays):
     for a in arrays:
         result[:len(a)] += a
     return result
+
 
 @numba.jit(nopython=True)
 def _base_get_n_in_window(ticks, adim_window):
@@ -90,9 +100,10 @@ def _base_get_n_in_window(ticks, adim_window):
     number_of_windows = int(tmax / adim_window)
     nums = np.zeros(number_of_windows)
 
-    indices = np.searchsorted(ticks, np.arange(number_of_windows+1)*adim_window)
+    indices = np.searchsorted(ticks,
+                              np.arange(number_of_windows + 1) * adim_window)
     nums = np.ediff1d(indices)
-    counts = np.zeros(max(nums)+1)
+    counts = np.zeros(max(nums) + 1)
     for num in nums:
         counts[num] += 1
     return counts
@@ -122,15 +133,18 @@ def get_n_in_window_from_ticks(ticks, window, resolution):
     total_ticks = MAX_TICKS
 
     number_subdivisions = len_ticks // total_ticks
-    adim_window = (window/resolution).to(u.dimensionless_unscaled).value
+    adim_window = (window / resolution).to(u.dimensionless_unscaled).value
 
     all_nums = []
     for subdivision in range(number_subdivisions):
-        current_ticks = ticks[subdivision * total_ticks:(subdivision + 1) * total_ticks]
-        nums = _base_get_n_in_window(current_ticks - current_ticks[0], adim_window)
+        current_ticks = ticks[subdivision * total_ticks:(subdivision + 1) *
+                              total_ticks]
+        nums = _base_get_n_in_window(current_ticks - current_ticks[0],
+                                     adim_window)
         all_nums.append(nums)
 
     return sum_arrays(all_nums)
+
 
 def get_n_in_window_from_all_ticks(all_ticks, window, resolution=RESOLUTION):
     """Returns the number of events observed in a specific window size
@@ -155,13 +169,16 @@ def get_n_in_window_from_all_ticks(all_ticks, window, resolution=RESOLUTION):
     """
 
     print(f'Analyzing window size {window}')
-    pool = Pool(cpu_count()-1)
-    func = partial(get_n_in_window_from_ticks, window=window, resolution=resolution)
+    pool = Pool(cpu_count() - 1)
+    func = partial(get_n_in_window_from_ticks,
+                   window=window,
+                   resolution=resolution)
     all_ns = pool.map(func, all_ticks)
-    pool.close() # no more tasks
-    pool.join()    # wrap up current tasks
+    pool.close()  # no more tasks
+    pool.join()  # wrap up current tasks
 
     return sum_arrays(all_ns)
+
 
 def get_photon_counts(window, ticks_dict):
     """Given a dictionary of lists of arrays of ticks and a window size,
@@ -171,15 +188,18 @@ def get_photon_counts(window, ticks_dict):
 
     photon_counts = {}
     for name, ticks_arrays in ticks_dict.items():
-        photon_counts[name] = get_n_in_window_from_all_ticks(ticks_arrays, window)
+        photon_counts[name] = get_n_in_window_from_all_ticks(
+            ticks_arrays, window)
     return photon_counts
+
 
 def thermal(counts, nbar):
     """Theoretical thermal distribution,
     with mean nbar.
     """
-    return (nbar/(1+nbar)) ** counts / (1 + nbar)
- 
+    return (nbar / (1 + nbar))**counts / (1 + nbar)
+
+
 def coherent(counts, nbar):
     """Theoretical coherent distribution,
     with mean nbar
@@ -188,10 +208,12 @@ def coherent(counts, nbar):
 
     return poisson.pmf(counts, nbar)
 
-THEORETICAL_DISTRIBUTIONS = {    
+
+THEORETICAL_DISTRIBUTIONS = {
     'thermal': thermal,
     'coherent': coherent,
 }
+
 
 def moment(bins, values, order):
     """Unnormalized order-th moment for the probability mass function given by
@@ -205,6 +227,7 @@ def moment(bins, values, order):
 
     return np.sum((bins - mean)**order * values / np.sum(values))
 
+
 def analyze(dist, bins, nbar):
     """Computes the theoretical distribution `dist` with mean nbar
     over the `bins` given, and returns a dictionary with a description
@@ -214,9 +237,12 @@ def analyze(dist, bins, nbar):
     values = dist(bins, nbar)
     th_desc = {}
     th_desc['variance'] = moment(bins, values, 2)
-    th_desc['skewness'] = moment(bins, values, 3) / moment(bins, values, 2)**(3/2)
-    th_desc['kurtosis'] = moment(bins, values, 4) / moment(bins, values, 2)**(4/2)
+    th_desc['skewness'] = moment(bins, values, 3) / moment(bins, values,
+                                                           2)**(3 / 2)
+    th_desc['kurtosis'] = moment(bins, values, 4) / moment(bins, values,
+                                                           2)**(4 / 2)
     return th_desc
+
 
 def describe(distribution, dist_type, bins=None):
     """Given a `distribution` given as an order array of values,
@@ -231,18 +257,20 @@ def describe(distribution, dist_type, bins=None):
     description['mode'] = np.argmax(distribution)
     description['mean'] = moment(bins, distribution, 1)
 
-    th_desc = analyze(THEORETICAL_DISTRIBUTIONS[dist_type], bins, description['mean'])
+    th_desc = analyze(THEORETICAL_DISTRIBUTIONS[dist_type], bins,
+                      description['mean'])
 
     description['variance'] = moment(bins, distribution, 2)
     description['theoretical variance'] = th_desc['variance']
-    description['skewness'] = (moment(bins, distribution, 3)
-                               / moment(bins, distribution, 2)**(3/2))
+    description['skewness'] = (moment(bins, distribution, 3) /
+                               moment(bins, distribution, 2)**(3 / 2))
     description['theoretical skewness'] = th_desc['skewness']
-    description['kurtosis'] = (moment(bins, distribution, 4)
-                               / moment(bins, distribution, 2)**(4/2))
+    description['kurtosis'] = (moment(bins, distribution, 4) /
+                               moment(bins, distribution, 2)**(4 / 2))
     description['theoretical kurtosis'] = th_desc['kurtosis']
 
     return description
+
 
 def plot_descriptions(windows, descriptions, colors=None):
     """Given a dictionary of lists of descriptions, 
@@ -273,8 +301,7 @@ def plot_descriptions(windows, descriptions, colors=None):
 
             linestyle = '--' if 'theoretical' in characteristic else '-'
 
-            axs[i].loglog(windows,
-                          [y[characteristic] for y in description],
+            axs[i].loglog(windows, [y[characteristic] for y in description],
                           label=characteristic,
                           ls=linestyle,
                           c=colors[characteristic])
@@ -286,6 +313,7 @@ def plot_descriptions(windows, descriptions, colors=None):
     plt.tight_layout()
     plt.savefig('descriptions.pdf', format='pdf')
     plt.show(block=False)
+
 
 def get_descriptions(windows=None, ticks_arrays=None):
     """Returns a dictionary of lists of descriptions.
@@ -305,7 +333,6 @@ def get_descriptions(windows=None, ticks_arrays=None):
     if windows is None:
         windows = WINDOWS
 
-
     descriptions = defaultdict(list)
 
     for window in windows:
@@ -316,6 +343,7 @@ def get_descriptions(windows=None, ticks_arrays=None):
             descriptions[name].append(description)
 
     return descriptions
+
 
 def get_rate(descriptions, windows, unit=u.kHz):
     """ Given the `descriptions` (a dictionary of lists of dictionaries of characteristics)
@@ -343,9 +371,10 @@ def get_rate(descriptions, windows, unit=u.kHz):
 
     return rates
 
+
 # if __name__ == '__main__':
 
-    # photon_counts = get_photon_counts(10*u.us)
-    # for name, distribution in photon_counts.items():
-    #     plt.bar(range(len(distribution)), distribution, label=name, alpha=.5)
-    # plt.show()
+# photon_counts = get_photon_counts(10*u.us)
+# for name, distribution in photon_counts.items():
+#     plt.bar(range(len(distribution)), distribution, label=name, alpha=.5)
+# plt.show()
