@@ -1,5 +1,6 @@
 import numpy as np
 import astropy.units as u
+from bayesian_hyp_testing import define_parameter_prior
 
 RESOLUTION = 81 * u.picosecond
 
@@ -26,3 +27,6 @@ N_NOISE = (WINDOW_COINCIDENCE * DETECTOR_FREQ).to(1).value
 RATE = (N_G1 + N_G2) / (2 * N_G)
 E_RATE = N_NOISE / N_G
 
+e_rate, e_rate_pdf = define_parameter_prior(-2, 1, num=5)
+rate = [RATE]
+param_prior = np.outer([1], e_rate_pdf)
