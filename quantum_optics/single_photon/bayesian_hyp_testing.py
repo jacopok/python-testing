@@ -9,6 +9,10 @@ from simulation import simulate_detections_quantum
 from scipy.stats import gaussian_kde
 import astropy.units as u
 
+from scipy.integrate import trapz
+from scipy.stats import lognorm
+
+
 SAMPLE_SIZE = int(1e5)
 
 
@@ -169,7 +173,12 @@ def get_bayes_factor(g_measurement, sample_size, rate, e_rate, N_gate):
 
     classical_logpdf = gaussian_kde(g_distribution_classical).logpdf(
         g_measurement)
-    quantum_logpdf = gaussian_kde(g_distribution_quantum).logpdf(g_measurement)
+
+    try:
+        quantum_logpdf = gaussian_kde(g_distribution_quantum).logpdf(
+            g_measurement)
+    except np.linalg.LinAlgError:
+        quantum_logpdf = 0.
 
     bayes_ratio_nepers = quantum_logpdf - classical_logpdf
 
@@ -188,21 +197,57 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
     for i, r in enumerate(rate):
         for j, e in enumerate(e_rate):
             g_distribution_classical = g_from_detections(
-                *simulate_detections_classical(sample_size, r, r, e, e,
+                *simulate_detections_classical(sample_size, r, e, r, e,
                                                int(np.sqrt(N_gate)),
                                                int(np.sqrt(N_gate))))
-            data_given_model_classical[i, j] = gaussian_kde(
-                g_distribution_classical).pdf(g_measurement)
+            try:
+                data_given_model_classical[i, j] = gaussian_kde(
+                    g_distribution_classical).pdf(g_measurement)
+            except np.linalg.LinAlgError:
+                if np.isclose(g_measurement, g_distribution_classical).all():
+                    data_given_model_classical[i, j] = 1
+                else:
+                    data_given_model_classical[i, j] = 0
 
     data_given_model_quantum = np.zeros_like(parameters_prior)
 
     for i, r in enumerate(rate):
         for j, e in enumerate(e_rate):
             g_distribution_quantum = g_from_detections(
-                *simulate_detections_quantum(sample_size, r, r, e, e,
-                                               int(np.sqrt(N_gate)),
-                                               int(np.sqrt(N_gate))))
-            data_given_model_quantum[i, j] = gaussian_kde(
-                g_distribution_quantum).pdf(g_measurement)
+                *simulate_detections_quantum(sample_size, r, e, r, e,
+                                             int(np.sqrt(N_gate)),
+                                             int(np.sqrt(N_gate))))
+            try:
+                data_given_model_quantum[i, j] = gaussian_kde(
+                    g_distribution_quantum).pdf(g_measurement)
+            except np.linalg.LinAlgError:
+                if np.isclose(g_measurement, g_distribution_quantum).all():
+                    data_given_model_quantum[i, j] = 1
+                else:
+                    data_given_model_quantum[i, j] = 0
+
+    rate_len, e_rate_len = np.shape(parameters_prior)
+    integrand_classical = parameters_prior * data_given_model_classical
+    integrand_quantum = parameters_prior * data_given_model_quantum
     
+    if rate_len > 1:
+        integrand_classical = trapz(y=integrand_classical, x=rate, axis=0)
+        integrand_quantum = trapz(y=integrand_quantum, x=rate, axis=0)
+
+    if e_rate_len > 1:
+        integrand_classical = trapz(y=integrand_classical, x=e_rate, axis=1)
+        integrand_quantum = trapz(y=integrand_quantum, x=e_rate, axis=1)
+
+    return(integrand_classical, integrand_quantum)
+
+
+def define_parameter_prior(mean, std, num=40):
     
+    def dist(x):
+        n = 1 / x / std / np.sqrt(2 * np.pi)
+        a = -(np.log(x) - mean)** 2 / 2 / std ** 2
+        return(n * np.exp(a))
+    
+    param = np.logspace(mean - 3 * std, min(mean + 3 * std, 0), base=np.e, num=num)
+    
+    return (param, dist(param))

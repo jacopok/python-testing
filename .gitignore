@@ -16,4 +16,5 @@ numerical_methods/**/*.pdf
 numerical_methods/basics-1/starlab_output.txt
 numerical_methods/ODE-8/Nbody/*.npy
 CNNs/*
-quantum_optics/data/**/*.txt
+quantum_optics/**/data/**/*.txt
+quantum_optics/**/data/*.txt
