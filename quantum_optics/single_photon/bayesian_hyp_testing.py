@@ -271,10 +271,10 @@ def lognormal_dist(mean, std, num=40):
     return (param, dist(param))
 
 
-def loguniform_dist(mean, std, num=40):
+def loguniform_dist(lower_log, upper_log, num=40):
 
-    param = np.logspace(mean - 3 * std,
-                        min(mean + 3 * std, 0),
+    param = np.logspace(lower_log,
+                        min(upper_log, 0),
                         base=np.e,
                         num=num)
 
@@ -307,4 +307,4 @@ def plot_logpdf(rate, e_rate, pdf):
     ax.plot_surface(X, Y, pdf, cmap=coolwarm, antialiased=False)
     ax.set_xlabel('detection rate (log base e)')
     ax.set_ylabel('error rate (log base e)')
-    plt.show()
+    plt.show(block=False)
