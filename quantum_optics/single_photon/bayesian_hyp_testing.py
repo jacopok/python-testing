@@ -192,6 +192,17 @@ def get_bayes_factor(g_measurement, sample_size, rate, e_rate, N_gate):
 def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
                                 parameters_prior, N_gate):
     """the shape if parameters_prior should be (len(rate), len(e_rate))
+
+    Should be called like:
+    i, p, r, prior = get_bayes_factor_parametric(g, 200, rate, e_rate, param_prior, N_G.n)
+    
+    after running the file 
+    `parameter_estimates.py`
+    
+    then plot like 
+    `plot_logpdf(*r, p[i])`
+    
+    where i = 0, 1
     """
 
     to_sim = sample_size * parameters_prior.size * N_gate
@@ -213,7 +224,7 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
             try:
                 data_given_model_classical[i, j] = gaussian_kde(
                     g_distribution_classical).pdf(g_measurement)
-            except np.linalg.LinAlgError:
+            except (np.linalg.LinAlgError, ValueError):
                 if np.isclose(g_measurement, g_distribution_classical).all():
                     data_given_model_classical[i, j] = 1
                 else:
@@ -232,7 +243,7 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
             try:
                 data_given_model_quantum[i, j] = gaussian_kde(
                     g_distribution_quantum).pdf(g_measurement)
-            except np.linalg.LinAlgError:
+            except (np.linalg.LinAlgError, ValueError):
                 if np.isclose(g_measurement, g_distribution_quantum).all():
                     data_given_model_quantum[i, j] = 1
                 else:
@@ -246,15 +257,45 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
     if rate_len > 1:
         integrand_classical = trapz(y=integrand_classical, x=rate, axis=0)
         integrand_quantum = trapz(y=integrand_quantum, x=rate, axis=0)
+    else:
+        integrand_classical = integrand_classical[0]
+        integrand_quantum = integrand_quantum[0]
 
     if e_rate_len > 1:
         # axis 0 is now what was axis 1 before
-        integrand_classical = trapz(y=integrand_classical, x=e_rate, axis=0)
-        integrand_quantum = trapz(y=integrand_quantum, x=e_rate, axis=0)
+        likelihood_classical = trapz(y=integrand_classical, x=e_rate, axis=0)
+        likelihood_quantum = trapz(y=integrand_quantum, x=e_rate, axis=0)
+    else:
+        likelihood_classical = integrand_classical[0]
+        likelihood_quantum = integrand_quantum[0]
 
-    return ((integrand_classical, integrand_quantum),
+    from datetime import datetime
+    now = datetime.now().isoformat()
+    path = 'simulations/'
+    to_save = {
+        'dgm_classical': data_given_model_classical,
+        'dgm_quantum': data_given_model_quantum,
+        'rate': rate,
+        'e_rate': e_rate,
+        'param_prior': parameters_prior
+    }
+
+    with open(path + 'result_' + now + '.txt', 'w') as f:
+        f.writelines('\n'.join([
+            f'Classical pdf value: {likelihood_classical}',
+            f'Quantum pdf value: {likelihood_quantum}',
+            f'Ratio (log10): {-np.log10(likelihood_classical/likelihood_quantum)}',
+            f'N_gate: {N_gate}', f'sample size: {sample_size}',
+            f'parameter pdf shape: {parameters_prior.shape}',
+            f'g_measurement: {g_measurement}'
+        ]))
+
+    for name, x in to_save.items():
+        np.save(path + name + '_' + now, x)
+
+    return ((likelihood_classical, likelihood_quantum),
             (data_given_model_classical,
-             data_given_model_quantum), (rate, e_rate, parameters_prior))
+             data_given_model_quantum), (rate, e_rate), parameters_prior)
 
 
 def lognormal_dist(mean, std, num=40):
@@ -273,14 +314,21 @@ def lognormal_dist(mean, std, num=40):
 
 def loguniform_dist(lower_log, upper_log, num=40):
 
-    param = np.logspace(lower_log,
-                        min(upper_log, 0),
-                        base=np.e,
-                        num=num)
+    param = np.logspace(lower_log, min(upper_log, 0), base=np.e, num=num)
 
     dist = np.ones_like(param)
     normalization = trapz(y=dist, x=param)
     # = 1, but just to be sure
+
+    return (param, dist / normalization)
+
+
+def uniform_dist(lower_log, upper_log, num=40):
+
+    param = np.logspace(lower_log, min(upper_log, 0), base=np.e, num=num)
+
+    dist = np.copy(param)
+    normalization = trapz(y=dist, x=param)
 
     return (param, dist / normalization)
 
@@ -300,11 +348,27 @@ def normal_dist(mean, std, num=40):
 def plot_logpdf(rate, e_rate, pdf):
 
     fig = plt.figure()
-    ax = fig.gca(projection='3d')
+    # ax = fig.gca(projection='3d')
+    ax = fig.gca()
+    
+    cmap = plt.get_cmap('viridis')
+    
+    ax.set_facecolor(cmap.colors[0])
+    # X, Y = np.meshgrid(np.log(rate), np.log(e_rate), indexing='ij')
 
-    X, Y = np.meshgrid(np.log(rate), np.log(e_rate), indexing='ij')
+    log_xy = np.log(np.outer(rate, e_rate))
 
-    ax.plot_surface(X, Y, pdf, cmap=coolwarm, antialiased=False)
-    ax.set_xlabel('detection rate (log base e)')
-    ax.set_ylabel('error rate (log base e)')
+    # ax.plot_surface(X, Y, pdf, cmap=coolwarm, antialiased=False)
+    print(rate.shape, e_rate.shape, pdf.shape)
+    c = ax.contourf(np.log(rate),
+                    np.log(e_rate),
+                    (np.log(pdf) + log_xy).T,
+                    levels=np.linspace(-100, np.max(np.log(pdf)+log_xy)),
+                    cmap=cmap)
+    ax.axvline(x=-4.68300335940118)
+    ax.axvline(x=-4.665307683572091)
+    ax.axvline(x=-4.701017821785233)
+    fig.colorbar(c, label='natural log of pdf')
+    ax.set_xlabel('detection rate (natural log)')
+    ax.set_ylabel('error rate (natural log)')
     plt.show(block=False)
