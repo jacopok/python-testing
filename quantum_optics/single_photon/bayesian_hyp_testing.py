@@ -9,9 +9,11 @@ from simulation import simulate_detections_quantum
 from scipy.stats import gaussian_kde
 import astropy.units as u
 from tqdm import tqdm
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.cm import coolwarm
 
 from scipy.integrate import trapz
-from scipy.stats import lognorm
+from scipy.stats import norm
 
 SAMPLE_SIZE = int(1e5)
 
@@ -202,6 +204,7 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
     print('Estimating classical data-given-model')
 
     for i, r in enumerate(rate):
+        print(f'{i+1} out of {len(rate)}')
         for j, e in tqdm(enumerate(e_rate)):
             g_distribution_classical = g_from_detections(
                 *simulate_detections_classical(sample_size, r, e, r, e,
@@ -220,6 +223,7 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
     print('Estimating quantum data-given-model')
 
     for i, r in enumerate(rate):
+        print(f'{i+1} out of {len(rate)}')
         for j, e in tqdm(enumerate(e_rate)):
             g_distribution_quantum = g_from_detections(
                 *simulate_detections_quantum(sample_size, r, e, r, e,
@@ -244,11 +248,13 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
         integrand_quantum = trapz(y=integrand_quantum, x=rate, axis=0)
 
     if e_rate_len > 1:
-        integrand_classical = trapz(y=integrand_classical, x=e_rate, axis=1)
-        integrand_quantum = trapz(y=integrand_quantum, x=e_rate, axis=1)
+        # axis 0 is now what was axis 1 before
+        integrand_classical = trapz(y=integrand_classical, x=e_rate, axis=0)
+        integrand_quantum = trapz(y=integrand_quantum, x=e_rate, axis=0)
 
-    return (integrand_classical, integrand_quantum, data_given_model_classical,
-            data_given_model_quantum)
+    return ((integrand_classical, integrand_quantum),
+            (data_given_model_classical,
+             data_given_model_quantum), (rate, e_rate, parameters_prior))
 
 
 def lognormal_dist(mean, std, num=40):
@@ -271,9 +277,34 @@ def loguniform_dist(mean, std, num=40):
                         min(mean + 3 * std, 0),
                         base=np.e,
                         num=num)
-    
+
     dist = np.ones_like(param)
-    norm = trapz(y=dist, x=param)
+    normalization = trapz(y=dist, x=param)
     # = 1, but just to be sure
 
-    return (param, dist/norm)
+    return (param, dist / normalization)
+
+
+def normal_dist(mean, std, num=40):
+
+    param = np.logspace(np.log(mean - 3 * std),
+                        min(np.log(mean + 3 * std), 0),
+                        base=np.e,
+                        num=num)
+
+    dist = norm(loc=mean, scale=std).pdf(param)
+
+    return (param, dist)
+
+
+def plot_logpdf(rate, e_rate, pdf):
+
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+
+    X, Y = np.meshgrid(np.log(rate), np.log(e_rate), indexing='ij')
+
+    ax.plot_surface(X, Y, pdf, cmap=coolwarm, antialiased=False)
+    ax.set_xlabel('detection rate (log base e)')
+    ax.set_ylabel('error rate (log base e)')
+    plt.show()
