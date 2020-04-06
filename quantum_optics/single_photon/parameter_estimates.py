@@ -35,8 +35,8 @@ N_NOISE = (WINDOW_COINCIDENCE * DETECTOR_FREQ).to(1).value
 RATE = (N_G1 + N_G2) / (2 * N_G)
 E_RATE = N_NOISE / N_G
 
-e_rate, e_rate_pdf = uniform_dist(-12, -2, num=40)
-rate, rate_pdf = normal_dist(RATE.n, RATE.s, num=10)
+e_rate, e_rate_pdf = uniform_dist(-12, -2, num=100)
+rate, rate_pdf = normal_dist(RATE.n, RATE.s, num=20)
 # rate, rate_pdf = loguniform_dist(-8, 0, num=25)
 
 
