@@ -335,8 +335,8 @@ def uniform_dist(lower_log, upper_log, num=40):
 
 def normal_dist(mean, std, num=40):
 
-    param = np.logspace(np.log(mean - 3 * std),
-                        min(np.log(mean + 3 * std), 0),
+    param = np.logspace(np.log(mean - 5 * std),
+                        min(np.log(mean + 5 * std), 0),
                         base=np.e,
                         num=num)
 
