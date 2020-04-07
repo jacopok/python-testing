@@ -4,6 +4,7 @@ import astropy.units as u
 
 FILENAME = 'data/TimeTags.txt'
 RESOLUTION = 80.955 * u.ps
+THR = 200
 
 
 def read_file(name):
@@ -32,11 +33,39 @@ def get_ticks(name=FILENAME):
     return (ticks_t - first_tick, ticks_r - first_tick, ticks_g - first_tick)
 
 
-def get_coincidences(t, g):
+def get_timediffs(a, g, thr=THR):
     for tick in g:
-        i = np.searchsorted(t, tick)
-        res = tick-t[i]
-        if abs(res)<200:
-            yield (t[i] - tick)
+        i = np.searchsorted(a, tick, side='left')
+        try:
+            if abs(tick - a[i]) < abs(tick - a[i+i]):
+                res = tick - a[i]
+            else:
+                res = tick - a[i + 1]
+        except IndexError:
+            res = tick - a[i]
+        if abs(res) < thr:
+            yield res
+
 
 #plt.hist(list(get_coincidences(r, g)), bins=np.arange(0,200), alpha=.5, label='r')
+
+def get_all_timediffs(t, r, g):
+    dtt = get_timediffs(t, g)
+    dtr = get_timediffs(r, g)
+    
+    bins_t = np.arange(-THR, THR)
+    bins_r = np.copy(bins_t)
+    vals_t = np.zeros_like(bins_t)
+    vals_r = np.zeros_like(bins_r)
+    
+    for x in dtt:
+        vals_t[x] += 1
+    for x in dtr:
+        vals_r[x] += 1
+
+    return ((bins_t, vals_t), (bins_r, vals_r))
+    
+if __name__ == "__main__":
+    t, r, g = get_ticks()
+    
+    T, R = get_all_timediffs(t, r, g)
