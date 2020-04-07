@@ -16,8 +16,9 @@ def _simulate_detection_classical(rate_1,
                                   e_rate_1=0,
                                   rate_2=0,
                                   e_rate_2=0,
-                                  sample_size_outer=SAMPLE_SIZE_OUTER,
-                                  sample_size_inner=SAMPLE_SIZE_INNER):
+                                  sample_size=1000):
+                                #   sample_size_outer=SAMPLE_SIZE_OUTER,
+                                #   sample_size_inner=SAMPLE_SIZE_INNER):
 
     if not (rate_2):
         rate_2 = rate_1
@@ -29,26 +30,26 @@ def _simulate_detection_classical(rate_1,
     n_2 = 0
     n_12 = 0
 
-    for _ in numba.prange(sample_size_outer):
-        det1 = np.random.random(size=sample_size_inner)
-        det2 = np.random.random(size=sample_size_inner)
-        err1 = np.random.random(size=sample_size_inner)
-        err2 = np.random.random(size=sample_size_inner)
+    for _ in numba.prange(sample_size):
+        det1 = np.random.random()
+        det2 = np.random.random()
+        err1 = np.random.random()
+        err2 = np.random.random()
 
-        bool1 = det1 < rate_1 / 2
-        bool2 = det2 < rate_2 / 2
+        bool1 = bool(det1 < rate_1 / 2)
+        bool2 = bool(det2 < rate_2 / 2)
 
-        e_bool1 = err1 < e_rate_1
-        e_bool2 = err2 < e_rate_2
+        e_bool1 = bool(err1 < e_rate_1)
+        e_bool2 = bool(err2 < e_rate_2)
 
         bool1 = np.logical_or(bool1, e_bool1)
         bool2 = np.logical_or(bool2, e_bool2)
 
-        n_1 += np.sum(bool1)
-        n_2 += np.sum(bool2)
-        n_12 += np.sum(bool1 * bool2)
+        n_1 += int(bool1)
+        n_2 += int(bool2)
+        n_12 += int(bool1 * bool2)
 
-    return (n_1, n_2, n_12, sample_size_inner * sample_size_outer)
+    return (n_1, n_2, n_12, sample_size)
 
 
 @numba.njit(parallel=True)
@@ -56,8 +57,9 @@ def _simulate_detection_quantum(rate_1,
                                 e_rate_1=0,
                                 rate_2=0,
                                 e_rate_2=0,
-                                sample_size_outer=SAMPLE_SIZE_OUTER,
-                                sample_size_inner=SAMPLE_SIZE_INNER):
+                                sample_size=1000):
+                                # sample_size_outer=SAMPLE_SIZE_OUTER,
+                                # sample_size_inner=SAMPLE_SIZE_INNER):
 
     if not (rate_2):
         rate_2 = rate_1
@@ -69,13 +71,13 @@ def _simulate_detection_quantum(rate_1,
     n_2 = 0
     n_12 = 0
 
-    for _ in numba.prange(sample_size_outer):
-        which_way = np.random.random(size=sample_size_inner) > .5
+    for _ in numba.prange(sample_size):
+        which_way = np.random.random() > .5
 
-        det1 = np.random.random(size=sample_size_inner)
-        det2 = np.random.random(size=sample_size_inner)
-        err1 = np.random.random(size=sample_size_inner)
-        err2 = np.random.random(size=sample_size_inner)
+        det1 = np.random.random()
+        det2 = np.random.random()
+        err1 = np.random.random()
+        err2 = np.random.random()
 
         bool1 = np.logical_and(det1 < rate_1, which_way)
         bool2 = np.logical_and(det2 < rate_2, np.logical_not(which_way))
@@ -90,7 +92,7 @@ def _simulate_detection_quantum(rate_1,
         n_2 += np.sum(bool2)
         n_12 += np.sum(bool1 * bool2)
 
-    return (n_1, n_2, n_12, sample_size_inner * sample_size_outer)
+    return (n_1, n_2, n_12, sample_size)
 
 
 def simulate_detection_classical(*args):
@@ -140,7 +142,12 @@ def simulate_detections_quantum(size, *args):
 def g_from_detections(*detections):
 
     n_1, n_2, n_12, n_gate = detections
-
+    
+    print('starting')
+    for N in n_12:
+        if N > 0:
+            print(N)
+    
     return n_12 * n_gate / n_1 / n_2
 
 

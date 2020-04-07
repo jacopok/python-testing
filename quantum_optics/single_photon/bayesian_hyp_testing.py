@@ -129,12 +129,16 @@ def plot_distribution_quantum(*args):
     # plt.show(block=False)
 
 
-def plot_both_distributions(*args):
-    g_q = g_from_detections(*simulate_detections_quantum(*args))
-    g_c = g_from_detections(*simulate_detections_classical(*args))
+def plot_both_distributions(sample_size, rate, e_rate, N_gate):
+    g_q = g_from_detections(*simulate_detections_quantum(
+        sample_size, rate, e_rate, rate, e_rate, int(np.sqrt(N_gate)),
+        int(np.sqrt(N_gate))))
+    g_c = g_from_detections(*simulate_detections_classical(
+        sample_size, rate, e_rate, rate, e_rate, int(np.sqrt(N_gate)),
+        int(np.sqrt(N_gate))))
     bins = np.logspace(-5, .5, num=1000)
     bins[0] = 0
-    sample_size, probability_rate, error_rate, *_ = args
+    # sample_size, probability_rate, error_rate, *_ = args
 
     # plt.semilogy(bins, gaussian_kde(g_q).pdf(bins), label='Quantum')
     # plt.semilogy(bins, gaussian_kde(g_c).pdf(bins), label='Classical')
@@ -147,7 +151,7 @@ def plot_both_distributions(*args):
 
     print(f'Quantum std: {np.std(g_q)}')
     print(f'Classical std: {np.std(g_c)}')
-    plt.title(f'Pdfs with error {error_rate:.4f}, rate {probability_rate:.4f}'
+    plt.title(f'Pdfs with error {e_rate:.4f}, rate {rate:.4f}'
               f', sample size {sample_size}')
     plt.xlabel('$g^{(2)}$')
     plt.legend()
@@ -189,12 +193,15 @@ def get_bayes_factor(g_measurement, sample_size, rate, e_rate, N_gate):
     return bayes_ratio
 
 
-def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
-                                parameters_prior, N_gate):
+def get_bayes_factor_parametric(measurement, sample_size, rate, e_rate,
+                                parameters_prior):
     """the shape if parameters_prior should be (len(rate), len(e_rate))
 
     Should be called like:
-    i, p, r, prior = get_bayes_factor_parametric(g, 200, rate, e_rate, param_prior, N_G.n)
+    i, p, r, prior = get_bayes_factor_parametric(meas, 200, rate, e_rate, param_prior)
+    
+    where meas is a `measurement` named tuple
+    
     
     after running the file 
     `parameter_estimates.py`
@@ -204,6 +211,7 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
     
     where i = 0, 1
     """
+    N_1, N_2, N_12, N_gate = measurement
 
     to_sim = sample_size * parameters_prior.size * N_gate
 
@@ -217,18 +225,19 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
     for i, r in enumerate(rate):
         print(f'{i+1} out of {len(rate)}')
         for j, e in tqdm(enumerate(e_rate)):
-            g_distribution_classical = g_from_detections(
-                *simulate_detections_classical(sample_size, r, e, r, e,
-                                               int(np.sqrt(N_gate)),
-                                               int(np.sqrt(N_gate))))
-            try:
-                data_given_model_classical[i, j] = gaussian_kde(
-                    g_distribution_classical).pdf(g_measurement)
-            except (np.linalg.LinAlgError, ValueError):
-                if np.isclose(g_measurement, g_distribution_classical).all():
-                    data_given_model_classical[i, j] = 1
-                else:
-                    data_given_model_classical[i, j] = 0
+            det_classical = simulate_detections_classical(
+                sample_size, r, e, r, e, N_gate)
+            likelihoods = np.zeros_like(measurement)
+            for k, (N, N_meas) in enumerate(zip(det_classical, measurement)):
+                try:
+                    likelihoods[k] = gaussian_kde(N).pdf(N_meas)
+                except (np.linalg.LinAlgError, ValueError):
+                    if np.isclose(N, N_meas).all():
+                        likelihoods[k] = 1
+                    else:
+                        likelihoods[k] = 0
+            print(likelihoods)
+            data_given_model_classical[i, j] = np.prod(likelihoods)
 
     data_given_model_quantum = np.zeros_like(parameters_prior)
     print('Estimating quantum data-given-model')
@@ -236,18 +245,19 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
     for i, r in enumerate(rate):
         print(f'{i+1} out of {len(rate)}')
         for j, e in tqdm(enumerate(e_rate)):
-            g_distribution_quantum = g_from_detections(
-                *simulate_detections_quantum(sample_size, r, e, r, e,
-                                             int(np.sqrt(N_gate)),
-                                             int(np.sqrt(N_gate))))
-            try:
-                data_given_model_quantum[i, j] = gaussian_kde(
-                    g_distribution_quantum).pdf(g_measurement)
-            except (np.linalg.LinAlgError, ValueError):
-                if np.isclose(g_measurement, g_distribution_quantum).all():
-                    data_given_model_quantum[i, j] = 1
-                else:
-                    data_given_model_quantum[i, j] = 0
+            det_quantum = simulate_detections_quantum(sample_size, r, e, r, e,
+                                                      N_gate)
+            likelihoods = np.zeros_like(measurement)
+            for k, (N, N_meas) in enumerate(zip(det_quantum, measurement)):
+                try:
+                    likelihoods[k] = gaussian_kde(N).pdf(N_meas)
+                except (np.linalg.LinAlgError, ValueError):
+                    if np.isclose(N, N_meas).all():
+                        likelihoods[k] = 1
+                    else:
+                        likelihoods[k] = 0
+            print(likelihoods)
+            data_given_model_quantum[i, j] = np.prod(likelihoods)
 
     print('Integrating')
     rate_len, e_rate_len = np.shape(parameters_prior)
@@ -286,8 +296,8 @@ def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
             f'Quantum pdf value: {likelihood_quantum}',
             f'Ratio (log10): {-np.log10(likelihood_classical/likelihood_quantum)}',
             f'N_gate: {N_gate}', f'sample size: {sample_size}',
-            f'parameter pdf shape: {parameters_prior.shape}',
-            f'g_measurement: {g_measurement}'
+            f'parameter pdf shape: {parameters_prior.shape}'
+            # f'g_measurement: {g_measurement}'
         ]))
 
     for name, x in to_save.items():
@@ -350,9 +360,9 @@ def plot_logpdf(rate, e_rate, pdf):
     fig = plt.figure()
     # ax = fig.gca(projection='3d')
     ax = fig.gca()
-    
+
     cmap = plt.get_cmap('viridis')
-    
+
     ax.set_facecolor(cmap.colors[0])
     # X, Y = np.meshgrid(np.log(rate), np.log(e_rate), indexing='ij')
 
@@ -361,9 +371,8 @@ def plot_logpdf(rate, e_rate, pdf):
     # ax.plot_surface(X, Y, pdf, cmap=coolwarm, antialiased=False)
     print(rate.shape, e_rate.shape, pdf.shape)
     c = ax.contourf(np.log(rate),
-                    np.log(e_rate),
-                    (np.log(pdf) + log_xy).T,
-                    levels=np.linspace(-100, np.max(np.log(pdf)+log_xy)),
+                    np.log(e_rate), (np.log(pdf) + log_xy).T,
+                    levels=np.linspace(-100, np.max(np.log(pdf) + log_xy)),
                     cmap=cmap)
     ax.axvline(x=-4.68300335940118)
     ax.axvline(x=-4.665307683572091)
@@ -372,3 +381,112 @@ def plot_logpdf(rate, e_rate, pdf):
     ax.set_xlabel('detection rate (natural log)')
     ax.set_ylabel('error rate (natural log)')
     plt.show(block=False)
+
+
+# def get_bayes_factor_parametric(g_measurement, sample_size, rate, e_rate,
+#                                 parameters_prior, N_gate):
+#     """the shape if parameters_prior should be (len(rate), len(e_rate))
+
+#     Should be called like:
+#     i, p, r, prior = get_bayes_factor_parametric(g, 200, rate, e_rate, param_prior, N_G.n)
+
+#     after running the file
+#     `parameter_estimates.py`
+
+#     then plot like
+#     `plot_logpdf(*r, p[i])`
+
+#     where i = 0, 1
+#     """
+
+#     to_sim = sample_size * parameters_prior.size * N_gate
+
+#     print(f'Need to compute {sample_size=} times '
+#           f'{parameters_prior.size=} times {N_gate=}')
+#     print(f'detections, which means 10 to the {np.log10(to_sim):.1f}')
+
+#     data_given_model_classical = np.zeros_like(parameters_prior)
+#     print('Estimating classical data-given-model')
+
+#     for i, r in enumerate(rate):
+#         print(f'{i+1} out of {len(rate)}')
+#         for j, e in tqdm(enumerate(e_rate)):
+#             g_distribution_classical = g_from_detections(
+#                 *simulate_detections_classical(sample_size, r, e, r, e,
+#                                                int(np.sqrt(N_gate)),
+#                                                int(np.sqrt(N_gate))))
+#             try:
+#                 data_given_model_classical[i, j] = gaussian_kde(
+#                     g_distribution_classical).pdf(g_measurement)
+#             except (np.linalg.LinAlgError, ValueError):
+#                 if np.isclose(g_measurement, g_distribution_classical).all():
+#                     data_given_model_classical[i, j] = 1
+#                 else:
+#                     data_given_model_classical[i, j] = 0
+
+#     data_given_model_quantum = np.zeros_like(parameters_prior)
+#     print('Estimating quantum data-given-model')
+
+#     for i, r in enumerate(rate):
+#         print(f'{i+1} out of {len(rate)}')
+#         for j, e in tqdm(enumerate(e_rate)):
+#             g_distribution_quantum = g_from_detections(
+#                 *simulate_detections_quantum(sample_size, r, e, r, e,
+#                                              int(np.sqrt(N_gate)),
+#                                              int(np.sqrt(N_gate))))
+#             try:
+#                 data_given_model_quantum[i, j] = gaussian_kde(
+#                     g_distribution_quantum).pdf(g_measurement)
+#             except (np.linalg.LinAlgError, ValueError):
+#                 if np.isclose(g_measurement, g_distribution_quantum).all():
+#                     data_given_model_quantum[i, j] = 1
+#                 else:
+#                     data_given_model_quantum[i, j] = 0
+
+#     print('Integrating')
+#     rate_len, e_rate_len = np.shape(parameters_prior)
+#     integrand_classical = parameters_prior * data_given_model_classical
+#     integrand_quantum = parameters_prior * data_given_model_quantum
+
+#     if rate_len > 1:
+#         integrand_classical = trapz(y=integrand_classical, x=rate, axis=0)
+#         integrand_quantum = trapz(y=integrand_quantum, x=rate, axis=0)
+#     else:
+#         integrand_classical = integrand_classical[0]
+#         integrand_quantum = integrand_quantum[0]
+
+#     if e_rate_len > 1:
+#         # axis 0 is now what was axis 1 before
+#         likelihood_classical = trapz(y=integrand_classical, x=e_rate, axis=0)
+#         likelihood_quantum = trapz(y=integrand_quantum, x=e_rate, axis=0)
+#     else:
+#         likelihood_classical = integrand_classical[0]
+#         likelihood_quantum = integrand_quantum[0]
+
+#     from datetime import datetime
+#     now = datetime.now().isoformat()
+#     path = 'simulations/'
+#     to_save = {
+#         'dgm_classical': data_given_model_classical,
+#         'dgm_quantum': data_given_model_quantum,
+#         'rate': rate,
+#         'e_rate': e_rate,
+#         'param_prior': parameters_prior
+#     }
+
+#     with open(path + 'result_' + now + '.txt', 'w') as f:
+#         f.writelines('\n'.join([
+#             f'Classical pdf value: {likelihood_classical}',
+#             f'Quantum pdf value: {likelihood_quantum}',
+#             f'Ratio (log10): {-np.log10(likelihood_classical/likelihood_quantum)}',
+#             f'N_gate: {N_gate}', f'sample size: {sample_size}',
+#             f'parameter pdf shape: {parameters_prior.shape}',
+#             f'g_measurement: {g_measurement}'
+#         ]))
+
+#     for name, x in to_save.items():
+#         np.save(path + name + '_' + now, x)
+
+#     return ((likelihood_classical, likelihood_quantum),
+#             (data_given_model_classical,
+#              data_given_model_quantum), (rate, e_rate), parameters_prior)
