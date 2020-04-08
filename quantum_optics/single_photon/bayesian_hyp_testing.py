@@ -1,19 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import numba
 
 from simulation import g_from_detections
 from simulation import detections
 from simulation import simulate_detections_classical
 from simulation import simulate_detections_quantum
 from scipy.stats import gaussian_kde
-import astropy.units as u
 from tqdm import tqdm
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.cm import coolwarm
 
 from scipy.integrate import trapz
-from scipy.stats import norm
 
 
 def plot_both_distributions(sample_size, rate, e_rate, ratio, N_gate):
@@ -60,8 +55,6 @@ def get_bayes_factor_parametric(measurement, sample_size, rate, e_rate, ratio,
     
     then plot like 
     `plot_both_logpdfs(*r, p)`
-    
-    where i = 0, 1
     """
     N_1, N_2, N_12, N_gate = measurement
 
@@ -91,7 +84,11 @@ def get_bayes_factor_parametric(measurement, sample_size, rate, e_rate, ratio,
                 # to estimate the probability density
                 # given the parameters in this iterations
                 # evaluated at the measurement
-                likelihood = gaussian_kde(det_classical).pdf(measurement)
+                likelihood = gaussian_kde(det_classical[:-1]).pdf(
+                    measurement[:-1])
+                # we compare only the first three parameters: they are the
+                # only ones which can vary, the N_gate is constant by design
+                # and the kde algorithm is not well-behaved for singular pdfs
             except (np.linalg.LinAlgError, ValueError):
 
                 # if we get here it means the probability density
@@ -108,15 +105,12 @@ def get_bayes_factor_parametric(measurement, sample_size, rate, e_rate, ratio,
         print(f'{i+1} out of {len(rate)}')
         for j, e in tqdm(enumerate(e_rate)):
             det_quantum = simulate_detections_quantum(sample_size, r, e,
-                                                      r * ratio, e,
-                                                      N_gate)
+                                                      r * ratio, e, N_gate)
             try:
-                likelihood = gaussian_kde(det_quantum).pdf(measurement)
+                likelihood = gaussian_kde(det_quantum[:-1]).pdf(
+                    measurement[:-1])
             except (np.linalg.LinAlgError, ValueError):
-                if np.isclose(det_quantum, measurement[:, np.newaxis]).all():
-                    likelihood = 1
-                else:
-                    likelihood = 0
+                likelihood = 0
             data_given_model_quantum[i, j] = likelihood
 
     print('Integrating')
@@ -179,10 +173,10 @@ def uniform_dist_log(lower_log, upper_log, num=40):
 
 
 def uniform_dist(lower, upper, num=40):
-    
+
     param = np.linspace(lower, min(upper, 1), num=num)
 
-    dist = np.ones_like(param)
+    dist = np.copy(param)
     normalization = trapz(y=dist, x=param)
 
     return (param, dist / normalization)
@@ -218,7 +212,7 @@ def plot_both_logpdfs(rate, e_rate, p):
     c1 = plot_logpdf(rate, e_rate, p[0], axs[0], levels)
     axs[0].set_title('Classical')
     fig.colorbar(c1, label='natural log of pdf', ax=axs[0])
-    
+
     c2 = plot_logpdf(rate, e_rate, p[1], axs[1], levels)
     axs[1].set_title('Quantum')
     fig.colorbar(c2, label='natural log of pdf', ax=axs[1])
