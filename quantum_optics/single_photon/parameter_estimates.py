@@ -1,8 +1,6 @@
 import numpy as np
 import astropy.units as u
 from bayesian_hyp_testing import uniform_dist_log, uniform_dist
-import uncertainties as un
-# import uncertainties.umath as um
 from simulation import detections
 
 RESOLUTION = 80.955 * u.picosecond
@@ -16,7 +14,7 @@ meas = detections(N_G1, N_G2, N_G12, N_G)
 ratio = N_G2 / N_G1
 
 
-rate, rate_pdf = uniform_dist(np.exp(-4.25), np.exp(-3.95), num=20)
-e_rate, e_rate_pdf = uniform_dist_log(-15, -6, num=20)
+rate, rate_pdf = uniform_dist(np.exp(-4.3), np.exp(-3.95), num=40)
+e_rate, e_rate_pdf = uniform_dist_log(-15, -5, num=40)
 
 param_prior = np.outer(rate_pdf, e_rate_pdf)
