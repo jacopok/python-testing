@@ -1,10 +1,11 @@
 import numpy as np
 import pandas as pd
 import astropy.units as u
+import matplotlib.pyplot as plt
 
 FILENAME = 'data/TimeTags.txt'
 RESOLUTION = 80.955 * u.ps
-THR = 200
+THR = (-20, 100)
 
 
 def read_file(name):
@@ -37,14 +38,14 @@ def get_timediffs(a, g, thr=THR):
     for tick in g:
         i = np.searchsorted(a, tick, side='left')
         try:
-            if abs(tick - a[i-1]) < abs(tick - a[i]):
-                res = tick - a[i-1]
+            if abs(tick - a[i - 1]) < abs(tick - a[i]):
+                res = a[i - 1] - tick
             else:
-                res = tick - a[i]
+                res = a[i] - tick
         except IndexError:
-            res = tick - a[i]
+            res = a[i] - tick
 
-        if abs(res) < thr:
+        if thr[0] <= res < thr[1]:
             yield res
 
 
@@ -55,7 +56,7 @@ def get_all_timediffs(t, r, g):
     dtt = get_timediffs(t, g)
     dtr = get_timediffs(r, g)
 
-    bins_t = np.arange(-THR, THR)
+    bins_t = np.arange(*THR)
     bins_r = np.copy(bins_t)
     vals_t = np.zeros_like(bins_t)
     vals_r = np.zeros_like(bins_r)
@@ -68,32 +69,34 @@ def get_all_timediffs(t, r, g):
     return ((bins_t, vals_t), (bins_r, vals_r))
 
 
-if __name__ == "__main__":
-    t, r, g = get_ticks()
+def shapes(arr, n):
+    return [np.shape(arr[arr % n == i])[0] for i in range(n)]
 
-    T, R = get_all_timediffs(t, r, g)
+
+def get_odd_even_ratios(arr, num=50_000):
+    dt = []
+    for i in range(len(arr) // num):
+        c = np.array(shapes(arr[num * i:num * (i + 1)], 2))
+        dt.append(c[1] / c[0])
+    return (dt)
+
+
+def plot_oer(t, r, g):
+    dt = get_odd_even_ratios(t)
+    dr = get_odd_even_ratios(r)
+    dg = get_odd_even_ratios(g)
+
+    plt.plot(np.linspace(0, 1, len(dr)), dr, label='refl')
+    plt.plot(np.linspace(0, 1, len(dg)), dg, label='gate')
+    plt.plot(np.linspace(0, 1, len(dt)), dt, label='tr')
+    plt.legend()
+    plt.title('odd to even ratios')
+    plt.show()
+
+
+if __name__ == "__main__":
+    ticks = get_ticks()
+
+    T, R = get_all_timediffs(*ticks)
     
-    dt = [] 
-    for i in range(len(t)//50000): 
-        c = np.array(shapes(t[50000*i:50000*(i+1)], 2)) 
-        dt.append(c[1]/c[0]) 
-        
-                                                                                            
-    dr = [] 
-    for i in range(len(r)//50000): 
-        c = np.array(shapes(r[50000*i:50000*(i+1)], 2)) 
-        dr.append(c[1]/c[0]) 
-        
-                                                                                            
-    dg = [] 
-    for i in range(len(g)//50000): 
-        c = np.array(shapes(g[50000*i:50000*(i+1)], 2)) 
-        dg.append(c[1]/c[0]) 
-        
-                                                                                            
-    plt.plot(np.linspace(0,1, len(dr)),dr, label='refl') 
-    plt.plot(np.linspace(0,1, len(dg)),dg, label='gate') 
-    plt.plot(np.linspace(0,1, len(dt)),dt, label='tr') 
-    plt.legend() 
-    plt.title('rapporto pari/dispari') 
-    plt.show() 
+    
