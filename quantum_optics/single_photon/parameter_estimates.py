@@ -1,50 +1,22 @@
 import numpy as np
 import astropy.units as u
-from bayesian_hyp_testing import loguniform_dist, normal_dist, uniform_dist
+from bayesian_hyp_testing import uniform_dist_log, uniform_dist
 import uncertainties as un
 # import uncertainties.umath as um
 from simulation import detections
 
 RESOLUTION = 80.955 * u.picosecond
 
-GATE_FREQ = 34.95490663 * u.kHz
+N_G = 1_554_341
+N_G1 = 13_839  # reflected
+N_G2 = 14_821  # transmitted
+N_G12 = 2
 
-DETECTOR_FREQ = 23.76362711 * u.kHz
-
-DARK_COUNT = 200 * u.Hz
-
-OBS_TIME = 1 * u.min
-
-WINDOW_COINCIDENCE = 30 * 2 * RESOLUTION
+meas = detections(N_G1, N_G2, N_G12, N_G)
+ratio = N_G2 / N_G1
 
 
-def pv(N):
-    """Poisson error on a variable"""
-    return un.ufloat(N, np.sqrt(N))
-
-
-N_G = pv(1_554_341)
-N_1 = pv(1_056_698)
-N_2 = pv(1_000_384)
-N_G1 = pv(13_930)
-N_G2 = pv(14_829)
-N_G12 = pv(3)
-meas = detections(N_G1.n, N_G2.n, N_G12.n, N_G.n)
-
-g = (N_G * N_G12 / (N_G1 * N_G2)).n
-
-N_NOISE = (WINDOW_COINCIDENCE * DETECTOR_FREQ).to(1).value
-RATE = (N_G1 + N_G2) / (2 * N_G)
-RATE1 = (N_G1 / N_G)
-RATE2 = (N_G2 / N_G)
-
-E_RATE = N_NOISE / N_G
-
-e_rate, e_rate_pdf = uniform_dist(-12, -2, num=10)
-rate, rate_pdf = normal_dist(RATE.n, 10 * RATE.s, num=1)
-# rate, rate_pdf = loguniform_dist(-8, 0, num=25)
-
+rate, rate_pdf = uniform_dist(np.exp(-4.25), np.exp(-3.95), num=20)
+e_rate, e_rate_pdf = uniform_dist_log(-15, -6, num=20)
 
 param_prior = np.outer(rate_pdf, e_rate_pdf)
-
-# param_prior_visible = np.outer(rate_pdf / np.gradient(rate), e_rate_pdf / np.gradient(e_rate))
