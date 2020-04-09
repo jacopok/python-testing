@@ -207,9 +207,9 @@ def plot_both_logpdfs(rate, e_rate, p):
 
     max_p = max(np.max(np.log(p[0]) + log_e_rate),
                 np.max(np.log(p[1]) + log_e_rate))
-    levels = np.linspace(-200, max_p)
+    levels = np.linspace(-400, max_p)
 
-    c1 = plot_logpdf(rate, e_rate, p[0], axs[0], levels)
+    c1 = plot_logpdf(rate, e_rate, p[0], axs[0], levels=levels)
     axs[0].set_title('Classical')
     fig.colorbar(c1, label='natural log of pdf', ax=axs[0])
 
