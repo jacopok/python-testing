@@ -47,7 +47,7 @@ def get_timediffs(a, g, thr=THR):
         except IndexError:
             res = a[i] - tick
 
-        if thr[0] <= res < thr[1]:
+        if thr[0] <= res <= thr[1]:
             yield res
 
 
@@ -72,8 +72,8 @@ def get_timediffs_double(a1, a2, g, thr1, thr2):
         except IndexError:
             res2 = a2[j] - tick
 
-        if thr1[0] <= res1 < thr1[1]:
-            if thr2[0] <= res2 < thr2[1]:
+        if thr1[0] <= res1 <= thr1[1]:
+            if thr2[0] <= res2 <= thr2[1]:
                 yield (res1, res2)
 
 
