@@ -1,39 +1,46 @@
 import unittest
 from class_experiments import Circle, Tire, Cylinder
 import math
+from hypothesis import given
+import hypothesis.strategies as st
+
+FLOAT_OPTIONS = {'min_value': 0, 'max_value': 1e30, 'allow_nan': False}
 
 
 class TestCircle(unittest.TestCase):
+    @given(st.floats(**FLOAT_OPTIONS))
+    def test_radius(self, r):
+        c = Circle(r)
+        self.assertAlmostEqual(c.radius, r)
 
-    radius_value = 10.
-
-    def test_radius(self):
-        c = Circle(self.radius_value)
-        self.assertAlmostEqual(c.radius, self.radius_value)
-
-    def test_diameter(self):
-        c = Circle(self.radius_value)
-        self.assertAlmostEqual(c.diameter, self.radius_value * 2.)
+    @given(st.floats(**FLOAT_OPTIONS))
+    def test_diameter(self, r):
+        c = Circle(r)
+        self.assertAlmostEqual(c.diameter, r * 2.)
         self.assertAlmostEqual(c.diameter, c.radius * 2.)
 
-    def test_area(self):
-        c = Circle(self.radius_value)
-        self.assertAlmostEqual(c.area, math.pi * c.radius**2.)
+    @given(st.floats(**FLOAT_OPTIONS))
+    def test_area(self, r):
+        c = Circle(r)
+        self.assertTrue(
+            math.isclose(c.area, math.pi * c.radius**2., rel_tol=1e-9))
 
-    def test_perimeter(self):
-        c = Circle(self.radius_value)
+    @given(st.floats(**FLOAT_OPTIONS))
+    def test_perimeter(self, r):
+        c = Circle(r)
         self.assertAlmostEqual(c.perimeter, 2. * math.pi * c.radius)
 
-    def test_conversion_degrees_to_radians(self):
-        angle_deg = 30.
-        angle_rad = math.pi / 6.
-        self.assertAlmostEqual(Circle.degrees_to_radians(angle_deg), angle_rad)
+    @given(st.floats(**FLOAT_OPTIONS))
+    def test_conversion_degrees_to_radians(self, angle_deg):
+        angle_rad = angle_deg * math.pi / 180.
+        self.assertTrue(
+            math.isclose(Circle.degrees_to_radians(angle_deg), angle_rad))
 
-    def test_construction_from_bbd(self):
-        bbd = math.sqrt(2.) * 2.
-        radius = 1.
+    @given(st.floats(**FLOAT_OPTIONS))
+    def test_construction_from_bbd(self, r):
+        bbd = math.sqrt(2.) * 2. * r
         c = Circle.from_bbd(bbd)
-        self.assertAlmostEqual(c.radius, radius)
+        self.assertTrue(math.isclose(c.radius, r, rel_tol=1e-9))
 
 
 class TestTire(unittest.TestCase):
