@@ -17,7 +17,6 @@ class TestCircle(unittest.TestCase):
     def test_diameter(self, r):
         c = Circle(r)
         self.assertAlmostEqual(c.diameter, r * 2.)
-        self.assertAlmostEqual(c.diameter, c.radius * 2.)
 
     @given(st.floats(**FLOAT_OPTIONS))
     def test_area(self, r):
