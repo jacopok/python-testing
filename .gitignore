@@ -19,3 +19,4 @@ CNNs/*
 quantum_optics/**/data/**/*.txt
 quantum_optics/**/data/*.txt
 quantum_optics/single_photon/simulations/*
+basic_testing/.hypothesis/*
