@@ -195,6 +195,8 @@ def plot_lethality(first=IGN_FIRST):
     confirmed = np.array(TS['Confirmed']['Confirmed'][first:])
     dead = np.array(TS['Deaths']['Deaths'][first:])
     nums = np.arange(len(dead))[::-1]
+    
+    today = (TS[name].time[-1]).strftime('%d %b %Y')
 
     plt.plot(nums, dead / confirmed)
     a, b = plt.xlim()
