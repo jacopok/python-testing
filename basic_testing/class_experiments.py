@@ -2,35 +2,40 @@ import math
 
 
 class Circle():
-    'Docstring here'
+    # 'Docstring here'
 
-    version = '0.1'
+    # version = '0.1'
 
-    __slots__ = ['diameter']
+    __slots__ = 'diameter', '_perimeter', '_radius'
 
     def __init__(self, radius):
-        self.radius = radius
+        self._radius = radius
+        self._perimeter = None
 
     @property
     def area(self):
-        p = self.__perimeter
+        p = self.perimeter
         r = p / math.pi / 2.
 
         return math.pi * r**2
 
     @property
     def perimeter(self):
-        return 2. * math.pi * self.radius
+        if self._perimeter is None:
+            print('Calculating perimeter!')
+            self._perimeter = 2. * math.pi * self.radius
 
-    __perimeter = perimeter
+        return self._perimeter
+
 
     @property
     def radius(self):
-        return self.diameter / 2.
+        return self._radius
 
     @radius.setter
     def radius(self, radius):
         self.diameter = radius * 2.
+        self._radius = radius
 
     @classmethod
     def from_bbd(cls, bbd):
@@ -67,4 +72,5 @@ class Cylinder(Circle, FixedAreaPrism):
     def __init__(self, radius, height):
         Circle.__init__(self, radius)
         FixedAreaPrism.__init__(self, self.area, height)
+    
     
