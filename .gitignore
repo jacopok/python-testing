@@ -1,0 +1,23 @@
+#Untracked files:
+	Sympy_cheatsheet.pdf
+
+venv_pybinding/*
+lesson_duration_stats/data/*
+*dat
+fractals/py-mandelbrot/**
+fractals/*.npy
+fractals/pictures/*.pdf
+fractals/pictures/*.png
+fractals/pictures/*.npz
+!fractals/pictures/high_res_plasma.pdf
+
+numerical_methods/**/*.pdf
+*checkpoint.ipynb
+numerical_methods/basics-1/starlab_output.txt
+numerical_methods/ODE-8/Nbody/*.npy
+CNNs/*
+quantum_optics/**/data/**/*.txt
+quantum_optics/**/data/*.txt
+quantum_optics/single_photon/simulations/*
+basic_testing/.hypothesis/*
+old_projects/Nuclide_data/*
