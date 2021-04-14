@@ -21,6 +21,7 @@ def phi_hom(n, i, j):
 # @lru_cache(maxsize=4 * L ** 2)
 @njit
 def D(i, j):
+
     sign = (i // L + j % 2) % 2
     # 0 maps to +, 1 maps to -
     
