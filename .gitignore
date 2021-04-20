@@ -22,3 +22,5 @@ quantum_optics/single_photon/simulations/*
 basic_testing/.hypothesis/*
 old_projects/Nuclide_data/*
 **/__pycache__/*
+chat_scraping/history.txt
+astronomy/corrections_earth_rotation/eopc04.62-now
