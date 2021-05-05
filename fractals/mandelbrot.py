@@ -5,15 +5,21 @@ from astropy.visualization import astropy_mpl_style
 plt.style.use(astropy_mpl_style)
 from matplotlib import cm
 from multiprocessing import Pool
+from numba import njit
+
 
 ITMAX = int(2e2)
+EPS_MANDELBROT = 1e-6
+EPS_JULIA = 1e-5
 
 
+@njit
 def iterate(z, c):
     return (z**2 + c)
 
 
-def convergence_mandelbrot(c, eps=1e-6, itmax=ITMAX):
+@njit
+def convergence_mandelbrot(c, eps=EPS_MANDELBROT, itmax=ITMAX):
 
     iterations = 0
     z = 0
@@ -26,7 +32,13 @@ def convergence_mandelbrot(c, eps=1e-6, itmax=ITMAX):
         iterations += 1
 
 
-def convergence_julia(z0, c, rmax, eps=1e-5, itmax=ITMAX):
+@njit
+def convm(xy):
+    x, y = xy
+    return(convergence_mandelbrot(x + 1j * y))
+
+
+def convergence_julia(z0, c, rmax, eps=EPS_JULIA, itmax=ITMAX):
 
     iterations = 0
     z = z0
@@ -42,11 +54,15 @@ def convergence_julia(z0, c, rmax, eps=1e-5, itmax=ITMAX):
         iterations += 1
 
 
-def generate_set(*args,
+def generate_set(x1, x2, y1, y2,
                  N=int(1e2),
                  ccheck=convergence_mandelbrot,
                  **ccheck_args):
-    x1, x2, y1, y2 = args
+    """
+    Good values: -2., .5, -1.2, 1.2 for Mandelbrot.
+    For Julia it depends.
+    """                 
+
     xs = np.linspace(x1, x2, num=N)
     ys = np.linspace(y1, y2, num=N)
 
