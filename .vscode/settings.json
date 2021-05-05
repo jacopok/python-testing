@@ -1,9 +1,10 @@
 {
-    "python.pythonPath": "/home/jacopo/anaconda3/envs/python38env/bin/python",
+    "python.pythonPath": "/home/jacopo/anaconda3/bin/python",
     "python.linting.pylintEnabled": false,
     "python.linting.enabled": true,
     "python.linting.banditEnabled": false,
     "python.linting.flake8Enabled": true,
     "python.linting.pydocstyleEnabled": false,
-    "python.formatting.provider": "yapf"
+    "python.formatting.provider": "yapf",
+    "python.dataScience.jupyterServerURI": "local"
 }
