@@ -37,4 +37,5 @@ c = Counter()
 for parts in participant_dict.values():
     for p in parts:
         c[p] += 1
-    
+
+print(c)
