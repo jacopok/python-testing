@@ -104,7 +104,7 @@ def ratio(counter, them, me='Jacopo Tissino'):
         return np.nan
 
 
-possible_thrs = np.geomspace(3/60, 24 * 30, num=100)
+possible_thrs = np.geomspace(3/60, 24 * 14, num=100)
 
 def make_plot(senttimes: dict, them, possible_thrs=possible_thrs):
     
@@ -161,7 +161,7 @@ def make_plot(senttimes: dict, them, possible_thrs=possible_thrs):
 
 # %%
 
-them = ''
+them = 'Elisa Chinello'
 
 wa_filename = datafolder / f'WhatsApp Chat with {them}.txt'
 wa = dict_from_file_wa(wa_filename)
@@ -173,9 +173,9 @@ comb = {k: tg[k] + wa[k] for k in tg}
 
 make_plot(
     {
-        'whatsapp': wa,
-        'telegram': tg,
-        'combined': comb
+        # 'whatsapp': wa,
+        # 'telegram': tg,
+        'whatsapp + telegram': comb
     },
     them=them
 )

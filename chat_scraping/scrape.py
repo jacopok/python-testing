@@ -1,3 +1,4 @@
+#%%
 from datetime import datetime
 
 filename = 'history.txt'
@@ -39,3 +40,4 @@ for parts in participant_dict.values():
         c[p] += 1
 
 print(c)
+# %%
