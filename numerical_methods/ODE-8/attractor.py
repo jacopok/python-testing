@@ -1,3 +1,5 @@
+#%%
+
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.visualization import astropy_mpl_style
@@ -74,18 +76,31 @@ def general_halvorsen(x, t, alpha):
 params_halvorsen = {'alpha': 1.4}
 halvorsen = partial(general_halvorsen, **params_halvorsen)
 
+#%%
+
 def plot(xs):
     fig = plt.figure()
     ax = fig.gca(projection='3d')
     if (isinstance(xs, list)):
       for x in xs:
         ax.plot(x[:, 0], x[:, 1], x[:, 2], linewidth=.5)
+    # elif len(xs.shape) == 3:
+    #   for i in range(xs.shape[1]):
+    #     ax.plot(xs[:, i, 0], xs[:, i, 1], xs[:, i, 2], linewidth=.5)
     else:
       ax.plot(xs[:, 0], xs[:, 1], xs[:, 2], linewidth=.5)
     plt.show()
+
+#%%
 
 # ts, xs = fourth_order(lorenz, 0, 40, [1., 1., 1.], h=1e-4)
 # ts, xs = fourth_order(rossler, 0, 400, [1, 1, 1], h=1e-3)
 # ts, xs = fourth_order(coupled_lorenz, 0, 200, np.random.rand(6).reshape((2, 3)), h=1e-3)
 # ts, xs = fourth_order(lorenz_mod2, 0, 100, np.random.rand(3), h=1e-3)
 ts, xs = fourth_order(halvorsen, 0, 200, np.random.rand(3), h=2e-3)
+
+# %%
+%matplotlib qt
+plot(xs)
+
+# %%
