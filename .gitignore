@@ -27,3 +27,5 @@ astronomy/corrections_earth_rotation/eopc04.62-now
 chat_scraping/telegram/data/*
 chat_scraping/telegram/*.png
 NR/*
+minimum_entropy/diagonal_spacings.txt
+minimum_entropy/hermitian_spacings.txt

@@ -1,5 +1,5 @@
 {
-    "python.pythonPath": "/home/jacopo/anaconda3/envs/python38env/bin/python",
+    "python.pythonPath": "/home/jacopo/anaconda3/envs/mlgw_bns/bin/python",
     "python.linting.pylintEnabled": false,
     "python.linting.enabled": true,
     "python.linting.banditEnabled": false,
