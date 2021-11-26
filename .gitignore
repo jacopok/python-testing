@@ -29,3 +29,9 @@ chat_scraping/telegram/*.png
 NR/*
 minimum_entropy/diagonal_spacings.txt
 minimum_entropy/hermitian_spacings.txt
+elevator/meta/device.csv
+elevator/Data1.csv
+elevator/Data2.csv
+elevator/Data3.csv
+elevator/elevator
+elevator/meta/time.csv
