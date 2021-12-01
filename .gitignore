@@ -35,3 +35,6 @@ elevator/Data2.csv
 elevator/Data3.csv
 elevator/elevator
 elevator/meta/time.csv
+elevator/Data4.csv
+.gitignore
+elevator/Data5.csv
