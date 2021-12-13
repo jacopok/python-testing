@@ -26,9 +26,12 @@ with h5py.File('GW170817_GWTC-1.hdf5') as file:
         np.array(file['IMRPhenomPv2NRT_highSpin_prior']['lambda2']),
     ))
 
-
-print(gaussian_kde(post_ls, bw_method=1e-1)([0, 0]) * 5000**2)
-print(gaussian_kde(post_hs, bw_method=1.69e-1)([0, 0]) * 5000**2)
+print('Low spin: ')
+print(np.log2(gaussian_kde(post_ls, bw_method=1e-1)([0, 0]) * 2500**2)[0])
+print('bits for the no-tides hypothesis')
+print('High spin:')
+print(np.log2(gaussian_kde(post_hs, bw_method=1e-1)([0, 0]) * 2500**2)[0])
+print('bits for the no-tides hypothesis')
 # %%
 
 plt.hist2d(*post_ls, bins=200)
@@ -45,7 +48,7 @@ def plot_bw_selection(data):
     training = data[:, 1000:]
     testing = data[:, :1000]
     
-    bws = np.logspace(-1.8, 1)
+    bws = np.logspace(-3, 1)
     
     entropies = [
         sum(-np.log(gaussian_kde(training, bw_method=bw)(testing)))
