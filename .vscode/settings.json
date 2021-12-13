@@ -1,7 +1,7 @@
 {
-    "python.pythonPath": "/home/jacopo/anaconda3/envs/mlgw_bns/bin/python",
+    "python.pythonPath": "/home/jacopo/.pyenv/versions/scripting-env-3.9/bin/python",
     "python.linting.pylintEnabled": false,
-    "python.linting.enabled": true,
+    "python.linting.enabled": false,
     "python.linting.banditEnabled": false,
     "python.linting.flake8Enabled": true,
     "python.linting.pydocstyleEnabled": false,

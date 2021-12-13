@@ -1,7 +1,6 @@
 # %%
 
 import numpy as np
-from tqdm import tqdm
 from scipy.integrate import solve_ivp
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
@@ -9,8 +8,6 @@ from matplotlib.cm import ScalarMappable
 from matplotlib.ticker import FuncFormatter, MultipleLocator
 
 bs = np.linspace(5.195, 5.199, num=30)
-norm = Normalize(min(bs), max(bs))
-cmap = plt.get_cmap('inferno')
 
 infinity = 1e4
 
@@ -36,14 +33,17 @@ def reach_infinity(t, uv):
 reach_infinity.terminal = True
 reach_infinity.direction = -1
 
+norm = Normalize(min(bs), max(bs))
+cmap = plt.get_cmap('inferno')
+
 
 for b in bs:
     sol = solve_ivp(
         ode,
         t_span=(0, 4 * np.pi),
-        y0=[1e-6, 1/b],
+        y0=[1/infinity, 1/b],
         events=[cross_horizon, reach_infinity],
-        max_step=.001,
+        max_step=.01,
         )
 
     plt.semilogy(sol.t, 1/sol.y[0], c=cmap(norm(b)))
@@ -56,12 +56,8 @@ for b in bs:
         if phi := sol.t_events[1]:
             print(f'{b=:.3f}GM, reached infinity at phi={phi[0]/np.pi:.3f}pi')
             print(f'Minimum radius: {1/ max(sol.y[0]):.3f}GM')
-    
-    # if ch.any():
 
-    # if ri.any():
-    #     print(f'{b=}, reached infinity at phase {1/ri[0][1]}')
-    
+
 plt.colorbar(
     ScalarMappable(norm=norm, cmap=cmap),
     label='Impact parameter [units of $GM$]')
