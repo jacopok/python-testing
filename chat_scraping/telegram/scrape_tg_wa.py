@@ -161,7 +161,7 @@ def make_plot(senttimes: dict, them, possible_thrs=possible_thrs):
 
 # %%
 
-them = 'Elisa Chinello'
+
 
 wa_filename = datafolder / f'WhatsApp Chat with {them}.txt'
 wa = dict_from_file_wa(wa_filename)
@@ -179,4 +179,6 @@ make_plot(
     },
     them=them
 )
+
+plt.savefig(f'{them}.pdf')
 # %%
